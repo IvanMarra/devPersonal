@@ -43,9 +43,14 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
           message: 'Faça backup dos seus dados regularmente'
         },
         {
-          type: 'error' as const,
-          title: 'Erro de Conexão',
-          message: 'Falha temporária na conexão com o servidor'
+          type: 'success' as const,
+          title: 'Dados Sincronizados',
+          message: 'Todas as alterações foram salvas no Supabase'
+        },
+        {
+          type: 'info' as const,
+          title: 'Sistema Atualizado',
+          message: 'Nova versão do admin panel disponível'
         }
       ];
 
@@ -66,10 +71,10 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
 
     // Gerar notificações aleatórias
     const interval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% de chance a cada 30 segundos
+      if (Math.random() > 0.8) { // 20% de chance a cada 45 segundos
         generateNotifications();
       }
-    }, 30000);
+    }, 45000);
 
     return () => clearInterval(interval);
   }, []);
@@ -136,7 +141,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
         )}
       </button>
 
-      {/* Notification Panel */}
+      {/* Notification Panel - POSICIONADO À DIREITA */}
       {isOpen && (
         <>
           {/* Overlay */}
@@ -145,16 +150,19 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Panel */}
-          <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-cyan-500/30 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
+          {/* Panel - CORRIGIDO: Posicionado à direita */}
+          <div className="absolute right-0 top-12 w-96 bg-gray-900/95 backdrop-blur-md border border-cyan-500/30 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-cyan-400">Notificações</h3>
+              <h3 className="text-lg font-semibold text-cyan-400 flex items-center">
+                <Bell className="w-5 h-5 mr-2" />
+                Notificações
+              </h3>
               <div className="flex items-center space-x-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-xs text-gray-400 hover:text-cyan-400 transition-colors"
+                    className="text-xs text-gray-400 hover:text-cyan-400 transition-colors px-2 py-1 rounded bg-gray-800/50"
                   >
                     Marcar todas como lidas
                   </button>
@@ -206,7 +214,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
                               <X className="w-3 h-3 text-gray-400" />
                             </button>
                           </div>
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-sm text-gray-400 mt-1 leading-relaxed">
                             {notification.message}
                           </p>
                           <div className="flex items-center justify-between mt-2">
@@ -217,7 +225,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
                               })}
                             </span>
                             {!notification.read && (
-                              <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
                             )}
                           </div>
                           {notification.action && (
@@ -237,6 +245,14 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Footer com informações úteis */}
+            <div className="p-3 border-t border-gray-700 bg-gray-800/30">
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span>Total: {notifications.length}</span>
+                <span>Não lidas: {unreadCount}</span>
+              </div>
             </div>
           </div>
         </>
