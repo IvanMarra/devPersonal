@@ -6,6 +6,7 @@ import UserManagement from './UserManagement';
 import NotificationSystem from './NotificationSystem';
 import GoogleAnalyticsSetup from './GoogleAnalyticsSetup';
 import { useProjects, useTestimonials, useTalks, useSiteSettings } from '../hooks/useSupabaseData';
+import { logoutAdmin } from '../lib/supabase';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -19,35 +20,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAnalyticsSetup, setShowAnalyticsSetup] = useState(false);
 
-  // Usar hooks do Supabase para dados reais
+  // Usar hooks do Supabase
   const { 
     projects, 
+    loading: projectsLoading, 
     addProject, 
     updateProject, 
-    deleteProject,
-    loading: projectsLoading 
+    deleteProject 
   } = useProjects();
-  
+
   const { 
     testimonials, 
+    loading: testimonialsLoading, 
     addTestimonial, 
     updateTestimonial, 
-    deleteTestimonial,
-    loading: testimonialsLoading 
+    deleteTestimonial 
   } = useTestimonials();
-  
+
   const { 
     talks, 
+    loading: talksLoading, 
     addTalk, 
     updateTalk, 
-    deleteTalk,
-    loading: talksLoading 
+    deleteTalk 
   } = useTalks();
-  
+
   const { 
     settings, 
-    updateSettings,
-    loading: settingsLoading 
+    loading: settingsLoading, 
+    updateSettings 
   } = useSiteSettings();
 
   // Estados de edição
@@ -62,33 +63,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [newTalk, setNewTalk] = useState({ title: '', description: '', tags: '', image_url: '' });
 
   const handleLogout = () => {
-    console.log('🚪 Iniciando processo de logout...');
-    
-    // Limpar TODAS as informações de autenticação
-    localStorage.removeItem('deviem_admin_token');
-    localStorage.removeItem('deviem_admin_session');
-    localStorage.removeItem('deviem_users');
-    
-    // Limpar qualquer cache do Supabase
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.includes('supabase') || key.includes('sb-') || key.includes('deviem')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Limpar sessionStorage também
-    sessionStorage.clear();
-    
-    console.log('✅ Dados de autenticação limpos');
-    
-    // Voltar ao frontend e forçar recarregamento
+    console.log('🚪 Fazendo logout completo...');
+    logoutAdmin(); // Limpar sessão do Supabase
     onBackToFrontend();
-    
-    // Forçar recarregamento da página para garantir estado limpo
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   };
 
   const showSuccessMessage = (message: string) => {
@@ -96,28 +73,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  // Funções para projetos com Supabase real
+  // Funções para projetos
   const handleAddProject = async () => {
     if (newProject.title && newProject.description) {
-      setLoading(true);
       try {
-        console.log('➕ Adicionando projeto:', newProject.title);
+        setLoading(true);
+        console.log('➕ Adicionando projeto via AdminPanel...');
         
-        const projectData = {
+        const project = {
           title: newProject.title,
           description: newProject.description,
           tech: newProject.tech.split(',').map(t => t.trim()).filter(t => t),
           image_url: newProject.image_url || undefined
         };
         
-        await addProject(projectData);
+        await addProject(project);
         setNewProject({ title: '', description: '', tech: '', image_url: '' });
-        showSuccessMessage('✅ Projeto adicionado com sucesso!');
-        
-        console.log('✅ Projeto adicionado e dados sincronizados');
+        showSuccessMessage('✅ Projeto adicionado com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao adicionar projeto:', error);
-        showSuccessMessage('❌ Erro ao adicionar projeto');
+        showSuccessMessage('❌ Erro ao adicionar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       } finally {
         setLoading(false);
       }
@@ -126,9 +101,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
 
   const handleUpdateProject = async () => {
     if (editingProject) {
-      setLoading(true);
       try {
-        console.log('📝 Atualizando projeto:', editingProject.id);
+        setLoading(true);
+        console.log('📝 Atualizando projeto via AdminPanel...');
         
         await updateProject(editingProject.id, {
           title: editingProject.title,
@@ -138,12 +113,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         });
         
         setEditingProject(null);
-        showSuccessMessage('✅ Projeto atualizado com sucesso!');
-        
-        console.log('✅ Projeto atualizado e dados sincronizados');
+        showSuccessMessage('✅ Projeto atualizado com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao atualizar projeto:', error);
-        showSuccessMessage('❌ Erro ao atualizar projeto');
+        showSuccessMessage('❌ Erro ao atualizar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       } finally {
         setLoading(false);
       }
@@ -152,191 +125,55 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
 
   const handleDeleteProject = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este projeto?')) {
-      setLoading(true);
       try {
-        console.log('🗑️ Deletando projeto:', id);
+        setLoading(true);
+        console.log('🗑️ Deletando projeto via AdminPanel...');
         
         await deleteProject(id);
-        showSuccessMessage('✅ Projeto excluído com sucesso!');
-        
-        console.log('✅ Projeto deletado e dados sincronizados');
+        showSuccessMessage('✅ Projeto excluído com sucesso do Supabase!');
       } catch (error) {
         console.error('❌ Erro ao deletar projeto:', error);
-        showSuccessMessage('❌ Erro ao deletar projeto');
+        showSuccessMessage('❌ Erro ao deletar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       } finally {
         setLoading(false);
       }
     }
   };
 
-  // Funções similares para testimonials
+  // Funções similares para testimonials e talks...
   const handleAddTestimonial = async () => {
     if (newTestimonial.name && newTestimonial.text) {
-      setLoading(true);
       try {
-        console.log('➕ Adicionando depoimento:', newTestimonial.name);
-        
-        await addTestimonial({
-          name: newTestimonial.name,
-          role: newTestimonial.role,
-          text: newTestimonial.text,
-          avatar_url: newTestimonial.avatar_url || undefined
-        });
-        
+        setLoading(true);
+        await addTestimonial(newTestimonial);
         setNewTestimonial({ name: '', role: '', text: '', avatar_url: '' });
-        showSuccessMessage('✅ Depoimento adicionado com sucesso!');
-        
-        console.log('✅ Depoimento adicionado e dados sincronizados');
+        showSuccessMessage('✅ Depoimento adicionado com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao adicionar depoimento:', error);
-        showSuccessMessage('❌ Erro ao adicionar depoimento');
+        showSuccessMessage('❌ Erro ao adicionar depoimento: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       } finally {
         setLoading(false);
       }
     }
   };
 
-  const handleUpdateTestimonial = async () => {
-    if (editingTestimonial) {
-      setLoading(true);
-      try {
-        console.log('📝 Atualizando depoimento:', editingTestimonial.id);
-        
-        await updateTestimonial(editingTestimonial.id, {
-          name: editingTestimonial.name,
-          role: editingTestimonial.role,
-          text: editingTestimonial.text,
-          avatar_url: editingTestimonial.avatar_url
-        });
-        
-        setEditingTestimonial(null);
-        showSuccessMessage('✅ Depoimento atualizado com sucesso!');
-        
-        console.log('✅ Depoimento atualizado e dados sincronizados');
-      } catch (error) {
-        console.error('❌ Erro ao atualizar depoimento:', error);
-        showSuccessMessage('❌ Erro ao atualizar depoimento');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleDeleteTestimonial = async (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este depoimento?')) {
-      setLoading(true);
-      try {
-        console.log('🗑️ Deletando depoimento:', id);
-        
-        await deleteTestimonial(id);
-        showSuccessMessage('✅ Depoimento excluído com sucesso!');
-        
-        console.log('✅ Depoimento deletado e dados sincronizados');
-      } catch (error) {
-        console.error('❌ Erro ao deletar depoimento:', error);
-        showSuccessMessage('❌ Erro ao deletar depoimento');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  // Funções para talks
   const handleAddTalk = async () => {
     if (newTalk.title && newTalk.description) {
-      setLoading(true);
       try {
-        console.log('➕ Adicionando palestra:', newTalk.title);
-        
-        await addTalk({
+        setLoading(true);
+        const talk = {
           title: newTalk.title,
           description: newTalk.description,
           tags: newTalk.tags.split(',').map(t => t.trim()).filter(t => t),
           image_url: newTalk.image_url || undefined
-        });
+        };
         
+        await addTalk(talk);
         setNewTalk({ title: '', description: '', tags: '', image_url: '' });
-        showSuccessMessage('✅ Palestra adicionada com sucesso!');
-        
-        console.log('✅ Palestra adicionada e dados sincronizados');
+        showSuccessMessage('✅ Palestra adicionada com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao adicionar palestra:', error);
-        showSuccessMessage('❌ Erro ao adicionar palestra');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleUpdateTalk = async () => {
-    if (editingTalk) {
-      setLoading(true);
-      try {
-        console.log('📝 Atualizando palestra:', editingTalk.id);
-        
-        await updateTalk(editingTalk.id, {
-          title: editingTalk.title,
-          description: editingTalk.description,
-          tags: editingTalk.tags,
-          image_url: editingTalk.image_url
-        });
-        
-        setEditingTalk(null);
-        showSuccessMessage('✅ Palestra atualizada com sucesso!');
-        
-        console.log('✅ Palestra atualizada e dados sincronizados');
-      } catch (error) {
-        console.error('❌ Erro ao atualizar palestra:', error);
-        showSuccessMessage('❌ Erro ao atualizar palestra');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleDeleteTalk = async (id: number) => {
-    if (confirm('Tem certeza que deseja excluir esta palestra?')) {
-      setLoading(true);
-      try {
-        console.log('🗑️ Deletando palestra:', id);
-        
-        await deleteTalk(id);
-        showSuccessMessage('✅ Palestra excluída com sucesso!');
-        
-        console.log('✅ Palestra deletada e dados sincronizados');
-      } catch (error) {
-        console.error('❌ Erro ao deletar palestra:', error);
-        showSuccessMessage('❌ Erro ao deletar palestra');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  // Função para atualizar configurações
-  const handleUpdateSettings = async () => {
-    if (editingSettings) {
-      setLoading(true);
-      try {
-        console.log('📝 Atualizando configurações do site');
-        
-        await updateSettings({
-          site_title: editingSettings.site_title,
-          site_description: editingSettings.site_description,
-          hero_title: editingSettings.hero_title,
-          hero_subtitle: editingSettings.hero_subtitle,
-          about_text: editingSettings.about_text,
-          skills: editingSettings.skills,
-          profile_image_url: editingSettings.profile_image_url
-        });
-        
-        setEditingSettings(null);
-        showSuccessMessage('✅ Configurações atualizadas com sucesso!');
-        
-        console.log('✅ Configurações atualizadas e dados sincronizados');
-      } catch (error) {
-        console.error('❌ Erro ao atualizar configurações:', error);
-        showSuccessMessage('❌ Erro ao atualizar configurações');
+        showSuccessMessage('❌ Erro ao adicionar palestra: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       } finally {
         setLoading(false);
       }
@@ -352,86 +189,83 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col lg:flex-row">
-      {/* Sidebar - RESPONSIVO */}
-      <div className="w-full lg:w-64 bg-gray-900 border-b lg:border-b-0 lg:border-r border-cyan-500/30 p-4 lg:p-6 overflow-y-auto">
-        <div className="flex items-center justify-between mb-6 lg:mb-8">
-          <h2 className="text-lg lg:text-xl font-bold text-cyan-400">Admin Panel</h2>
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex">
+      {/* Sidebar - RESPONSIVIDADE MELHORADA */}
+      <div className="w-full sm:w-80 md:w-64 bg-gray-900 border-r border-cyan-500/30 p-4 sm:p-6 overflow-y-auto">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-bold text-cyan-400">Admin Panel</h2>
           <div className="flex items-center space-x-2">
             <NotificationSystem />
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white lg:hidden"
+              className="text-gray-400 hover:text-white p-1 sm:p-0"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 sm:w-6 h-5 sm:h-6" />
             </button>
           </div>
         </div>
 
-        {/* Navigation - RESPONSIVO */}
-        <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2">
+        <nav className="space-y-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-2 lg:px-4 py-2 lg:py-3 rounded-lg transition-all duration-300 text-sm lg:text-base ${
+              className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-3 rounded-lg transition-all duration-300 text-sm sm:text-base ${
                 activeTab === tab.id
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400'
                   : 'text-gray-400 hover:text-cyan-400 hover:bg-gray-800'
               }`}
             >
-              <tab.icon className="w-4 lg:w-5 h-4 lg:h-5" />
-              <span className="hidden sm:inline">{tab.title}</span>
+              <tab.icon className="w-4 sm:w-5 h-4 sm:h-5" />
+              <span>{tab.title}</span>
             </button>
           ))}
         </nav>
 
-        {/* Action Buttons - RESPONSIVO */}
-        <div className="mt-6 lg:mt-8 pt-6 lg:pt-8 border-t border-gray-700 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-3">
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-700 space-y-3">
           <button
             onClick={() => setShowAnalyticsSetup(true)}
-            className="px-2 lg:px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
+            className="w-full px-3 sm:px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
-            <TrendingUp className="w-3 lg:w-4 h-3 lg:h-4 mr-1 lg:mr-2" />
-            <span className="hidden sm:inline">Analytics</span>
+            <TrendingUp className="w-3 sm:w-4 h-3 sm:h-4 mr-2" />
+            Google Analytics
           </button>
           <button
             onClick={() => setShowUserManagement(true)}
-            className="px-2 lg:px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
+            className="w-full px-3 sm:px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
-            <UserCog className="w-3 lg:w-4 h-3 lg:h-4 mr-1 lg:mr-2" />
-            <span className="hidden sm:inline">Usuários</span>
+            <UserCog className="w-3 sm:w-4 h-3 sm:h-4 mr-2" />
+            Usuários
           </button>
           <button
             onClick={onBackToFrontend}
-            className="px-2 lg:px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
+            className="w-full px-3 sm:px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
-            <Eye className="w-3 lg:w-4 h-3 lg:h-4 mr-1 lg:mr-2" />
-            <span className="hidden sm:inline">Ver Site</span>
+            <Eye className="w-3 sm:w-4 h-3 sm:h-4 mr-2" />
+            Ver Site
           </button>
           <button
             onClick={handleLogout}
-            className="px-2 lg:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
+            className="w-full px-3 sm:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 text-sm sm:text-base"
           >
-            <span className="hidden sm:inline">Sair</span>
-            <span className="sm:hidden">🚪</span>
+            Sair
           </button>
         </div>
       </div>
 
-      {/* Main Content - RESPONSIVO */}
-      <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
+      {/* Main Content - RESPONSIVIDADE MELHORADA */}
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
         {/* Success Message */}
         {successMessage && (
-          <div className="fixed top-4 right-4 bg-green-500/20 border border-green-400 text-green-400 px-4 lg:px-6 py-2 lg:py-3 rounded-lg flex items-center z-60 text-sm lg:text-base">
+          <div className="fixed top-4 right-4 bg-green-500/20 border border-green-400 text-green-400 px-4 sm:px-6 py-3 rounded-lg flex items-center z-60 text-sm sm:text-base max-w-xs sm:max-w-md">
             {successMessage}
           </div>
         )}
 
         {/* Loading Indicator */}
-        {(loading || projectsLoading || testimonialsLoading || talksLoading || settingsLoading) && (
-          <div className="fixed top-4 right-4 bg-cyan-500/20 border border-cyan-400 text-cyan-400 px-3 lg:px-4 py-2 rounded-lg flex items-center z-60 text-sm">
-            <Loader className="w-3 lg:w-4 h-3 lg:h-4 mr-2 animate-spin" />
+        {loading && (
+          <div className="fixed top-4 right-4 bg-cyan-500/20 border border-cyan-400 text-cyan-400 px-3 sm:px-4 py-2 rounded-lg flex items-center z-60 text-sm">
+            <Loader className="w-3 sm:w-4 h-3 sm:h-4 mr-2 animate-spin" />
             Processando...
           </div>
         )}
@@ -439,31 +273,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         {activeTab === 'dashboard' && <AdminDashboard />}
 
         {activeTab === 'projects' && (
-          <div className="space-y-4 lg:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Gerenciar Projetos</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Projetos</h2>
               <div className="text-sm text-gray-400">
                 Total: {projects.length} projetos
               </div>
             </div>
             
-            {/* Adicionar novo projeto - RESPONSIVO */}
-            <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
-              <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Projeto</h3>
+            {/* Adicionar novo projeto */}
+            <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+              <h3 className="text-base sm:text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Projeto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Título do projeto"
                   value={newProject.title}
                   onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
                 />
                 <input
                   type="text"
                   placeholder="Tecnologias (separadas por vírgula)"
                   value={newProject.tech}
                   onChange={(e) => setNewProject({ ...newProject, tech: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
                 />
               </div>
               <textarea
@@ -471,7 +305,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                 rows={3}
                 value={newProject.description}
                 onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4 text-sm lg:text-base"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4 text-sm sm:text-base"
               />
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -485,143 +319,157 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               </div>
               <button
                 onClick={handleAddProject}
-                disabled={loading}
-                className="mt-4 px-4 lg:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
+                disabled={loading || projectsLoading}
+                className="mt-4 px-4 sm:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
               >
-                <Plus className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
+                <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
                 Adicionar Projeto
               </button>
             </div>
 
-            {/* Lista de projetos - RESPONSIVO */}
+            {/* Lista de projetos */}
             <div className="space-y-4">
-              {projects.map((project) => (
-                <div key={project.id} className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-purple-500/30">
-                  {editingProject?.id === project.id ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input
-                          type="text"
-                          value={editingProject.title}
-                          onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+              {projectsLoading ? (
+                <div className="text-center py-8">
+                  <Loader className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-2" />
+                  <p className="text-gray-400">Carregando projetos do Supabase...</p>
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="text-center py-8">
+                  <Database className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Nenhum projeto encontrado no banco de dados</p>
+                  <p className="text-gray-500 text-sm mt-2">Adicione o primeiro projeto acima</p>
+                </div>
+              ) : (
+                projects.map((project) => (
+                  <div key={project.id} className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
+                    {editingProject?.id === project.id ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            value={editingProject.title}
+                            onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
+                            className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          />
+                          <input
+                            type="text"
+                            value={Array.isArray(editingProject.tech) ? editingProject.tech.join(', ') : editingProject.tech}
+                            onChange={(e) => setEditingProject({ 
+                              ...editingProject, 
+                              tech: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+                            })}
+                            className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          />
+                        </div>
+                        <textarea
+                          value={editingProject.description}
+                          onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
+                          rows={3}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                         />
-                        <input
-                          type="text"
-                          value={Array.isArray(editingProject.tech) ? editingProject.tech.join(', ') : editingProject.tech}
-                          onChange={(e) => setEditingProject({ 
-                            ...editingProject, 
-                            tech: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
-                          })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Imagem do Projeto
+                          </label>
+                          <ImageUpload
+                            currentImage={editingProject.image_url}
+                            onImageUploaded={(url) => setEditingProject({ ...editingProject, image_url: url })}
+                            folder="projects"
+                          />
+                        </div>
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                          <button
+                            onClick={handleUpdateProject}
+                            disabled={loading}
+                            className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
+                          >
+                            <Save className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
+                            Salvar
+                          </button>
+                          <button
+                            onClick={() => setEditingProject(null)}
+                            className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm sm:text-base"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       </div>
-                      <textarea
-                        value={editingProject.description}
-                        onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
-                        rows={3}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                      />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Imagem do Projeto
-                        </label>
-                        <ImageUpload
-                          currentImage={editingProject.image_url}
-                          onImageUploaded={(url) => setEditingProject({ ...editingProject, image_url: url })}
-                          folder="projects"
-                        />
-                      </div>
-                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                        <button
-                          onClick={handleUpdateProject}
-                          disabled={loading}
-                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
-                        >
-                          <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
-                          Salvar
-                        </button>
-                        <button
-                          onClick={() => setEditingProject(null)}
-                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                          {project.image_url && (
-                            <img
-                              src={project.image_url}
-                              alt={project.title}
-                              className="w-full sm:w-20 h-40 sm:h-20 object-cover rounded-lg"
-                            />
-                          )}
-                          <div className="flex-1">
-                            <h4 className="text-base lg:text-lg font-semibold text-purple-400">{project.title}</h4>
-                            <p className="text-gray-300 mt-2 text-sm lg:text-base">{project.description}</p>
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {(Array.isArray(project.tech) ? project.tech : []).map((tech, index) => (
-                                <span key={index} className="px-2 lg:px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs lg:text-sm">
-                                  {tech}
-                                </span>
-                              ))}
+                    ) : (
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                            {project.image_url && (
+                              <img
+                                src={project.image_url}
+                                alt={project.title}
+                                className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h4 className="text-base sm:text-lg font-semibold text-purple-400">{project.title}</h4>
+                              <p className="text-gray-300 mt-2 text-sm sm:text-base">{project.description}</p>
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                {(Array.isArray(project.tech) ? project.tech : []).map((tech, index) => (
+                                  <span key={index} className="px-2 sm:px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs sm:text-sm">
+                                    {tech}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
+                        <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
+                          <button 
+                            onClick={() => setEditingProject(project)}
+                            className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteProject(project.id)}
+                            disabled={loading}
+                            className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => setEditingProject(project)}
-                          className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
-                        >
-                          <Edit className="w-3 lg:w-4 h-3 lg:h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteProject(project.id)}
-                          disabled={loading}
-                          className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
-                        >
-                          <Trash2 className="w-3 lg:w-4 h-3 lg:h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
 
+        {/* Outras seções similares... */}
         {activeTab === 'testimonials' && (
-          <div className="space-y-4 lg:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Gerenciar Depoimentos</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Depoimentos</h2>
               <div className="text-sm text-gray-400">
                 Total: {testimonials.length} depoimentos
               </div>
             </div>
             
-            {/* Adicionar novo depoimento - RESPONSIVO */}
-            <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
-              <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Depoimento</h3>
+            {/* Adicionar novo depoimento */}
+            <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+              <h3 className="text-base sm:text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Depoimento</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Nome do cliente"
                   value={newTestimonial.name}
                   onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
                 />
                 <input
                   type="text"
                   placeholder="Cargo/Empresa"
                   value={newTestimonial.role}
                   onChange={(e) => setNewTestimonial({ ...newTestimonial, role: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
                 />
               </div>
               <textarea
@@ -629,7 +477,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                 rows={3}
                 value={newTestimonial.text}
                 onChange={(e) => setNewTestimonial({ ...newTestimonial, text: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4 text-sm lg:text-base"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4 text-sm sm:text-base"
               />
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -643,140 +491,86 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               </div>
               <button
                 onClick={handleAddTestimonial}
-                disabled={loading}
-                className="mt-4 px-4 lg:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
+                disabled={loading || testimonialsLoading}
+                className="mt-4 px-4 sm:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
               >
-                <Plus className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
+                <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
                 Adicionar Depoimento
               </button>
             </div>
 
-            {/* Lista de depoimentos - RESPONSIVO */}
+            {/* Lista de depoimentos */}
             <div className="space-y-4">
-              {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-purple-500/30">
-                  {editingTestimonial?.id === testimonial.id ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input
-                          type="text"
-                          value={editingTestimonial.name}
-                          onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                        />
-                        <input
-                          type="text"
-                          value={editingTestimonial.role}
-                          onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                        />
-                      </div>
-                      <textarea
-                        value={editingTestimonial.text}
-                        onChange={(e) => setEditingTestimonial({ ...editingTestimonial, text: e.target.value })}
-                        rows={3}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                      />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Avatar do Cliente
-                        </label>
-                        <ImageUpload
-                          currentImage={editingTestimonial.avatar_url}
-                          onImageUploaded={(url) => setEditingTestimonial({ ...editingTestimonial, avatar_url: url })}
-                          folder="avatars"
-                        />
-                      </div>
-                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                        <button
-                          onClick={handleUpdateTestimonial}
-                          disabled={loading}
-                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
-                        >
-                          <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
-                          Salvar
-                        </button>
-                        <button
-                          onClick={() => setEditingTestimonial(null)}
-                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                      <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                        {testimonial.avatar_url && (
-                          <img
-                            src={testimonial.avatar_url}
-                            alt={testimonial.name}
-                            className="w-16 h-16 object-cover rounded-full mx-auto sm:mx-0"
-                          />
-                        )}
-                        <div className="flex-1 text-center sm:text-left">
-                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 mb-2">
-                            <h4 className="text-base lg:text-lg font-semibold text-purple-400">{testimonial.name}</h4>
-                            <span className="text-gray-400 text-sm">{testimonial.role}</span>
-                          </div>
-                          <p className="text-gray-300 italic text-sm lg:text-base">"{testimonial.text}"</p>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2 justify-center lg:justify-start">
-                        <button 
-                          onClick={() => setEditingTestimonial(testimonial)}
-                          className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
-                        >
-                          <Edit className="w-3 lg:w-4 h-3 lg:h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteTestimonial(testimonial.id)}
-                          disabled={loading}
-                          className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
-                        >
-                          <Trash2 className="w-3 lg:w-4 h-3 lg:h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
+              {testimonialsLoading ? (
+                <div className="text-center py-8">
+                  <Loader className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-2" />
+                  <p className="text-gray-400">Carregando depoimentos do Supabase...</p>
                 </div>
-              ))}
+              ) : testimonials.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Nenhum depoimento encontrado no banco de dados</p>
+                  <p className="text-gray-500 text-sm mt-2">Adicione o primeiro depoimento acima</p>
+                </div>
+              ) : (
+                testimonials.map((testimonial) => (
+                  <div key={testimonial.id} className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
+                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                      {testimonial.avatar_url && (
+                        <img
+                          src={testimonial.avatar_url}
+                          alt={testimonial.name}
+                          className="w-16 h-16 object-cover rounded-full mx-auto sm:mx-0"
+                        />
+                      )}
+                      <div className="flex-1 text-center sm:text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
+                          <h4 className="text-base sm:text-lg font-semibold text-purple-400">{testimonial.name}</h4>
+                          <span className="text-gray-400 text-sm">{testimonial.role}</span>
+                        </div>
+                        <p className="text-gray-300 italic text-sm sm:text-base">"{testimonial.text}"</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
 
+        {/* Seção de Palestras */}
         {activeTab === 'talks' && (
-          <div className="space-y-4 lg:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Gerenciar Palestras</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Palestras</h2>
               <div className="text-sm text-gray-400">
                 Total: {talks.length} palestras
               </div>
             </div>
             
-            {/* Adicionar nova palestra - RESPONSIVO */}
-            <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
-              <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Adicionar Nova Palestra</h3>
+            {/* Adicionar nova palestra */}
+            <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+              <h3 className="text-base sm:text-lg font-semibold text-cyan-400 mb-4">Adicionar Nova Palestra</h3>
               <input
                 type="text"
                 placeholder="Título da palestra"
                 value={newTalk.title}
                 onChange={(e) => setNewTalk({ ...newTalk, title: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm lg:text-base"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm sm:text-base"
               />
               <textarea
                 placeholder="Descrição da palestra"
                 rows={3}
                 value={newTalk.description}
                 onChange={(e) => setNewTalk({ ...newTalk, description: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm lg:text-base"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm sm:text-base"
               />
               <input
                 type="text"
                 placeholder="Tags (separadas por vírgula)"
                 value={newTalk.tags}
                 onChange={(e) => setNewTalk({ ...newTalk, tags: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm lg:text-base"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm sm:text-base"
               />
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -790,121 +584,71 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               </div>
               <button
                 onClick={handleAddTalk}
-                disabled={loading}
-                className="px-4 lg:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
+                disabled={loading || talksLoading}
+                className="px-4 sm:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
               >
-                <Plus className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
+                <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
                 Adicionar Palestra
               </button>
             </div>
 
-            {/* Lista de palestras - RESPONSIVO */}
+            {/* Lista de palestras */}
             <div className="space-y-4">
-              {talks.map((talk) => (
-                <div key={talk.id} className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-purple-500/30">
-                  {editingTalk?.id === talk.id ? (
-                    <div className="space-y-4">
-                      <input
-                        type="text"
-                        value={editingTalk.title}
-                        onChange={(e) => setEditingTalk({ ...editingTalk, title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                      />
-                      <textarea
-                        value={editingTalk.description}
-                        onChange={(e) => setEditingTalk({ ...editingTalk, description: e.target.value })}
-                        rows={3}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                      />
-                      <input
-                        type="text"
-                        value={Array.isArray(editingTalk.tags) ? editingTalk.tags.join(', ') : editingTalk.tags}
-                        onChange={(e) => setEditingTalk({ 
-                          ...editingTalk, 
-                          tags: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
-                        })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
-                      />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Imagem da Palestra
-                        </label>
-                        <ImageUpload
-                          currentImage={editingTalk.image_url}
-                          onImageUploaded={(url) => setEditingTalk({ ...editingTalk, image_url: url })}
-                          folder="talks"
+              {talksLoading ? (
+                <div className="text-center py-8">
+                  <Loader className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-2" />
+                  <p className="text-gray-400">Carregando palestras do Supabase...</p>
+                </div>
+              ) : talks.length === 0 ? (
+                <div className="text-center py-8">
+                  <Mic className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Nenhuma palestra encontrada no banco de dados</p>
+                  <p className="text-gray-500 text-sm mt-2">Adicione a primeira palestra acima</p>
+                </div>
+              ) : (
+                talks.map((talk) => (
+                  <div key={talk.id} className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
+                    <div className="flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
+                      {talk.image_url && (
+                        <img
+                          src={talk.image_url}
+                          alt={talk.title}
+                          className="w-full lg:w-20 h-32 lg:h-20 object-cover rounded-lg"
                         />
-                      </div>
-                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                        <button
-                          onClick={handleUpdateTalk}
-                          disabled={loading}
-                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
-                        >
-                          <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
-                          Salvar
-                        </button>
-                        <button
-                          onClick={() => setEditingTalk(null)}
-                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                      <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                        {talk.image_url && (
-                          <img
-                            src={talk.image_url}
-                            alt={talk.title}
-                            className="w-full sm:w-20 h-40 sm:h-20 object-cover rounded-lg"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <h4 className="text-base lg:text-lg font-semibold text-purple-400">{talk.title}</h4>
-                          <p className="text-gray-300 mt-2 text-sm lg:text-base">{talk.description}</p>
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, index) => (
-                              <span key={index} className="px-2 lg:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs lg:text-sm">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
+                      )}
+                      <div className="flex-1">
+                        <h4 className="text-base sm:text-lg font-semibold text-purple-400">{talk.title}</h4>
+                        <p className="text-gray-300 mt-2 text-sm sm:text-base">{talk.description}</p>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, index) => (
+                            <span key={index} className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs sm:text-sm">
+                              {tag}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                      <div className="flex space-x-2 justify-center lg:justify-start">
-                        <button 
-                          onClick={() => setEditingTalk(talk)}
-                          className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
-                        >
-                          <Edit className="w-3 lg:w-4 h-3 lg:h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteTalk(talk.id)}
-                          disabled={loading}
-                          className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
-                        >
-                          <Trash2 className="w-3 lg:w-4 h-3 lg:h-4" />
-                        </button>
-                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
 
+        {/* Seção de Configurações */}
         {activeTab === 'settings' && (
-          <div className="space-y-4 lg:space-y-6">
-            <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Configurações do Site</h2>
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Configurações do Site</h2>
             
-            {editingSettings ? (
-              <div className="space-y-4 lg:space-y-6">
-                <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
-                  <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Editar Configurações</h3>
+            {settingsLoading ? (
+              <div className="text-center py-8">
+                <Loader className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-2" />
+                <p className="text-gray-400">Carregando configurações do Supabase...</p>
+              </div>
+            ) : editingSettings ? (
+              <div className="space-y-4 sm:space-y-6">
+                <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+                  <h3 className="text-base sm:text-lg font-semibold text-cyan-400 mb-4">Editar Configurações</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -914,7 +658,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         type="text"
                         value={editingSettings.site_title}
                         onChange={(e) => setEditingSettings({ ...editingSettings, site_title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -925,7 +669,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         rows={3}
                         value={editingSettings.site_description}
                         onChange={(e) => setEditingSettings({ ...editingSettings, site_description: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -936,7 +680,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         type="text"
                         value={editingSettings.hero_title}
                         onChange={(e) => setEditingSettings({ ...editingSettings, hero_title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -947,7 +691,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         type="text"
                         value={editingSettings.hero_subtitle}
                         onChange={(e) => setEditingSettings({ ...editingSettings, hero_subtitle: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -958,7 +702,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         rows={3}
                         value={editingSettings.about_text}
                         onChange={(e) => setEditingSettings({ ...editingSettings, about_text: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -972,7 +716,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           ...editingSettings, 
                           skills: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)
                         })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -988,16 +732,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                   </div>
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-6">
                     <button
-                      onClick={handleUpdateSettings}
+                      onClick={async () => {
+                        try {
+                          setLoading(true);
+                          await updateSettings(editingSettings);
+                          setEditingSettings(null);
+                          showSuccessMessage('✅ Configurações atualizadas com sucesso no Supabase!');
+                        } catch (error) {
+                          console.error('❌ Erro ao atualizar configurações:', error);
+                          showSuccessMessage('❌ Erro ao atualizar configurações: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
                       disabled={loading}
-                      className="px-4 lg:px-6 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
+                      className="px-4 sm:px-6 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
                     >
-                      <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
+                      <Save className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
                       Salvar Configurações
                     </button>
                     <button
                       onClick={() => setEditingSettings(null)}
-                      className="px-4 lg:px-6 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
+                      className="px-4 sm:px-6 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm sm:text-base"
                     >
                       Cancelar
                     </button>
@@ -1005,19 +761,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-                  <h3 className="text-base lg:text-lg font-semibold text-cyan-400">Configurações Atuais</h3>
+              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-cyan-400">Configurações Atuais</h3>
                   <button
                     onClick={() => setEditingSettings(settings)}
-                    className="px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 text-sm lg:text-base"
+                    className="mt-2 sm:mt-0 px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 text-sm sm:text-base"
                   >
-                    <Edit className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
+                    <Edit className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
                     Editar
                   </button>
                 </div>
-                {settings && (
-                  <div className="space-y-4 text-gray-300 text-sm lg:text-base">
+                {settings ? (
+                  <div className="space-y-4 text-gray-300 text-sm sm:text-base">
                     <div>
                       <strong className="text-cyan-400">Título:</strong> {settings.site_title}
                     </div>
@@ -1036,11 +792,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                     <div>
                       <strong className="text-cyan-400">Foto de Perfil:</strong>
                       {settings.profile_image_url ? (
-                        <div className="flex items-center space-x-3 mt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mt-2">
                           <img
                             src={settings.profile_image_url}
                             alt="Profile"
-                            className="w-12 lg:w-16 h-12 lg:h-16 object-cover rounded-full"
+                            className="w-16 h-16 object-cover rounded-full"
                           />
                           <span className="text-green-400">✅ Configurada</span>
                         </div>
@@ -1052,12 +808,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       <strong className="text-cyan-400">Habilidades:</strong>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {(Array.isArray(settings.skills) ? settings.skills : []).map((skill, index) => (
-                          <span key={index} className="px-2 lg:px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs lg:text-sm">
+                          <span key={index} className="px-2 sm:px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs sm:text-sm">
                             {skill}
                           </span>
                         ))}
                       </div>
                     </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-400">Nenhuma configuração encontrada no banco de dados</p>
                   </div>
                 )}
               </div>

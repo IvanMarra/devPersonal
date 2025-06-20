@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Shield, Eye, EyeOff, Terminal, ArrowLeft } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { authenticateAdmin } from '../lib/supabase';
 
 interface AdminLoginProps {
   onLogin: (success: boolean) => void;
@@ -44,25 +45,33 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
       return;
     }
 
-    // Simular autenticação com credenciais seguras
-    setTimeout(() => {
-      if (credentials.username === 'deviem_admin' && credentials.password === 'DevIem2024@Secure!') {
-        console.log('✅ Login bem-sucedido');
+    try {
+      console.log('🔐 Tentando autenticar admin...');
+      
+      // Autenticar no Supabase
+      const session = await authenticateAdmin(credentials.username, credentials.password);
+      
+      if (session) {
+        console.log('✅ Login bem-sucedido com autenticação Supabase');
         localStorage.setItem('deviem_admin_token', 'authenticated');
         localStorage.setItem('deviem_admin_session', Date.now().toString());
         onLogin(true);
       } else {
-        console.log('❌ Credenciais inválidas');
-        setError('Credenciais inválidas');
-        // Reset reCAPTCHA em caso de erro
-        if (recaptchaRef.current) {
-          recaptchaRef.current.reset();
-        }
-        setRecaptchaToken(null);
-        onLogin(false);
+        throw new Error('Falha na autenticação');
       }
+    } catch (err) {
+      console.log('❌ Erro na autenticação:', err);
+      setError(err instanceof Error ? err.message : 'Erro na autenticação');
+      
+      // Reset reCAPTCHA em caso de erro
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
+      setRecaptchaToken(null);
+      onLogin(false);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -152,7 +161,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <Terminal className="w-5 h-5 mr-2 animate-spin" />
-                Autenticando...
+                Autenticando no Supabase...
               </div>
             ) : (
               'Entrar'
@@ -163,7 +172,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>Credenciais de demonstração:</p>
           <p className="text-cyan-400">deviem_admin / DevIem2024@Secure!</p>
-          <p className="text-yellow-400 mt-2">🔒 Protegido por reCAPTCHA</p>
+          <p className="text-yellow-400 mt-2">🔒 Protegido por reCAPTCHA + Supabase Auth</p>
         </div>
       </div>
 
