@@ -1,6 +1,6 @@
 {
   "name": "deviem-portfolio",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "type": "module",
   "description": "Portfolio profissional do DevIem com área administrativa completa",
@@ -59,6 +59,21 @@
     "npm": ">=8.0.0"
   },
   "changelog": {
+    "2.2.2": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 CORREÇÃO CRÍTICA: CRUD agora escreve em tempo real no Supabase",
+        "🚪 Sistema de logout completamente corrigido com limpeza total",
+        "🔒 Implementado reCAPTCHA obrigatório no login administrativo",
+        "⚡ Sincronização automática entre admin e frontend após operações",
+        "🔄 Auto-refresh dos dados a cada 30 segundos",
+        "📊 Logs detalhados para debugging de todas as operações CRUD",
+        "🛡️ Validação robusta de formulários e estados de loading",
+        "✨ Mensagens de sucesso/erro para todas as operações",
+        "🎯 Auto-complete nos campos de login para facilitar testes",
+        "🔐 Limpeza completa de cache e sessões no logout"
+      ]
+    },
     "2.2.1": {
       "date": "2025-01-19",
       "changes": [

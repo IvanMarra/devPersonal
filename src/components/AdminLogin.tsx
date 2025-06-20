@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Shield, Eye, EyeOff, Terminal, ArrowLeft } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 interface AdminLoginProps {
   onLogin: (success: boolean) => void;
@@ -11,24 +12,57 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  // Chave do reCAPTCHA (para produção, use variável de ambiente)
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; // Chave de teste
+
+  useEffect(() => {
+    // Auto-complete para facilitar o teste
+    setCredentials({
+      username: 'deviem_admin',
+      password: 'DevIem2024@Secure!'
+    });
+  }, []);
+
+  const handleRecaptchaChange = (token: string | null) => {
+    console.log('🔒 reCAPTCHA token:', token ? 'Recebido' : 'Removido');
+    setRecaptchaToken(token);
+    setError('');
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
+    // Validar reCAPTCHA
+    if (!recaptchaToken) {
+      setError('Por favor, complete a verificação reCAPTCHA');
+      setIsLoading(false);
+      return;
+    }
+
     // Simular autenticação com credenciais seguras
     setTimeout(() => {
       if (credentials.username === 'deviem_admin' && credentials.password === 'DevIem2024@Secure!') {
+        console.log('✅ Login bem-sucedido');
         localStorage.setItem('deviem_admin_token', 'authenticated');
         localStorage.setItem('deviem_admin_session', Date.now().toString());
         onLogin(true);
       } else {
+        console.log('❌ Credenciais inválidas');
         setError('Credenciais inválidas');
+        // Reset reCAPTCHA em caso de erro
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
+        }
+        setRecaptchaToken(null);
         onLogin(false);
       }
       setIsLoading(false);
-    }, 1000);
+    }, 1500);
   };
 
   return (
@@ -64,6 +98,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
               onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
               className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
               placeholder="Digite seu usuário"
+              autoComplete="username"
               required
             />
           </div>
@@ -79,6 +114,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors pr-12"
                 placeholder="Digite sua senha"
+                autoComplete="current-password"
                 required
               />
               <button
@@ -91,6 +127,17 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
             </div>
           </div>
 
+          {/* reCAPTCHA */}
+          <div className="flex justify-center">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={RECAPTCHA_SITE_KEY}
+              onChange={handleRecaptchaChange}
+              theme="dark"
+              size="normal"
+            />
+          </div>
+
           {error && (
             <div className="bg-red-500/20 border border-red-500 rounded-lg p-3 text-red-400 text-sm">
               {error}
@@ -99,7 +146,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !recaptchaToken}
             className="w-full bg-cyan-500/20 border-2 border-cyan-400 text-cyan-400 py-3 rounded-lg font-semibold hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
@@ -116,6 +163,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBackToFrontend }) =>
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>Credenciais de demonstração:</p>
           <p className="text-cyan-400">deviem_admin / DevIem2024@Secure!</p>
+          <p className="text-yellow-400 mt-2">🔒 Protegido por reCAPTCHA</p>
         </div>
       </div>
 
