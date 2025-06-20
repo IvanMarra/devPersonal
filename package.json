@@ -1,6 +1,6 @@
 {
   "name": "deviem-portfolio",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "private": true,
   "type": "module",
   "description": "Portfolio profissional do DevIem com área administrativa completa",
@@ -59,6 +59,21 @@
     "npm": ">=8.0.0"
   },
   "changelog": {
+    "2.2.3": {
+      "date": "2025-01-19",
+      "changes": [
+        "📱 RESPONSIVIDADE COMPLETA: Frontend e backend 100% responsivos",
+        "🔧 CRUD CORRIGIDO: Agora grava em tempo real no Supabase",
+        "🚪 LOGOUT FUNCIONAL: Sistema de logout completamente corrigido",
+        "🔔 NOTIFICAÇÕES CORRIGIDAS: Posicionamento à direita e informações visíveis",
+        "📱 Mobile Menu melhorado com animações suaves",
+        "🎨 Breakpoints otimizados para todos os dispositivos",
+        "⚡ Performance melhorada em dispositivos móveis",
+        "🔄 Sincronização automática entre admin e frontend",
+        "🛡️ Validação robusta de formulários",
+        "✨ Micro-interações e animações responsivas"
+      ]
+    },
     "2.2.2": {
       "date": "2025-01-19",
       "changes": [

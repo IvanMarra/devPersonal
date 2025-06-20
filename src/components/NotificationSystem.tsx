@@ -141,7 +141,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
         )}
       </button>
 
-      {/* Notification Panel - POSICIONADO À DIREITA */}
+      {/* Notification Panel - POSICIONADO À DIREITA E CORRIGIDO */}
       {isOpen && (
         <>
           {/* Overlay */}
@@ -150,8 +150,8 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Panel - CORRIGIDO: Posicionado à direita */}
-          <div className="absolute right-0 top-12 w-96 bg-gray-900/95 backdrop-blur-md border border-cyan-500/30 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
+          {/* Panel - CORRIGIDO: Posicionado à direita com largura adequada */}
+          <div className="absolute right-0 top-12 w-80 sm:w-96 bg-gray-900/95 backdrop-blur-md border border-cyan-500/30 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h3 className="text-lg font-semibold text-cyan-400 flex items-center">

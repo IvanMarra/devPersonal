@@ -71,7 +71,7 @@ const MatrixRain = () => {
   );
 };
 
-// Mobile Menu Component
+// Mobile Menu Component - RESPONSIVIDADE MELHORADA
 const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -119,11 +119,11 @@ const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
       />
 
       <div 
-        className={`fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-cyan-500/30 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed top-0 right-0 h-full w-full max-w-sm bg-black/95 backdrop-blur-md border-l border-cyan-500/30 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between p-6 border-b border-cyan-500/30">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-cyan-500/30">
           <div className="flex items-center space-x-2">
             <Terminal className="w-6 h-6 text-cyan-400" />
             <span className="text-xl font-bold text-cyan-400">DEVIEM</span>
@@ -136,7 +136,7 @@ const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
           </button>
         </div>
 
-        <nav className="p-6 space-y-2">
+        <nav className="p-4 sm:p-6 space-y-2">
           {sections.map((section: any, index: number) => (
             <button
               key={section.id}
@@ -448,16 +448,48 @@ function App() {
               transform: translateX(0);
             }
           }
+
+          /* RESPONSIVIDADE MELHORADA */
+          @media (max-width: 768px) {
+            .glitch-text {
+              font-size: 2.5rem !important;
+            }
+            
+            .typing-effect {
+              font-size: 1rem !important;
+              white-space: normal;
+              border-right: none;
+              animation: none;
+            }
+            
+            .card-hover:hover {
+              transform: translateY(-4px) scale(1.01);
+            }
+            
+            .floating-animation {
+              animation: none;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .glitch-text {
+              font-size: 2rem !important;
+            }
+            
+            .project-card, .testimonial-card, .talk-card {
+              margin: 0.5rem 0;
+            }
+          }
         `
       }} />
 
-      {/* Navigation */}
+      {/* Navigation - RESPONSIVIDADE MELHORADA */}
       <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-sm border-b border-cyan-500/30">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Terminal className="w-8 h-8 text-cyan-400" />
-              <div className="text-2xl font-bold text-cyan-400 glitch-text">
+              <Terminal className="w-6 sm:w-8 h-6 sm:h-8 text-cyan-400" />
+              <div className="text-xl sm:text-2xl font-bold text-cyan-400 glitch-text">
                 DEVIEM
               </div>
             </div>
@@ -490,24 +522,24 @@ function App() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'home' && (
-        <section className="min-h-screen flex items-center justify-center relative pt-20">
-          <div className="text-center z-10 px-6">
+        <section className="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6">
+          <div className="text-center z-10 w-full max-w-4xl">
             <div className="mb-8">
-              <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 text-cyan-400 glitch-text">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold mb-4 text-cyan-400 glitch-text">
                 {settings?.hero_title || 'DEVIEM'}
               </h1>
-              <div className="text-lg md:text-xl lg:text-2xl text-purple-400 typing-effect">
+              <div className="text-base sm:text-lg md:text-xl lg:text-2xl text-purple-400 typing-effect">
                 {settings?.hero_subtitle || 'Desenvolvedor • Mentor • Especialista em IA • Ethical Hacker'}
               </div>
             </div>
             
             <div className="mb-8 text-gray-300 max-w-2xl mx-auto">
-              <p className="text-base md:text-lg mb-4">
+              <p className="text-sm sm:text-base md:text-lg mb-4">
                 {settings?.about_text || 'Mais de 20 anos transformando ideias em realidade digital'}
               </p>
-              <p className="text-sm md:text-base">
+              <p className="text-xs sm:text-sm md:text-base">
                 {settings?.site_description || 'Especialista em desenvolvimento web/mobile, inteligência artificial, cybersecurity e mentor de transição de carreira'}
               </p>
             </div>
@@ -515,36 +547,36 @@ function App() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <button 
                 onClick={() => setActiveSection('projects')}
-                className="px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow"
+                className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow"
               >
-                <Code className="w-5 h-5 inline mr-2" />
+                <Code className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />
                 Ver Projetos
               </button>
               <button 
                 onClick={() => setActiveSection('about')}
-                className="px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-purple-500/20 border-purple-400 text-purple-400 hover:bg-purple-500/30 hover:shadow-purple-glow"
+                className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-purple-500/20 border-purple-400 text-purple-400 hover:bg-purple-500/30 hover:shadow-purple-glow"
               >
-                <Eye className="w-5 h-5 inline mr-2" />
+                <Eye className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />
                 Sobre Mim
               </button>
             </div>
           </div>
           
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <ChevronDown className="w-8 h-8 text-cyan-400" />
+            <ChevronDown className="w-6 sm:w-8 h-6 sm:h-8 text-cyan-400" />
           </div>
         </section>
       )}
 
-      {/* About Section */}
+      {/* About Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'about' && (
-        <section className="min-h-screen pt-24 px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Sobre DevIem
             </h2>
             
-            <div className="grid lg:grid-cols-3 gap-12 items-start">
+            <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 items-start">
               {/* Profile Image Section */}
               <div className="lg:col-span-1 flex justify-center">
                 <div className="relative">
@@ -553,43 +585,43 @@ function App() {
                       <img
                         src={settings.profile_image_url}
                         alt="DevIem"
-                        className="w-48 md:w-64 h-48 md:h-64 object-cover rounded-full floating-animation"
+                        className="w-40 sm:w-48 md:w-64 h-40 sm:h-48 md:h-64 object-cover rounded-full floating-animation"
                       />
                     ) : (
-                      <div className="w-48 md:w-64 h-48 md:h-64 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-cyan-400/50 floating-animation">
+                      <div className="w-40 sm:w-48 md:w-64 h-40 sm:h-48 md:h-64 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-cyan-400/50 floating-animation">
                         <div className="text-center">
-                          <Terminal className="w-12 md:w-16 h-12 md:h-16 text-cyan-400 mx-auto mb-2" />
-                          <p className="text-cyan-400 font-bold">DevIem</p>
-                          <p className="text-purple-400 text-sm">20+ anos</p>
+                          <Terminal className="w-8 sm:w-12 md:w-16 h-8 sm:h-12 md:h-16 text-cyan-400 mx-auto mb-2" />
+                          <p className="text-cyan-400 font-bold text-sm sm:text-base">DevIem</p>
+                          <p className="text-purple-400 text-xs sm:text-sm">20+ anos</p>
                         </div>
                       </div>
                     )}
                   </div>
                   
                   {/* Floating elements around the image */}
-                  <div className="absolute -top-4 -right-4 w-8 h-8 bg-cyan-400/20 rounded-full border border-cyan-400 flex items-center justify-center floating-animation">
-                    <Shield className="w-4 h-4 text-cyan-400" />
+                  <div className="absolute -top-2 sm:-top-4 -right-2 sm:-right-4 w-6 sm:w-8 h-6 sm:h-8 bg-cyan-400/20 rounded-full border border-cyan-400 flex items-center justify-center floating-animation">
+                    <Shield className="w-3 sm:w-4 h-3 sm:h-4 text-cyan-400" />
                   </div>
-                  <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-purple-400/20 rounded-full border border-purple-400 flex items-center justify-center floating-animation" style={{animationDelay: '1s'}}>
-                    <Brain className="w-4 h-4 text-purple-400" />
+                  <div className="absolute -bottom-2 sm:-bottom-4 -left-2 sm:-left-4 w-6 sm:w-8 h-6 sm:h-8 bg-purple-400/20 rounded-full border border-purple-400 flex items-center justify-center floating-animation" style={{animationDelay: '1s'}}>
+                    <Brain className="w-3 sm:w-4 h-3 sm:h-4 text-purple-400" />
                   </div>
-                  <div className="absolute top-1/2 -left-8 w-6 h-6 bg-green-400/20 rounded-full border border-green-400 flex items-center justify-center floating-animation" style={{animationDelay: '2s'}}>
-                    <Code className="w-3 h-3 text-green-400" />
+                  <div className="absolute top-1/2 -left-4 sm:-left-8 w-5 sm:w-6 h-5 sm:h-6 bg-green-400/20 rounded-full border border-green-400 flex items-center justify-center floating-animation" style={{animationDelay: '2s'}}>
+                    <Code className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-green-400" />
                   </div>
                 </div>
               </div>
 
               {/* Content Section */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-6 sm:space-y-8">
                 <div className="cyber-border rounded-lg">
-                  <div className="bg-black p-6 rounded-lg">
-                    <h3 className="text-xl md:text-2xl font-bold text-purple-400 mb-4 flex items-center">
-                      <Shield className="w-6 h-6 mr-2" />
+                  <div className="bg-black p-4 sm:p-6 rounded-lg">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-400 mb-4 flex items-center">
+                      <Shield className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
                       Especialidades
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2">
                       {(settings?.skills || []).map((skill, index) => (
-                        <div key={index} className="bg-gray-900/50 p-2 rounded text-xs md:text-sm text-cyan-400 border border-cyan-500/20 hover:border-cyan-400 transition-all duration-300">
+                        <div key={index} className="bg-gray-900/50 p-2 rounded text-xs sm:text-sm text-cyan-400 border border-cyan-500/20 hover:border-cyan-400 transition-all duration-300">
                           {skill}
                         </div>
                       ))}
@@ -597,31 +629,31 @@ function App() {
                   </div>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
-                    <h3 className="text-lg md:text-xl font-bold text-purple-400 mb-4">Experiência</h3>
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-4">Experiência</h3>
                     <ul className="space-y-3 text-gray-300 text-sm md:text-base">
                       <li className="flex items-start">
-                        <Zap className="w-5 h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
+                        <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
                         <span>20+ anos em desenvolvimento de sistemas</span>
                       </li>
                       <li className="flex items-start">
-                        <Shield className="w-5 h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
+                        <Shield className="w-4 sm:w-5 h-4 sm:h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
                         <span>Prevenção de ataques ao Governo Federal</span>
                       </li>
                       <li className="flex items-start">
-                        <Brain className="w-5 h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
+                        <Brain className="w-4 sm:w-5 h-4 sm:h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
                         <span>Especialista em IA e Machine Learning</span>
                       </li>
                       <li className="flex items-start">
-                        <Users className="w-5 h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
+                        <Users className="w-4 sm:w-5 h-4 sm:h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
                         <span>Mentor de transição de carreira</span>
                       </li>
                     </ul>
                   </div>
 
-                  <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-                    <h3 className="text-lg md:text-xl font-bold text-cyan-400 mb-4">Conquistas</h3>
+                  <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-cyan-400 mb-4">Conquistas</h3>
                     <ul className="space-y-3 text-gray-300 text-sm md:text-base">
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -648,38 +680,38 @@ function App() {
         </section>
       )}
 
-      {/* Projects Section */}
+      {/* Projects Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'projects' && (
-        <section className="min-h-screen pt-24 px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Projetos Desenvolvidos
             </h2>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               {projects.map((project, index) => (
-                <div key={project.id} className="project-card rounded-xl p-6 card-hover group">
-                  <div className="relative overflow-hidden rounded-lg mb-6">
+                <div key={project.id} className="project-card rounded-xl p-4 sm:p-6 card-hover group">
+                  <div className="relative overflow-hidden rounded-lg mb-4 sm:mb-6">
                     <img
                       src={project.image_url || "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=800"}
                       alt={project.title}
-                      className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="w-full h-40 sm:h-48 object-cover transition-transform duration-300 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
                   
                   <div className="space-y-4">
-                    <h3 className="text-xl font-bold text-purple-400 group-hover:text-cyan-400 transition-colors duration-300">
+                    <h3 className="text-lg sm:text-xl font-bold text-purple-400 group-hover:text-cyan-400 transition-colors duration-300">
                       {project.title}
                     </h3>
                     <p className="text-gray-300 text-sm leading-relaxed">
                       {project.description}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech, techIndex) => (
+                      {(Array.isArray(project.tech) ? project.tech : []).map((tech, techIndex) => (
                         <span 
                           key={techIndex} 
-                          className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs border border-cyan-500/30 hover:border-cyan-400 transition-colors duration-300"
+                          className="px-2 sm:px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs border border-cyan-500/30 hover:border-cyan-400 transition-colors duration-300"
                         >
                           {tech}
                         </span>
@@ -693,47 +725,47 @@ function App() {
         </section>
       )}
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'testimonials' && (
-        <section className="min-h-screen pt-24 px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Depoimentos
             </h2>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               {testimonials.map((testimonial, index) => (
-                <div key={testimonial.id} className="testimonial-card rounded-xl p-6 card-hover group">
-                  <div className="flex items-center space-x-4 mb-6">
+                <div key={testimonial.id} className="testimonial-card rounded-xl p-4 sm:p-6 card-hover group">
+                  <div className="flex items-center space-x-4 mb-4 sm:mb-6">
                     <div className="relative">
                       <img
                         src={testimonial.avatar_url || "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"}
                         alt={testimonial.name}
-                        className="w-16 h-16 object-cover rounded-full avatar-glow"
+                        className="w-12 sm:w-16 h-12 sm:h-16 object-cover rounded-full avatar-glow"
                       />
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-black flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="absolute -bottom-1 -right-1 w-4 sm:w-5 h-4 sm:h-5 bg-green-400 rounded-full border-2 border-black flex items-center justify-center">
+                        <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full"></div>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-bold text-cyan-400 group-hover:text-purple-400 transition-colors duration-300">
+                      <h4 className="font-bold text-cyan-400 group-hover:text-purple-400 transition-colors duration-300 text-sm sm:text-base">
                         {testimonial.name}
                       </h4>
-                      <p className="text-sm text-gray-400">{testimonial.role}</p>
+                      <p className="text-xs sm:text-sm text-gray-400">{testimonial.role}</p>
                     </div>
                   </div>
                   
                   <div className="relative">
-                    <MessageSquare className="w-8 h-8 text-purple-400/30 absolute -top-2 -left-2" />
-                    <blockquote className="text-gray-300 italic leading-relaxed pl-6">
+                    <MessageSquare className="w-6 sm:w-8 h-6 sm:h-8 text-purple-400/30 absolute -top-2 -left-2" />
+                    <blockquote className="text-gray-300 italic leading-relaxed pl-4 sm:pl-6 text-sm sm:text-base">
                       "{testimonial.text}"
                     </blockquote>
                   </div>
                   
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-4 sm:mt-6 flex justify-end">
                     <div className="flex space-x-1">
                       {[...Array(5)].map((_, i) => (
-                        <div key={i} className="w-4 h-4 text-yellow-400">⭐</div>
+                        <div key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-yellow-400">⭐</div>
                       ))}
                     </div>
                   </div>
@@ -744,44 +776,44 @@ function App() {
         </section>
       )}
 
-      {/* Talks Section */}
+      {/* Talks Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'talks' && (
-        <section className="min-h-screen pt-24 px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Palestras & Eventos
             </h2>
             
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
               {talks.map((talk, index) => (
-                <div key={talk.id} className="talk-card rounded-xl p-8 card-hover group">
-                  <div className="flex flex-col lg:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-8">
-                    <div className="flex-shrink-0">
+                <div key={talk.id} className="talk-card rounded-xl p-4 sm:p-6 lg:p-8 card-hover group">
+                  <div className="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6 sm:lg:space-x-8">
+                    <div className="flex-shrink-0 w-full lg:w-auto">
                       <img
                         src={talk.image_url || "https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=800"}
                         alt={talk.title}
-                        className="w-full lg:w-48 h-32 lg:h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                        className="w-full lg:w-40 xl:w-48 h-32 lg:h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     
                     <div className="flex-1 space-y-4">
                       <div className="flex items-start space-x-3">
-                        <Mic className="w-6 h-6 text-green-400 mt-1 flex-shrink-0" />
+                        <Mic className="w-5 sm:w-6 h-5 sm:h-6 text-green-400 mt-1 flex-shrink-0" />
                         <div>
-                          <h3 className="text-xl lg:text-2xl font-bold text-green-400 group-hover:text-cyan-400 transition-colors duration-300 mb-2">
+                          <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-green-400 group-hover:text-cyan-400 transition-colors duration-300 mb-2">
                             {talk.title}
                           </h3>
-                          <p className="text-gray-300 leading-relaxed">
+                          <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
                             {talk.description}
                           </p>
                         </div>
                       </div>
                       
                       <div className="flex flex-wrap gap-2">
-                        {talk.tags.map((tag, tagIndex) => (
+                        {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, tagIndex) => (
                           <span 
                             key={tagIndex} 
-                            className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm border border-green-500/30 hover:border-green-400 transition-colors duration-300"
+                            className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs sm:text-sm border border-green-500/30 hover:border-green-400 transition-colors duration-300"
                           >
                             #{tag}
                           </span>
@@ -796,19 +828,19 @@ function App() {
         </section>
       )}
 
-      {/* Classes Section */}
+      {/* Classes Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'classes' && (
-        <section className="min-h-screen pt-24 px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Aulas Particulares
             </h2>
             
             <div className="max-w-4xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-                  <GraduationCap className="w-12 h-12 text-cyan-400 mb-4" />
-                  <h3 className="text-xl md:text-2xl font-bold text-cyan-400 mb-4">Metodologia</h3>
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
+                <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
+                  <GraduationCap className="w-8 sm:w-12 h-8 sm:h-12 text-cyan-400 mb-4" />
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-cyan-400 mb-4">Metodologia</h3>
                   <ul className="space-y-3 text-gray-300 text-sm md:text-base">
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -829,9 +861,9 @@ function App() {
                   </ul>
                 </div>
 
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
-                  <Brain className="w-12 h-12 text-purple-400 mb-4" />
-                  <h3 className="text-xl md:text-2xl font-bold text-purple-400 mb-4">Áreas de Ensino</h3>
+                <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
+                  <Brain className="w-8 sm:w-12 h-8 sm:h-12 text-purple-400 mb-4" />
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-400 mb-4">Áreas de Ensino</h3>
                   <ul className="space-y-3 text-gray-300 text-sm md:text-base">
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -854,8 +886,8 @@ function App() {
               </div>
 
               <div className="text-center">
-                <button className="px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow">
-                  <MessageSquare className="w-5 h-5 inline mr-2" />
+                <button className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow">
+                  <MessageSquare className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />
                   Agendar Aula Experimental
                 </button>
               </div>
