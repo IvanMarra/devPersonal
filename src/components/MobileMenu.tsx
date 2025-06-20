@@ -5,16 +5,12 @@ interface MobileMenuProps {
   sections: Array<{ id: string; title: string; icon: React.ComponentType<any> }>;
   activeSection: string;
   onSectionChange: (section: string) => void;
-  isAuthenticated: boolean;
-  onAdminClick: () => void;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
   sections,
   activeSection,
-  onSectionChange,
-  isAuthenticated,
-  onAdminClick
+  onSectionChange
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 

@@ -17,7 +17,11 @@ interface UserManagementProps {
 const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [newUser, setNewUser] = useState<{ username: string; password: string; role: 'admin' | 'editor' }>({ username: '', password: '', role: 'editor' });
+  const [newUser, setNewUser] = useState<{ username: string; password: string; role: 'admin' | 'editor' }>({ 
+    username: '', 
+    password: '', 
+    role: 'editor' 
+  });
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');

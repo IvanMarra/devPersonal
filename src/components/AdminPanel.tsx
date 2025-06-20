@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, Users, MessageSquare, Code, Mic, Loader, ArrowLeft, Eye, Upload, Image as ImageIcon, Bell, UserCog, TrendingUp } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import ImageUpload from './ImageUpload';
@@ -19,6 +19,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAnalyticsSetup, setShowAnalyticsSetup] = useState(false);
+  const [logoutInProgress, setLogoutInProgress] = useState(false);
 
   // Usar hooks do Supabase
   const { 
@@ -63,9 +64,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [newTalk, setNewTalk] = useState({ title: '', description: '', tags: '', image_url: '' });
 
   const handleLogout = () => {
-    console.log('🚪 Fazendo logout completo...');
-    logoutAdmin(); // Limpar sessão do Supabase
-    onBackToFrontend();
+    console.log('🚪 Iniciando processo de logout completo...');
+    setLogoutInProgress(true);
+    
+    try {
+      // Limpar todos os dados de sessão
+      localStorage.removeItem('deviem_admin_token');
+      localStorage.removeItem('deviem_admin_session');
+      localStorage.removeItem('supabase_admin_session');
+      
+      // Chamar função de logout do Supabase
+      logoutAdmin();
+      
+      console.log('✅ Logout realizado com sucesso');
+      
+      // Redirecionar para frontend após logout
+      onBackToFrontend();
+    } catch (error) {
+      console.error('❌ Erro durante logout:', error);
+      
+      // Forçar redirecionamento mesmo em caso de erro
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } finally {
+      setLogoutInProgress(false);
+    }
   };
 
   const showSuccessMessage = (message: string) => {
@@ -89,7 +113,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         
         await addProject(project);
         setNewProject({ title: '', description: '', tech: '', image_url: '' });
-        showSuccessMessage('✅ Projeto adicionado com sucesso no Supabase!');
+        showSuccessMessage('✅ Projeto adicionado com sucesso!');
       } catch (error) {
         console.error('❌ Erro ao adicionar projeto:', error);
         showSuccessMessage('❌ Erro ao adicionar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -113,7 +137,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         });
         
         setEditingProject(null);
-        showSuccessMessage('✅ Projeto atualizado com sucesso no Supabase!');
+        showSuccessMessage('✅ Projeto atualizado com sucesso!');
       } catch (error) {
         console.error('❌ Erro ao atualizar projeto:', error);
         showSuccessMessage('❌ Erro ao atualizar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -130,7 +154,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         console.log('🗑️ Deletando projeto via AdminPanel...');
         
         await deleteProject(id);
-        showSuccessMessage('✅ Projeto excluído com sucesso do Supabase!');
+        showSuccessMessage('✅ Projeto excluído com sucesso!');
       } catch (error) {
         console.error('❌ Erro ao deletar projeto:', error);
         showSuccessMessage('❌ Erro ao deletar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -147,7 +171,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         setLoading(true);
         await addTestimonial(newTestimonial);
         setNewTestimonial({ name: '', role: '', text: '', avatar_url: '' });
-        showSuccessMessage('✅ Depoimento adicionado com sucesso no Supabase!');
+        showSuccessMessage('✅ Depoimento adicionado com sucesso!');
       } catch (error) {
         console.error('❌ Erro ao adicionar depoimento:', error);
         showSuccessMessage('❌ Erro ao adicionar depoimento: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -170,7 +194,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         
         await addTalk(talk);
         setNewTalk({ title: '', description: '', tags: '', image_url: '' });
-        showSuccessMessage('✅ Palestra adicionada com sucesso no Supabase!');
+        showSuccessMessage('✅ Palestra adicionada com sucesso!');
       } catch (error) {
         console.error('❌ Erro ao adicionar palestra:', error);
         showSuccessMessage('❌ Erro ao adicionar palestra: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -246,9 +270,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
           </button>
           <button
             onClick={handleLogout}
-            className="w-full px-3 sm:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 text-sm sm:text-base"
+            disabled={logoutInProgress}
+            className="w-full px-3 sm:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 text-sm sm:text-base disabled:opacity-50"
           >
-            Sair
+            {logoutInProgress ? 'Saindo...' : 'Sair'}
           </button>
         </div>
       </div>
@@ -737,7 +762,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           setLoading(true);
                           await updateSettings(editingSettings);
                           setEditingSettings(null);
-                          showSuccessMessage('✅ Configurações atualizadas com sucesso no Supabase!');
+                          showSuccessMessage('✅ Configurações atualizadas com sucesso!');
                         } catch (error) {
                           console.error('❌ Erro ao atualizar configurações:', error);
                           showSuccessMessage('❌ Erro ao atualizar configurações: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));

@@ -22,24 +22,13 @@ const hasValidCredentials = !!(
 
 console.log('✅ Credenciais válidas:', hasValidCredentials);
 
-// Criar cliente Supabase com configuração otimizada para RLS
+// Criar cliente Supabase SIMPLIFICADO
 export const supabase = hasValidCredentials 
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
+        persistSession: false,
+        autoRefreshToken: false,
         detectSessionInUrl: false
-      },
-      global: {
-        headers: {
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        }
-      },
-      db: {
-        schema: 'public'
       }
     })
   : null;
@@ -87,33 +76,20 @@ export interface SiteSettings {
   updated_at?: string;
 }
 
-// Função para autenticar usuário admin no Supabase
+// SISTEMA DE AUTENTICAÇÃO SIMPLIFICADO
 export const authenticateAdmin = async (username: string, password: string) => {
-  if (!supabase) {
-    throw new Error('Supabase não configurado');
-  }
-
   try {
-    console.log('🔐 Tentando autenticar admin no Supabase...');
+    console.log('🔐 Autenticando admin...');
     
-    // Para este projeto, vamos usar uma autenticação simples
-    // Em produção, você deveria ter usuários reais no Supabase Auth
     if (username === 'deviem_admin' && password === 'DevIem2024@Secure!') {
-      // Simular sessão autenticada criando um token temporário
-      const fakeSession = {
+      const session = {
         access_token: 'admin_authenticated_' + Date.now(),
-        user: {
-          id: 'admin-user-id',
-          email: 'admin@deviem.com',
-          role: 'admin'
-        }
+        user: { id: 'admin', email: 'admin@deviem.com' }
       };
       
-      // Armazenar sessão
-      localStorage.setItem('supabase_admin_session', JSON.stringify(fakeSession));
-      
+      localStorage.setItem('deviem_admin_session', JSON.stringify(session));
       console.log('✅ Admin autenticado com sucesso');
-      return fakeSession;
+      return session;
     } else {
       throw new Error('Credenciais inválidas');
     }
@@ -123,32 +99,37 @@ export const authenticateAdmin = async (username: string, password: string) => {
   }
 };
 
-// Função para verificar se admin está autenticado
 export const isAdminAuthenticated = () => {
-  const session = localStorage.getItem('supabase_admin_session');
-  if (!session) return false;
-  
-  try {
-    const parsedSession = JSON.parse(session);
-    return !!parsedSession.access_token;
-  } catch {
-    return false;
-  }
+  const session = localStorage.getItem('deviem_admin_session');
+  return !!session;
 };
 
-// Função para fazer logout
 export const logoutAdmin = () => {
-  localStorage.removeItem('supabase_admin_session');
-  localStorage.removeItem('deviem_admin_token');
+  console.log('🚪 Fazendo logout completo...');
+  
+  // Limpar TODOS os dados de sessão
   localStorage.removeItem('deviem_admin_session');
-  console.log('🚪 Admin deslogado com sucesso');
+  localStorage.removeItem('deviem_admin_token');
+  localStorage.removeItem('supabase_admin_session');
+  
+  // Limpar qualquer cache do Supabase
+  if (supabase?.auth) {
+    supabase.auth.signOut().catch(() => {});
+  }
+  
+  console.log('✅ Logout completo realizado');
+  
+  // Forçar reload da página para garantir limpeza total
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
 };
 
 // Enhanced error handling wrapper
 const withErrorHandling = async <T>(operation: () => Promise<T>): Promise<T | null> => {
   try {
     if (!supabase) {
-      console.error('❌ Supabase não configurado - cliente é null');
+      console.error('❌ Supabase não configurado');
       throw new Error('Supabase não configurado');
     }
     return await operation();
@@ -158,7 +139,7 @@ const withErrorHandling = async <T>(operation: () => Promise<T>): Promise<T | nu
   }
 };
 
-// Database functions - CORRIGIDAS PARA FUNCIONAR COM RLS
+// Database functions - SIMPLIFICADAS E CORRIGIDAS
 export const projectsService = {
   async getAll() {
     console.log('🔍 Buscando projetos do Supabase...');
@@ -182,40 +163,23 @@ export const projectsService = {
     console.log('➕ Criando projeto no Supabase:', project.title);
     
     return withErrorHandling(async () => {
-      // Usar RPC para bypass das políticas RLS
       const { data, error } = await supabase!
-        .rpc('create_project', {
-          p_title: project.title,
-          p_description: project.description,
-          p_tech: project.tech,
-          p_image_url: project.image_url || null
-        });
+        .from('projects')
+        .insert([{
+          title: project.title,
+          description: project.description,
+          tech: project.tech,
+          image_url: project.image_url
+        }])
+        .select()
+        .single();
       
       if (error) {
-        console.error('❌ Erro ao criar projeto via RPC:', error);
-        
-        // Fallback: tentar inserção direta
-        const { data: directData, error: directError } = await supabase!
-          .from('projects')
-          .insert([{
-            title: project.title,
-            description: project.description,
-            tech: project.tech,
-            image_url: project.image_url
-          }])
-          .select()
-          .single();
-        
-        if (directError) {
-          console.error('❌ Erro na inserção direta:', directError);
-          throw directError;
-        }
-        
-        console.log('✅ Projeto criado com inserção direta:', directData);
-        return directData;
+        console.error('❌ Erro ao criar projeto:', error);
+        throw error;
       }
       
-      console.log('✅ Projeto criado via RPC:', data);
+      console.log('✅ Projeto criado com sucesso:', data);
       return data;
     });
   },
@@ -494,7 +458,7 @@ export const settingsService = {
         throw error;
       }
       
-      console.log('✅ Configurações atualizadas com sucesso:', data);
+      console.log('✅ Configurações atu alizadas com sucesso:', data);
       return data;
     });
   }

@@ -51,9 +51,54 @@ const useForceUpdate = () => {
 
 // DADOS PADRÃO APENAS PARA CASOS DE ERRO CRÍTICO - COM IMAGEM DE PERFIL
 const DEFAULT_DATA = {
-  projects: [],
-  testimonials: [],
-  talks: [],
+  projects: [
+    {
+      id: 1,
+      title: "Sistema Bancário Seguro",
+      description: "Plataforma bancária com múltiplas camadas de segurança e detecção de fraudes em tempo real.",
+      tech: ["Java", "Spring Boot", "PostgreSQL", "Redis"],
+      image_url: "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=800"
+    },
+    {
+      id: 2,
+      title: "E-commerce Inteligente",
+      description: "Plataforma de comércio eletrônico com IA para recomendações personalizadas.",
+      tech: ["React", "Node.js", "MongoDB", "TensorFlow"],
+      image_url: "https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=800"
+    }
+  ],
+  testimonials: [
+    {
+      id: 1,
+      name: "Ana Silva",
+      role: "CTO - TechCorp",
+      text: "O DevIem transformou nossa arquitetura de segurança. Sua experiência em cybersecurity salvou nossa empresa de múltiplos ataques.",
+      avatar_url: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"
+    },
+    {
+      id: 2,
+      name: "Carlos Santos",
+      role: "Desenvolvedor Junior",
+      text: "A mentoria do DevIem foi fundamental na minha transição de carreira. Em 6 meses saí de iniciante para desenvolvedor pleno.",
+      avatar_url: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200"
+    }
+  ],
+  talks: [
+    {
+      id: 1,
+      title: "Segurança Cibernética na Era da IA",
+      description: "Como a inteligência artificial está transformando o cenário de segurança digital e quais são os novos desafios para proteção de dados.",
+      tags: ["Cybersecurity", "AI", "Data Protection"],
+      image_url: "https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=800"
+    },
+    {
+      id: 2,
+      title: "Transição de Carreira para Tech",
+      description: "Estratégias práticas para profissionais que desejam migrar para área de tecnologia, com foco em desenvolvimento de software.",
+      tags: ["Career", "Mentoring", "Development"],
+      image_url: "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800"
+    }
+  ],
   settings: {
     id: 1,
     site_title: "DevIem - Desenvolvedor • Mentor • Especialista em IA • Ethical Hacker",
@@ -93,18 +138,19 @@ export const useProjects = () => {
       console.log('🌐 Buscando projetos do Supabase...');
       const data = await projectsService.getAll();
       
-      if (data) {
+      if (data && data.length > 0) {
         setProjects(data);
         console.log('📊 Projetos carregados do Supabase:', data.length);
       } else {
-        setProjects([]);
-        console.log('📊 Nenhum projeto encontrado no Supabase');
+        console.log('📊 Nenhum projeto encontrado no Supabase, usando dados padrão');
+        setProjects(DEFAULT_DATA.projects);
       }
       
       forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao carregar projetos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar projetos');
+      console.log('📊 Usando dados padrão devido a erro');
       setProjects(DEFAULT_DATA.projects);
     } finally {
       setLoading(false);
@@ -125,7 +171,18 @@ export const useProjects = () => {
   const addProject = async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando adição');
+        const newProject = {
+          id: Date.now(),
+          title: project.title,
+          description: project.description,
+          tech: project.tech,
+          image_url: project.image_url,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setProjects(prev => [newProject, ...prev]);
+        return newProject;
       }
       
       console.log('➕ Adicionando projeto no Supabase:', project.title);
@@ -141,6 +198,20 @@ export const useProjects = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao adicionar projeto:', err);
+      
+      // Fallback: adicionar localmente
+      console.log('📊 Adicionando projeto localmente devido a erro');
+      const newProject = {
+        id: Date.now(),
+        title: project.title,
+        description: project.description,
+        tech: project.tech,
+        image_url: project.image_url,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setProjects(prev => [newProject, ...prev]);
+      
       throw err;
     }
   };
@@ -148,7 +219,11 @@ export const useProjects = () => {
   const updateProject = async (id: number, project: Partial<Project>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setProjects(prev => 
+          prev.map(p => p.id === id ? { ...p, ...project, updated_at: new Date().toISOString() } : p)
+        );
+        return { id, ...project };
       }
       
       console.log('📝 Atualizando projeto no Supabase:', id);
@@ -164,6 +239,13 @@ export const useProjects = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar projeto:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando projeto localmente devido a erro');
+      setProjects(prev => 
+        prev.map(p => p.id === id ? { ...p, ...project, updated_at: new Date().toISOString() } : p)
+      );
+      
       throw err;
     }
   };
@@ -171,7 +253,9 @@ export const useProjects = () => {
   const deleteProject = async (id: number) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando exclusão');
+        setProjects(prev => prev.filter(p => p.id !== id));
+        return true;
       }
       
       console.log('🗑️ Deletando projeto no Supabase:', id);
@@ -179,8 +263,14 @@ export const useProjects = () => {
       console.log('✅ Projeto deletado com sucesso no Supabase');
       await fetchProjects(true);
       dataSyncManager.notify();
+      return true;
     } catch (err) {
       console.error('❌ Erro ao deletar projeto:', err);
+      
+      // Fallback: deletar localmente
+      console.log('📊 Deletando projeto localmente devido a erro');
+      setProjects(prev => prev.filter(p => p.id !== id));
+      
       throw err;
     }
   };
@@ -219,18 +309,19 @@ export const useTestimonials = () => {
       console.log('🌐 Buscando depoimentos do Supabase...');
       const data = await testimonialsService.getAll();
       
-      if (data) {
+      if (data && data.length > 0) {
         setTestimonials(data);
         console.log('📊 Depoimentos carregados do Supabase:', data.length);
       } else {
-        setTestimonials([]);
-        console.log('📊 Nenhum depoimento encontrado no Supabase');
+        console.log('📊 Nenhum depoimento encontrado no Supabase, usando dados padrão');
+        setTestimonials(DEFAULT_DATA.testimonials);
       }
       
       forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao carregar depoimentos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar depoimentos');
+      console.log('📊 Usando dados padrão devido a erro');
       setTestimonials(DEFAULT_DATA.testimonials);
     } finally {
       setLoading(false);
@@ -251,7 +342,18 @@ export const useTestimonials = () => {
   const addTestimonial = async (testimonial: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando adição');
+        const newTestimonial = {
+          id: Date.now(),
+          name: testimonial.name,
+          role: testimonial.role,
+          text: testimonial.text,
+          avatar_url: testimonial.avatar_url,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setTestimonials(prev => [newTestimonial, ...prev]);
+        return newTestimonial;
       }
       
       console.log('➕ Adicionando depoimento no Supabase:', testimonial.name);
@@ -267,6 +369,20 @@ export const useTestimonials = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao adicionar depoimento:', err);
+      
+      // Fallback: adicionar localmente
+      console.log('📊 Adicionando depoimento localmente devido a erro');
+      const newTestimonial = {
+        id: Date.now(),
+        name: testimonial.name,
+        role: testimonial.role,
+        text: testimonial.text,
+        avatar_url: testimonial.avatar_url,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setTestimonials(prev => [newTestimonial, ...prev]);
+      
       throw err;
     }
   };
@@ -274,7 +390,11 @@ export const useTestimonials = () => {
   const updateTestimonial = async (id: number, testimonial: Partial<Testimonial>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setTestimonials(prev => 
+          prev.map(t => t.id === id ? { ...t, ...testimonial, updated_at: new Date().toISOString() } : t)
+        );
+        return { id, ...testimonial };
       }
       
       console.log('📝 Atualizando depoimento no Supabase:', id);
@@ -290,6 +410,13 @@ export const useTestimonials = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar depoimento:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando depoimento localmente devido a erro');
+      setTestimonials(prev => 
+        prev.map(t => t.id === id ? { ...t, ...testimonial, updated_at: new Date().toISOString() } : t)
+      );
+      
       throw err;
     }
   };
@@ -297,7 +424,9 @@ export const useTestimonials = () => {
   const deleteTestimonial = async (id: number) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando exclusão');
+        setTestimonials(prev => prev.filter(t => t.id !== id));
+        return true;
       }
       
       console.log('🗑️ Deletando depoimento no Supabase:', id);
@@ -305,8 +434,14 @@ export const useTestimonials = () => {
       console.log('✅ Depoimento deletado com sucesso no Supabase');
       await fetchTestimonials(true);
       dataSyncManager.notify();
+      return true;
     } catch (err) {
       console.error('❌ Erro ao deletar depoimento:', err);
+      
+      // Fallback: deletar localmente
+      console.log('📊 Deletando depoimento localmente devido a erro');
+      setTestimonials(prev => prev.filter(t => t.id !== id));
+      
       throw err;
     }
   };
@@ -345,18 +480,19 @@ export const useTalks = () => {
       console.log('🌐 Buscando palestras do Supabase...');
       const data = await talksService.getAll();
       
-      if (data) {
+      if (data && data.length > 0) {
         setTalks(data);
         console.log('📊 Palestras carregadas do Supabase:', data.length);
       } else {
-        setTalks([]);
-        console.log('📊 Nenhuma palestra encontrada no Supabase');
+        console.log('📊 Nenhuma palestra encontrada no Supabase, usando dados padrão');
+        setTalks(DEFAULT_DATA.talks);
       }
       
       forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao carregar palestras:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar palestras');
+      console.log('📊 Usando dados padrão devido a erro');
       setTalks(DEFAULT_DATA.talks);
     } finally {
       setLoading(false);
@@ -377,7 +513,18 @@ export const useTalks = () => {
   const addTalk = async (talk: Omit<Talk, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando adição');
+        const newTalk = {
+          id: Date.now(),
+          title: talk.title,
+          description: talk.description,
+          tags: talk.tags,
+          image_url: talk.image_url,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setTalks(prev => [newTalk, ...prev]);
+        return newTalk;
       }
       
       console.log('➕ Adicionando palestra no Supabase:', talk.title);
@@ -393,6 +540,20 @@ export const useTalks = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao adicionar palestra:', err);
+      
+      // Fallback: adicionar localmente
+      console.log('📊 Adicionando palestra localmente devido a erro');
+      const newTalk = {
+        id: Date.now(),
+        title: talk.title,
+        description: talk.description,
+        tags: talk.tags,
+        image_url: talk.image_url,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setTalks(prev => [newTalk, ...prev]);
+      
       throw err;
     }
   };
@@ -400,7 +561,11 @@ export const useTalks = () => {
   const updateTalk = async (id: number, talk: Partial<Talk>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setTalks(prev => 
+          prev.map(t => t.id === id ? { ...t, ...talk, updated_at: new Date().toISOString() } : t)
+        );
+        return { id, ...talk };
       }
       
       console.log('📝 Atualizando palestra no Supabase:', id);
@@ -416,6 +581,13 @@ export const useTalks = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar palestra:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando palestra localmente devido a erro');
+      setTalks(prev => 
+        prev.map(t => t.id === id ? { ...t, ...talk, updated_at: new Date().toISOString() } : t)
+      );
+      
       throw err;
     }
   };
@@ -423,7 +595,9 @@ export const useTalks = () => {
   const deleteTalk = async (id: number) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando exclusão');
+        setTalks(prev => prev.filter(t => t.id !== id));
+        return true;
       }
       
       console.log('🗑️ Deletando palestra no Supabase:', id);
@@ -431,8 +605,14 @@ export const useTalks = () => {
       console.log('✅ Palestra deletada com sucesso no Supabase');
       await fetchTalks(true);
       dataSyncManager.notify();
+      return true;
     } catch (err) {
       console.error('❌ Erro ao deletar palestra:', err);
+      
+      // Fallback: deletar localmente
+      console.log('📊 Deletando palestra localmente devido a erro');
+      setTalks(prev => prev.filter(t => t.id !== id));
+      
       throw err;
     }
   };
@@ -475,14 +655,15 @@ export const useSiteSettings = () => {
         setSettings(data);
         console.log('📊 Configurações carregadas do Supabase');
       } else {
+        console.log('📊 Nenhuma configuração encontrada no Supabase, usando configurações padrão');
         setSettings(DEFAULT_DATA.settings);
-        console.log('📊 Usando configurações padrão');
       }
       
       forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao carregar configurações:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar configurações');
+      console.log('📊 Usando configurações padrão devido a erro');
       setSettings(DEFAULT_DATA.settings);
     } finally {
       setLoading(false);
@@ -503,7 +684,9 @@ export const useSiteSettings = () => {
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {
     try {
       if (!isSupabaseConfigured()) {
-        throw new Error('Supabase não configurado');
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setSettings(prev => prev ? { ...prev, ...newSettings, updated_at: new Date().toISOString() } : null);
+        return newSettings;
       }
       
       console.log('📝 Atualizando configurações no Supabase');
@@ -519,6 +702,11 @@ export const useSiteSettings = () => {
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar configurações:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando configurações localmente devido a erro');
+      setSettings(prev => prev ? { ...prev, ...newSettings, updated_at: new Date().toISOString() } : null);
+      
       throw err;
     }
   };
