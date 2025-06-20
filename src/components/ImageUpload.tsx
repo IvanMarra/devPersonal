@@ -115,6 +115,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             <li>• Projetos: 800x600px (paisagem 4:3)</li>
             <li>• Palestras: 800x400px (paisagem 2:1)</li>
             <li>• Avatares: 200x200px (quadrada)</li>
+            <li>• Blog: 1200x630px (formato de compartilhamento)</li>
             <li>• Formatos: JPG, PNG ou WebP (recomendado)</li>
             <li>• Otimize suas imagens antes do upload para melhor performance</li>
           </ul>

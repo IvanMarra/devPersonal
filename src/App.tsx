@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X, BookOpen } from 'lucide-react';
+import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X, FileText } from 'lucide-react';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
 import SupabaseStatus from './components/SupabaseStatus';
 import VersionInfo from './components/VersionInfo';
 import { useFrontendData } from './hooks/useSupabaseData';
+import BlogPost from './components/BlogPost';
 
 // Matrix rain effect component
 const MatrixRain = () => {
@@ -188,9 +189,142 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [activeBlogPost, setActiveBlogPost] = useState<string | null>(null);
 
   // Usar dados do Supabase
   const { projects, testimonials, talks, settings, refreshAllData } = useFrontendData();
+
+  // Blog posts de exemplo
+  const blogPosts = [
+    {
+      id: 1,
+      slug: 'introducao-seguranca-cibernetica',
+      title: 'Introdução à Segurança Cibernética',
+      excerpt: 'Uma introdução aos conceitos básicos de segurança cibernética e como proteger seus dados.',
+      content: `
+        <h2>Introdução à Segurança Cibernética</h2>
+        <p>A segurança cibernética é um campo em constante evolução que se concentra na proteção de sistemas, redes e programas contra ataques digitais. Esses ataques geralmente visam acessar, alterar ou destruir informações sensíveis, extorquir dinheiro dos usuários ou interromper processos de negócios normais.</p>
+        
+        <h3>Por que a segurança cibernética é importante?</h3>
+        <p>Com o aumento da dependência de tecnologia e o crescimento do número de dispositivos conectados à internet, há mais dados sensíveis sendo compartilhados online do que nunca. Isso cria um cenário perfeito para cibercriminosos que buscam explorar vulnerabilidades.</p>
+        
+        <h3>Princípios básicos de segurança cibernética</h3>
+        <ul>
+          <li><strong>Confidencialidade:</strong> Garantir que informações sensíveis sejam acessíveis apenas a pessoas autorizadas.</li>
+          <li><strong>Integridade:</strong> Manter a precisão e confiabilidade dos dados durante todo o seu ciclo de vida.</li>
+          <li><strong>Disponibilidade:</strong> Garantir que sistemas e dados estejam disponíveis quando necessário.</li>
+        </ul>
+        
+        <h3>Tipos comuns de ameaças cibernéticas</h3>
+        <ol>
+          <li><strong>Malware:</strong> Software malicioso projetado para danificar ou interromper sistemas.</li>
+          <li><strong>Phishing:</strong> Tentativas de obter informações sensíveis através de e-mails ou sites fraudulentos.</li>
+          <li><strong>Ataques de negação de serviço (DoS):</strong> Sobrecarregam sistemas para torná-los inacessíveis.</li>
+          <li><strong>Ransomware:</strong> Criptografa dados e exige pagamento para restaurá-los.</li>
+        </ol>
+        
+        <h3>Como se proteger</h3>
+        <p>Algumas medidas básicas de proteção incluem:</p>
+        <ul>
+          <li>Manter software e sistemas operacionais atualizados</li>
+          <li>Usar senhas fortes e gerenciadores de senhas</li>
+          <li>Implementar autenticação de dois fatores</li>
+          <li>Fazer backup regular de dados importantes</li>
+          <li>Educar-se sobre práticas seguras online</li>
+        </ul>
+        
+        <p>A segurança cibernética é responsabilidade de todos. Ao adotar práticas seguras, você não apenas protege seus próprios dados, mas também contribui para um ambiente digital mais seguro para todos.</p>
+      `,
+      image_url: 'https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      tags: ['Cybersecurity', 'Beginners', 'Data Protection'],
+      category: 'Security',
+      published_at: '2025-01-15T10:00:00Z',
+      author: 'DevIem',
+      reading_time: '5 min'
+    },
+    {
+      id: 2,
+      slug: 'iniciar-carreira-desenvolvimento-web',
+      title: 'Como Iniciar sua Carreira em Desenvolvimento Web',
+      excerpt: 'Guia completo para quem deseja iniciar uma carreira em desenvolvimento web em 2025.',
+      content: `
+        <h2>Como Iniciar sua Carreira em Desenvolvimento Web em 2025</h2>
+        <p>O desenvolvimento web continua sendo uma das carreiras mais promissoras e acessíveis na área de tecnologia. Com a crescente digitalização dos negócios, a demanda por desenvolvedores web qualificados só aumenta a cada ano.</p>
+        
+        <h3>Por onde começar?</h3>
+        <p>Iniciar uma carreira em desenvolvimento web pode parecer intimidador, mas com um plano estruturado, é possível progredir de forma consistente:</p>
+        
+        <h4>1. Aprenda os fundamentos</h4>
+        <ul>
+          <li><strong>HTML:</strong> A linguagem de marcação que estrutura o conteúdo web</li>
+          <li><strong>CSS:</strong> Responsável pelo estilo e aparência visual</li>
+          <li><strong>JavaScript:</strong> Linguagem de programação que torna as páginas interativas</li>
+        </ul>
+        
+        <h4>2. Escolha uma especialização</h4>
+        <p>O desenvolvimento web se divide principalmente em:</p>
+        <ul>
+          <li><strong>Frontend:</strong> Foco na interface do usuário (React, Angular, Vue.js)</li>
+          <li><strong>Backend:</strong> Foco na lógica do servidor e banco de dados (Node.js, Python, PHP)</li>
+          <li><strong>Fullstack:</strong> Combinação de ambos</li>
+        </ul>
+        
+        <h4>3. Aprenda frameworks modernos</h4>
+        <p>Em 2025, os frameworks mais relevantes incluem:</p>
+        <ul>
+          <li>React e Next.js para frontend</li>
+          <li>Node.js e Express para backend</li>
+          <li>Tailwind CSS para estilização</li>
+          <li>Supabase ou Firebase para backend-as-a-service</li>
+        </ul>
+        
+        <h4>4. Construa projetos práticos</h4>
+        <p>Nada substitui a experiência prática. Construa projetos como:</p>
+        <ul>
+          <li>Um portfólio pessoal</li>
+          <li>Um clone de site popular</li>
+          <li>Uma aplicação CRUD simples</li>
+          <li>Um blog ou loja virtual</li>
+        </ul>
+        
+        <h4>5. Aprenda controle de versão</h4>
+        <p>Git e GitHub são essenciais para qualquer desenvolvedor moderno.</p>
+        
+        <h3>Recursos para aprendizado</h3>
+        <ul>
+          <li>Plataformas como freeCodeCamp, Codecademy e The Odin Project</li>
+          <li>Documentação oficial das tecnologias</li>
+          <li>YouTube para tutoriais práticos</li>
+          <li>Bootcamps intensivos para aprendizado acelerado</li>
+        </ul>
+        
+        <h3>Construindo seu portfólio</h3>
+        <p>Seu portfólio é sua vitrine profissional. Inclua:</p>
+        <ul>
+          <li>Projetos pessoais bem documentados</li>
+          <li>Contribuições para projetos open source</li>
+          <li>Pequenos experimentos e demonstrações de conceitos</li>
+        </ul>
+        
+        <h3>Encontrando seu primeiro emprego</h3>
+        <p>Estratégias para conseguir sua primeira oportunidade:</p>
+        <ul>
+          <li>Estágios e programas de trainee</li>
+          <li>Trabalho freelance em plataformas como Upwork</li>
+          <li>Networking em eventos e comunidades de tecnologia</li>
+          <li>Participação em hackathons</li>
+        </ul>
+        
+        <p>Lembre-se: persistência é a chave. O desenvolvimento web é uma jornada de aprendizado contínuo, mas os resultados valem a pena!</p>
+      `,
+      image_url: 'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      tags: ['Career', 'Web Development', 'Beginners'],
+      category: 'Career',
+      published_at: '2025-01-10T14:30:00Z',
+      author: 'DevIem',
+      reading_time: '7 min'
+    }
+  ];
 
   useEffect(() => {
     // Verificar se já está autenticado
@@ -303,11 +437,19 @@ function App() {
     { id: 'home', title: 'Início', icon: Terminal },
     { id: 'about', title: 'Sobre', icon: Eye },
     { id: 'projects', title: 'Projetos', icon: Code },
-    { id: 'blog', title: 'Blog', icon: BookOpen },
     { id: 'testimonials', title: 'Depoimentos', icon: MessageSquare },
     { id: 'talks', title: 'Palestras', icon: Mic },
+    { id: 'blog', title: 'Blog', icon: FileText },
     { id: 'classes', title: 'Aulas Particulares', icon: GraduationCap },
   ];
+
+  // Renderizar post do blog se estiver ativo
+  if (activeBlogPost) {
+    const post = blogPosts.find(post => post.slug === activeBlogPost);
+    if (post) {
+      return <BlogPost post={post} onBack={() => setActiveBlogPost(null)} />;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -452,7 +594,7 @@ function App() {
           }
 
           .blog-card {
-            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(249, 115, 22, 0.2);
           }
@@ -553,7 +695,7 @@ function App() {
 
       {/* Hero Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'home' && (
-        <section className="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6">
+        <section className="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6 pb-16">
           <div className="text-center z-10 w-full max-w-4xl">
             <div className="mb-8">
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold mb-4 text-cyan-400 glitch-text">
@@ -599,7 +741,7 @@ function App() {
 
       {/* About Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'about' && (
-        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Sobre DevIem
@@ -711,7 +853,7 @@ function App() {
 
       {/* Projects Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'projects' && (
-        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Projetos Desenvolvidos
@@ -754,229 +896,9 @@ function App() {
         </section>
       )}
 
-      {/* Blog Section - NOVA SEÇÃO */}
-      {activeSection === 'blog' && (
-        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
-          <div className="container mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
-              Blog
-            </h2>
-            
-            <div className="max-w-4xl mx-auto">
-              {/* Artigos do Blog */}
-              <div className="space-y-8">
-                {/* Artigo 1 */}
-                <div className="blog-card rounded-xl p-6 card-hover">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="md:w-1/3">
-                      <img 
-                        src="https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                        alt="Inteligência Artificial" 
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="md:w-2/3 space-y-4">
-                      <div className="flex items-center space-x-2 text-orange-400 text-sm">
-                        <span>Inteligência Artificial</span>
-                        <span>•</span>
-                        <span>12 Jan 2025</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-orange-400">O Futuro da IA Generativa em 2025</h3>
-                      <p className="text-gray-300 text-sm">
-                        Explorando os avanços mais recentes em modelos de linguagem e como eles estão transformando 
-                        o desenvolvimento de software, design e criação de conteúdo.
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #IA
-                        </span>
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #MachineLearning
-                        </span>
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #Futuro
-                        </span>
-                      </div>
-                      <button className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center">
-                        Ler artigo completo
-                        <ChevronDown className="w-4 h-4 ml-1 rotate-270" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Artigo 2 */}
-                <div className="blog-card rounded-xl p-6 card-hover">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="md:w-1/3">
-                      <img 
-                        src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                        alt="Cybersecurity" 
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="md:w-2/3 space-y-4">
-                      <div className="flex items-center space-x-2 text-orange-400 text-sm">
-                        <span>Cybersecurity</span>
-                        <span>•</span>
-                        <span>5 Jan 2025</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-orange-400">Protegendo Infraestruturas Críticas</h3>
-                      <p className="text-gray-300 text-sm">
-                        Como as técnicas modernas de ethical hacking estão sendo usadas para identificar vulnerabilidades 
-                        em sistemas governamentais e empresariais antes que hackers maliciosos as explorem.
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #Cybersecurity
-                        </span>
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #EthicalHacking
-                        </span>
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #Segurança
-                        </span>
-                      </div>
-                      <button className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center">
-                        Ler artigo completo
-                        <ChevronDown className="w-4 h-4 ml-1 rotate-270" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Artigo 3 */}
-                <div className="blog-card rounded-xl p-6 card-hover">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="md:w-1/3">
-                      <img 
-                        src="https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                        alt="Transição de Carreira" 
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="md:w-2/3 space-y-4">
-                      <div className="flex items-center space-x-2 text-orange-400 text-sm">
-                        <span>Carreira</span>
-                        <span>•</span>
-                        <span>28 Dez 2024</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-orange-400">Transição para Tech em 6 Meses</h3>
-                      <p className="text-gray-300 text-sm">
-                        Um guia passo a passo para profissionais que desejam migrar para a área de tecnologia, 
-                        com foco em desenvolvimento de software e estratégias práticas para aprendizado acelerado.
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #Carreira
-                        </span>
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #Desenvolvimento
-                        </span>
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          #Mentoria
-                        </span>
-                      </div>
-                      <button className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center">
-                        Ler artigo completo
-                        <ChevronDown className="w-4 h-4 ml-1 rotate-270" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Categorias e Tags */}
-              <div className="mt-12 grid md:grid-cols-2 gap-6">
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-                  <h3 className="text-lg font-bold text-cyan-400 mb-4">Categorias</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Inteligência Artificial</span>
-                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">8</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Cybersecurity</span>
-                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">6</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Desenvolvimento</span>
-                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">12</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Carreira</span>
-                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">5</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Tutoriais</span>
-                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">9</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
-                  <h3 className="text-lg font-bold text-purple-400 mb-4">Tags Populares</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #IA
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #MachineLearning
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #Cybersecurity
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #EthicalHacking
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #React
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #JavaScript
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #Python
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #Carreira
-                    </span>
-                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                      #Mentoria
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Newsletter */}
-              <div className="mt-12 bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="md:w-2/3">
-                    <h3 className="text-lg font-bold text-cyan-400 mb-2">Inscreva-se na Newsletter</h3>
-                    <p className="text-gray-300 text-sm">
-                      Receba artigos, tutoriais e dicas exclusivas diretamente no seu email.
-                    </p>
-                  </div>
-                  <div className="md:w-1/3 flex">
-                    <input 
-                      type="email" 
-                      placeholder="Seu email" 
-                      className="flex-1 p-3 bg-black border border-gray-600 rounded-l-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
-                    />
-                    <button className="px-4 py-3 bg-cyan-500/20 border-y border-r border-cyan-400 text-cyan-400 rounded-r-lg hover:bg-cyan-500/30 transition-all duration-300">
-                      Inscrever
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Testimonials Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'testimonials' && (
-        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Depoimentos
@@ -1027,7 +949,7 @@ function App() {
 
       {/* Talks Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'talks' && (
-        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Palestras & Eventos
@@ -1077,15 +999,267 @@ function App() {
         </section>
       )}
 
-      {/* Classes Section - RESPONSIVIDADE MELHORADA E EDITÁVEL */}
+      {/* Blog Section - NOVA SEÇÃO */}
+      {activeSection === 'blog' && (
+        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+          <div className="container mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+              Blog & Artigos
+            </h2>
+            
+            <div className="max-w-5xl mx-auto">
+              {/* Featured Post */}
+              {blogPosts.length > 0 && (
+                <div 
+                  className="blog-card rounded-xl p-4 sm:p-6 card-hover group mb-8 cursor-pointer"
+                  onClick={() => setActiveBlogPost(blogPosts[0].slug)}
+                >
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="relative overflow-hidden rounded-lg">
+                      <img
+                        src={blogPosts[0].image_url}
+                        alt={blogPosts[0].title}
+                        className="w-full h-48 sm:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          {blogPosts[0].category}
+                        </span>
+                        {blogPosts[0].tags.slice(0, 2).map((tag, index) => (
+                          <span key={index} className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      <h3 className="text-xl sm:text-2xl font-bold text-orange-400 group-hover:text-cyan-400 transition-colors duration-300">
+                        {blogPosts[0].title}
+                      </h3>
+                      
+                      <p className="text-gray-300 text-sm sm:text-base">
+                        {blogPosts[0].excerpt}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>{new Date(blogPosts[0].published_at).toLocaleDateString('pt-BR')}</span>
+                        <span>{blogPosts[0].reading_time} de leitura</span>
+                      </div>
+                      
+                      <button 
+                        className="px-4 py-2 bg-orange-500/20 border border-orange-400 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all duration-300 text-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveBlogPost(blogPosts[0].slug);
+                        }}
+                      >
+                        Ler artigo completo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Other Posts */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {blogPosts.slice(1).map((post) => (
+                  <div 
+                    key={post.id} 
+                    className="blog-card rounded-xl p-4 card-hover group cursor-pointer"
+                    onClick={() => setActiveBlogPost(post.slug)}
+                  >
+                    <div className="relative overflow-hidden rounded-lg mb-4">
+                      <img
+                        src={post.image_url}
+                        alt={post.title}
+                        className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-1">
+                        <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          {post.category}
+                        </span>
+                      </div>
+                      
+                      <h3 className="text-lg font-bold text-orange-400 group-hover:text-cyan-400 transition-colors duration-300 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      
+                      <p className="text-gray-300 text-sm line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
+                        <span>{post.reading_time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Placeholder para mais posts */}
+                <div className="blog-card rounded-xl p-4 border border-dashed border-gray-700 flex flex-col items-center justify-center h-64 text-center">
+                  <FileText className="w-12 h-12 text-gray-600 mb-4" />
+                  <p className="text-gray-500">Mais artigos em breve</p>
+                  <p className="text-gray-600 text-sm mt-2">Fique ligado para novos conteúdos</p>
+                </div>
+              </div>
+              
+              {/* Newsletter */}
+              <div className="mt-12 bg-gray-900/50 p-6 rounded-xl border border-purple-500/30">
+                <div className="grid md:grid-cols-2 gap-6 items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-purple-400 mb-2">Inscreva-se na Newsletter</h3>
+                    <p className="text-gray-300 text-sm">Receba artigos, tutoriais e dicas diretamente no seu email.</p>
+                  </div>
+                  <div className="flex">
+                    <input
+                      type="email"
+                      placeholder="Seu melhor email"
+                      className="flex-1 p-3 bg-black border border-gray-600 rounded-l-lg text-white"
+                    />
+                    <button className="px-4 py-3 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-r-lg hover:bg-purple-500/30 transition-all duration-300">
+                      Inscrever
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Classes Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'classes' && (
-        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Aulas Particulares
             </h2>
             
             <div className="max-w-4xl mx-auto">
+              {/* Introdução */}
+              <div className="text-center mb-12">
+                <h3 className="text-xl sm:text-2xl font-bold text-purple-400 mb-4">Aprenda com um especialista</h3>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Aulas personalizadas para seu nível e objetivos, com foco em projetos práticos e aplicação real.
+                  Desenvolva habilidades que o mercado realmente valoriza.
+                </p>
+              </div>
+              
+              {/* Planos */}
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-12">
+                {/* Plano Básico */}
+                <div className="bg-gray-900/50 p-6 rounded-xl border border-cyan-500/30 relative card-hover">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-cyan-400 mb-2">Plano Básico</h3>
+                    <p className="text-gray-300 text-sm">Ideal para iniciantes que desejam aprender os fundamentos.</p>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span className="text-2xl font-bold text-purple-400">R$150</span>
+                    <span className="text-gray-400 text-sm">/ aula</span>
+                  </div>
+                  
+                  <div className="text-sm text-gray-400 mb-2 flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-cyan-400" />
+                    1 hora por aula
+                  </div>
+                  
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>1 aula semanal</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Suporte por e-mail</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Material didático</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Certificado de conclusão</span>
+                    </li>
+                  </ul>
+                  
+                  <a 
+                    href={settings?.class_link || "https://wa.me/5511999999999"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg text-center hover:bg-cyan-500/30 transition-all duration-300"
+                  >
+                    Agendar Aula Experimental
+                  </a>
+                </div>
+                
+                {/* Plano Premium */}
+                <div className="bg-gray-900/50 p-6 rounded-xl border border-purple-500/30 relative card-hover">
+                  <div className="absolute -top-3 -right-3 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    Recomendado
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-purple-400 mb-2">Plano Premium</h3>
+                    <p className="text-gray-300 text-sm">Para quem deseja aprender de forma intensiva e com mais recursos.</p>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span className="text-2xl font-bold text-purple-400">R$250</span>
+                    <span className="text-gray-400 text-sm">/ aula</span>
+                  </div>
+                  
+                  <div className="text-sm text-gray-400 mb-2 flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-purple-400" />
+                    1.5 horas por aula
+                  </div>
+                  
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>2 aulas semanais</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Suporte por WhatsApp</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Material didático avançado</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Projetos práticos</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Certificado de conclusão</span>
+                    </li>
+                    <li className="flex items-start text-gray-300 text-sm">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span>Mentoria personalizada</span>
+                    </li>
+                  </ul>
+                  
+                  <a 
+                    href={settings?.class_link || "https://wa.me/5511999999999"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg text-center hover:bg-purple-500/30 transition-all duration-300"
+                  >
+                    Agendar Aula Experimental
+                  </a>
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
                 <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
                   <GraduationCap className="w-8 sm:w-12 h-8 sm:h-12 text-cyan-400 mb-4" />
@@ -1134,111 +1308,19 @@ function App() {
                 </div>
               </div>
 
-              {/* Planos de Aula */}
-              <div className="grid md:grid-cols-3 gap-6 mb-8">
-                {/* Plano Básico */}
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30 flex flex-col">
-                  <h4 className="text-lg font-bold text-cyan-400 mb-2">Plano Básico</h4>
-                  <div className="text-3xl font-bold text-white mb-4">R$ 120<span className="text-sm font-normal text-gray-400">/hora</span></div>
-                  <ul className="space-y-2 text-gray-300 text-sm flex-grow mb-6">
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>4 horas mensais</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Suporte por email</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Material didático</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-red-400 mr-2">✗</div>
-                      <span className="text-gray-500">Projetos práticos</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-red-400 mr-2">✗</div>
-                      <span className="text-gray-500">Mentoria de carreira</span>
-                    </li>
-                  </ul>
-                  <button className="w-full px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300">
-                    Selecionar Plano
-                  </button>
-                </div>
-
-                {/* Plano Intermediário */}
-                <div className="bg-gray-900/50 p-6 rounded-lg border-2 border-purple-400 flex flex-col relative">
-                  <div className="absolute -top-3 right-4 bg-purple-400 text-black px-3 py-1 text-xs font-bold rounded-full">
-                    POPULAR
-                  </div>
-                  <h4 className="text-lg font-bold text-purple-400 mb-2">Plano Intermediário</h4>
-                  <div className="text-3xl font-bold text-white mb-4">R$ 100<span className="text-sm font-normal text-gray-400">/hora</span></div>
-                  <ul className="space-y-2 text-gray-300 text-sm flex-grow mb-6">
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>8 horas mensais</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Suporte por WhatsApp</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Material didático</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Projetos práticos</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-red-400 mr-2">✗</div>
-                      <span className="text-gray-500">Mentoria de carreira</span>
-                    </li>
-                  </ul>
-                  <button className="w-full px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300">
-                    Selecionar Plano
-                  </button>
-                </div>
-
-                {/* Plano Avançado */}
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-green-500/30 flex flex-col">
-                  <h4 className="text-lg font-bold text-green-400 mb-2">Plano Avançado</h4>
-                  <div className="text-3xl font-bold text-white mb-4">R$ 90<span className="text-sm font-normal text-gray-400">/hora</span></div>
-                  <ul className="space-y-2 text-gray-300 text-sm flex-grow mb-6">
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>12 horas mensais</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Suporte prioritário</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Material didático</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Projetos práticos</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="text-green-400 mr-2">✓</div>
-                      <span>Mentoria de carreira</span>
-                    </li>
-                  </ul>
-                  <button className="w-full px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300">
-                    Selecionar Plano
-                  </button>
-                </div>
-              </div>
-
-              {/* CTA */}
               <div className="text-center">
-                <button className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow">
-                  <MessageSquare className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />
+                <a 
+                  href={settings?.class_link || "https://wa.me/5511999999999"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow"
+                >
+                  <MessageSquare className="w-5 h-5 inline mr-2" />
                   Agendar Aula Experimental
-                </button>
+                </a>
+                <p className="text-gray-400 text-sm mt-4">
+                  Primeira aula com 50% de desconto para novos alunos!
+                </p>
               </div>
             </div>
           </div>

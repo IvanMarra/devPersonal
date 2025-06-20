@@ -141,7 +141,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
         )}
       </button>
 
-      {/* Notification Panel - CORRIGIDO: Posicionado à direita com largura adequada */}
+      {/* Notification Panel - CORRIGIDO: Posição à direita */}
       {isOpen && (
         <>
           {/* Overlay */}

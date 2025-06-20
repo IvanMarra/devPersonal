@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, Eye, UserCog, TrendingUp, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, ArrowLeft, Eye, UserCog, TrendingUp, Book, Link, FileText } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import ImageUpload from './ImageUpload';
 import UserManagement from './UserManagement';
 import NotificationSystem from './NotificationSystem';
 import GoogleAnalyticsSetup from './GoogleAnalyticsSetup';
+import BlogManager from './BlogManager';
+import ClassesManager from './ClassesManager';
 import { useProjects, useTestimonials, useTalks, useSiteSettings } from '../hooks/useSupabaseData';
-import { logoutAdmin, isAdminAuthenticated } from '../lib/supabase';
+import { logoutAdmin } from '../lib/supabase';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -19,8 +21,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAnalyticsSetup, setShowAnalyticsSetup] = useState(false);
-  const [logoutInProgress, setLogoutInProgress] = useState(false);
-  const [showBlogEditor, setShowBlogEditor] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Usar hooks do Supabase
   const { 
@@ -63,43 +64,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [newProject, setNewProject] = useState({ title: '', description: '', tech: '', image_url: '' });
   const [newTestimonial, setNewTestimonial] = useState({ name: '', role: '', text: '', avatar_url: '' });
   const [newTalk, setNewTalk] = useState({ title: '', description: '', tags: '', image_url: '' });
-  const [newBlogPost, setNewBlogPost] = useState({ title: '', category: '', content: '', tags: '', image_url: '' });
 
-  // Verificar autenticação
+  // Efeito para fechar menu mobile quando mudar de tab
   useEffect(() => {
-    if (!isAdminAuthenticated()) {
-      console.log('❌ Usuário não autenticado, redirecionando...');
-      onBackToFrontend();
-    }
-  }, [onBackToFrontend]);
+    setIsMobileMenuOpen(false);
+  }, [activeTab]);
 
   const handleLogout = () => {
-    console.log('🚪 Iniciando processo de logout completo...');
-    setLogoutInProgress(true);
-    
-    try {
-      // Limpar todos os dados de sessão
-      localStorage.removeItem('deviem_admin_token');
-      localStorage.removeItem('deviem_admin_session');
-      localStorage.removeItem('supabase_admin_session');
-      
-      // Chamar função de logout do Supabase
-      logoutAdmin();
-      
-      console.log('✅ Logout realizado com sucesso');
-      
-      // Redirecionar para frontend após logout
-      onBackToFrontend();
-    } catch (error) {
-      console.error('❌ Erro durante logout:', error);
-      
-      // Forçar redirecionamento mesmo em caso de erro
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } finally {
-      setLogoutInProgress(false);
-    }
+    console.log('🚪 Fazendo logout completo...');
+    logoutAdmin(); // Limpar sessão do Supabase
+    onBackToFrontend();
   };
 
   const showSuccessMessage = (message: string) => {
@@ -123,7 +97,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         
         await addProject(project);
         setNewProject({ title: '', description: '', tech: '', image_url: '' });
-        showSuccessMessage('✅ Projeto adicionado com sucesso!');
+        showSuccessMessage('✅ Projeto adicionado com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao adicionar projeto:', error);
         showSuccessMessage('❌ Erro ao adicionar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -147,7 +121,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         });
         
         setEditingProject(null);
-        showSuccessMessage('✅ Projeto atualizado com sucesso!');
+        showSuccessMessage('✅ Projeto atualizado com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao atualizar projeto:', error);
         showSuccessMessage('❌ Erro ao atualizar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -164,7 +138,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         console.log('🗑️ Deletando projeto via AdminPanel...');
         
         await deleteProject(id);
-        showSuccessMessage('✅ Projeto excluído com sucesso!');
+        showSuccessMessage('✅ Projeto excluído com sucesso do Supabase!');
       } catch (error) {
         console.error('❌ Erro ao deletar projeto:', error);
         showSuccessMessage('❌ Erro ao deletar projeto: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -181,7 +155,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         setLoading(true);
         await addTestimonial(newTestimonial);
         setNewTestimonial({ name: '', role: '', text: '', avatar_url: '' });
-        showSuccessMessage('✅ Depoimento adicionado com sucesso!');
+        showSuccessMessage('✅ Depoimento adicionado com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao adicionar depoimento:', error);
         showSuccessMessage('❌ Erro ao adicionar depoimento: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -204,7 +178,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         
         await addTalk(talk);
         setNewTalk({ title: '', description: '', tags: '', image_url: '' });
-        showSuccessMessage('✅ Palestra adicionada com sucesso!');
+        showSuccessMessage('✅ Palestra adicionada com sucesso no Supabase!');
       } catch (error) {
         console.error('❌ Erro ao adicionar palestra:', error);
         showSuccessMessage('❌ Erro ao adicionar palestra: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -214,50 +188,41 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     }
   };
 
-  // Função para adicionar post no blog
-  const handleAddBlogPost = () => {
-    if (newBlogPost.title && newBlogPost.content) {
-      try {
-        setLoading(true);
-        // Simulação de adição de post
-        console.log('Adicionando post:', newBlogPost);
-        
-        // Limpar formulário
-        setNewBlogPost({ title: '', category: '', content: '', tags: '', image_url: '' });
-        showSuccessMessage('✅ Post adicionado com sucesso!');
-        
-        // Fechar editor
-        setShowBlogEditor(false);
-      } catch (error) {
-        console.error('❌ Erro ao adicionar post:', error);
-        showSuccessMessage('❌ Erro ao adicionar post: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      showSuccessMessage('❌ Preencha pelo menos título e conteúdo');
-    }
-  };
-
   const tabs = [
     { id: 'dashboard', title: 'Dashboard', icon: BarChart3 },
     { id: 'projects', title: 'Projetos', icon: Code },
-    { id: 'blog', title: 'Blog', icon: BookOpen },
     { id: 'testimonials', title: 'Depoimentos', icon: MessageSquare },
     { id: 'talks', title: 'Palestras', icon: Mic },
+    { id: 'blog', title: 'Blog', icon: FileText },
+    { id: 'classes', title: 'Aulas', icon: Book },
     { id: 'settings', title: 'Configurações', icon: Settings }
   ];
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex">
+      {/* Mobile Menu Toggle Button */}
+      <div className="fixed top-4 left-4 z-60 md:hidden">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-lg bg-gray-800 text-cyan-400 border border-cyan-500/30"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Settings className="w-6 h-6" />}
+        </button>
+      </div>
+
       {/* Sidebar - RESPONSIVIDADE MELHORADA */}
-      <div className="w-full sm:w-80 md:w-64 bg-gray-900 border-r border-cyan-500/30 p-4 sm:p-6 overflow-y-auto">
+      <div className={`w-full sm:w-80 md:w-64 bg-gray-900 border-r border-cyan-500/30 p-4 sm:p-6 overflow-y-auto fixed md:static h-full z-50 transition-all duration-300 transform ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <h2 className="text-lg sm:text-xl font-bold text-cyan-400">Admin Panel</h2>
           <div className="flex items-center space-x-2">
             <NotificationSystem />
             <button
-              onClick={onClose}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onClose();
+              }}
               className="text-gray-400 hover:text-white p-1 sm:p-0"
             >
               <X className="w-5 sm:w-6 h-5 sm:h-6" />
@@ -269,7 +234,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setIsMobileMenuOpen(false);
+              }}
               className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-3 rounded-lg transition-all duration-300 text-sm sm:text-base ${
                 activeTab === tab.id
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400'
@@ -284,21 +252,30 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
 
         <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-700 space-y-3">
           <button
-            onClick={() => setShowAnalyticsSetup(true)}
+            onClick={() => {
+              setShowAnalyticsSetup(true);
+              setIsMobileMenuOpen(false);
+            }}
             className="w-full px-3 sm:px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
             <TrendingUp className="w-3 sm:w-4 h-3 sm:h-4 mr-2" />
             Google Analytics
           </button>
           <button
-            onClick={() => setShowUserManagement(true)}
+            onClick={() => {
+              setShowUserManagement(true);
+              setIsMobileMenuOpen(false);
+            }}
             className="w-full px-3 sm:px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
             <UserCog className="w-3 sm:w-4 h-3 sm:h-4 mr-2" />
             Usuários
           </button>
           <button
-            onClick={onBackToFrontend}
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              onBackToFrontend();
+            }}
             className="w-full px-3 sm:px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
             <Eye className="w-3 sm:w-4 h-3 sm:h-4 mr-2" />
@@ -306,17 +283,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
           </button>
           <button
             onClick={handleLogout}
-            disabled={logoutInProgress}
-            className="w-full px-3 sm:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 text-sm sm:text-base disabled:opacity-50"
+            className="w-full px-3 sm:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 text-sm sm:text-base"
           >
-            {logoutInProgress ? 'Saindo...' : 'Sair'}
+            Sair
           </button>
         </div>
       </div>
 
+      {/* Overlay para fechar menu mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Main Content - RESPONSIVIDADE MELHORADA */}
-      <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
-        {/* Success Message - CORRIGIDO: Posicionado à direita */}
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto md:ml-0 pt-16 md:pt-4">
+        {/* Success Message */}
         {successMessage && (
           <div className="fixed top-4 right-4 bg-green-500/20 border border-green-400 text-green-400 px-4 sm:px-6 py-3 rounded-lg flex items-center z-60 text-sm sm:text-base max-w-xs sm:max-w-md">
             {successMessage}
@@ -502,207 +486,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                   </div>
                 ))
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Blog Section - NOVA SEÇÃO */}
-        {activeTab === 'blog' && (
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Blog</h2>
-              <button
-                onClick={() => setShowBlogEditor(!showBlogEditor)}
-                className="px-4 sm:px-6 py-2 bg-orange-500/20 border border-orange-400 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all duration-300 text-sm sm:text-base"
-              >
-                <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
-                Novo Artigo
-              </button>
-            </div>
-            
-            {/* Editor de Blog */}
-            {showBlogEditor && (
-              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30 space-y-4">
-                <h3 className="text-base sm:text-lg font-semibold text-orange-400 mb-2">Novo Artigo</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Título do artigo"
-                    value={newBlogPost.title}
-                    onChange={(e) => setNewBlogPost({ ...newBlogPost, title: e.target.value })}
-                    className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
-                  />
-                  
-                  <select
-                    value={newBlogPost.category}
-                    onChange={(e) => setNewBlogPost({ ...newBlogPost, category: e.target.value })}
-                    className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    <option value="Inteligência Artificial">Inteligência Artificial</option>
-                    <option value="Cybersecurity">Cybersecurity</option>
-                    <option value="Desenvolvimento">Desenvolvimento</option>
-                    <option value="Carreira">Carreira</option>
-                    <option value="Tutoriais">Tutoriais</option>
-                  </select>
-                </div>
-                
-                <textarea
-                  placeholder="Conteúdo do artigo (suporta markdown)"
-                  rows={10}
-                  value={newBlogPost.content}
-                  onChange={(e) => setNewBlogPost({ ...newBlogPost, content: e.target.value })}
-                  className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
-                />
-                
-                <input
-                  type="text"
-                  placeholder="Tags (separadas por vírgula)"
-                  value={newBlogPost.tags}
-                  onChange={(e) => setNewBlogPost({ ...newBlogPost, tags: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
-                />
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Imagem de Capa
-                  </label>
-                  <ImageUpload
-                    currentImage={newBlogPost.image_url}
-                    onImageUploaded={(url) => setNewBlogPost({ ...newBlogPost, image_url: url })}
-                    folder="blog"
-                    recommendedSize="1200x630px"
-                  />
-                </div>
-                
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                  <button
-                    onClick={handleAddBlogPost}
-                    disabled={loading}
-                    className="px-4 py-2 bg-orange-500/20 border border-orange-400 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
-                  >
-                    <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
-                    Publicar Artigo
-                  </button>
-                  <button
-                    onClick={() => setShowBlogEditor(false)}
-                    className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm sm:text-base"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {/* Lista de Posts */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-orange-400 mb-2">Artigos Publicados</h3>
-              
-              {/* Post 1 */}
-              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30">
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                      <img
-                        src="https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg?auto=compress&cs=tinysrgb&w=800"
-                        alt="O Futuro da IA Generativa em 2025"
-                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 text-orange-400 text-xs mb-1">
-                          <span>Inteligência Artificial</span>
-                          <span>•</span>
-                          <span>12 Jan 2025</span>
-                        </div>
-                        <h4 className="text-base sm:text-lg font-semibold text-orange-400">O Futuro da IA Generativa em 2025</h4>
-                        <p className="text-gray-300 mt-2 text-sm sm:text-base line-clamp-2">
-                          Explorando os avanços mais recentes em modelos de linguagem e como eles estão transformando 
-                          o desenvolvimento de software, design e criação de conteúdo.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
-                    <button className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-red-400 hover:bg-red-500/20 rounded">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Post 2 */}
-              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30">
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                      <img
-                        src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800"
-                        alt="Protegendo Infraestruturas Críticas"
-                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 text-orange-400 text-xs mb-1">
-                          <span>Cybersecurity</span>
-                          <span>•</span>
-                          <span>5 Jan 2025</span>
-                        </div>
-                        <h4 className="text-base sm:text-lg font-semibold text-orange-400">Protegendo Infraestruturas Críticas</h4>
-                        <p className="text-gray-300 mt-2 text-sm sm:text-base line-clamp-2">
-                          Como as técnicas modernas de ethical hacking estão sendo usadas para identificar vulnerabilidades 
-                          em sistemas governamentais e empresariais antes que hackers maliciosos as explorem.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
-                    <button className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-red-400 hover:bg-red-500/20 rounded">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Post 3 */}
-              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30">
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                      <img
-                        src="https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800"
-                        alt="Transição para Tech em 6 Meses"
-                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 text-orange-400 text-xs mb-1">
-                          <span>Carreira</span>
-                          <span>•</span>
-                          <span>28 Dez 2024</span>
-                        </div>
-                        <h4 className="text-base sm:text-lg font-semibold text-orange-400">Transição para Tech em 6 Meses</h4>
-                        <p className="text-gray-300 mt-2 text-sm sm:text-base line-clamp-2">
-                          Um guia passo a passo para profissionais que desejam migrar para a área de tecnologia, 
-                          com foco em desenvolvimento de software e estratégias práticas para aprendizado acelerado.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
-                    <button className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-red-400 hover:bg-red-500/20 rounded">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -901,7 +684,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
           </div>
         )}
 
-        {/* Seção de Configurações */}
+        {/* Seção de Blog */}
+        {activeTab === 'blog' && (
+          <BlogManager />
+        )}
+
+        {/* Seção de Aulas Particulares */}
+        {activeTab === 'classes' && (
+          <ClassesManager />
+        )}
+
+        {/* Seção de Configurações - LAYOUT MELHORADO */}
         {activeTab === 'settings' && (
           <div className="space-y-4 sm:space-y-6">
             <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Configurações do Site</h2>
@@ -915,88 +708,124 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               <div className="space-y-4 sm:space-y-6">
                 <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
                   <h3 className="text-base sm:text-lg font-semibold text-cyan-400 mb-4">Editar Configurações</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Título do Site
-                      </label>
-                      <input
-                        type="text"
-                        value={editingSettings.site_title}
-                        onChange={(e) => setEditingSettings({ ...editingSettings, site_title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                      />
+                  
+                  {/* Layout melhorado com grid */}
+                  <div className="space-y-6">
+                    {/* Primeira linha: Título e Descrição */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Título do Site
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSettings.site_title}
+                          onChange={(e) => setEditingSettings({ ...editingSettings, site_title: e.target.value })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Descrição do Site
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSettings.site_description}
+                          onChange={(e) => setEditingSettings({ ...editingSettings, site_description: e.target.value })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Descrição do Site
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={editingSettings.site_description}
-                        onChange={(e) => setEditingSettings({ ...editingSettings, site_description: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                      />
+                    
+                    {/* Segunda linha: Hero Título e Subtítulo */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Título Hero
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSettings.hero_title}
+                          onChange={(e) => setEditingSettings({ ...editingSettings, hero_title: e.target.value })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Subtítulo Hero
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSettings.hero_subtitle}
+                          onChange={(e) => setEditingSettings({ ...editingSettings, hero_subtitle: e.target.value })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Título Hero
-                      </label>
-                      <input
-                        type="text"
-                        value={editingSettings.hero_title}
-                        onChange={(e) => setEditingSettings({ ...editingSettings, hero_title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                      />
+                    
+                    {/* Terceira linha: Texto Sobre e Habilidades */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Texto Sobre
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={editingSettings.about_text}
+                          onChange={(e) => setEditingSettings({ ...editingSettings, about_text: e.target.value })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Habilidades (separadas por vírgula)
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={Array.isArray(editingSettings.skills) ? editingSettings.skills.join(', ') : editingSettings.skills}
+                          onChange={(e) => setEditingSettings({ 
+                            ...editingSettings, 
+                            skills: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)
+                          })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Subtítulo Hero
-                      </label>
-                      <input
-                        type="text"
-                        value={editingSettings.hero_subtitle}
-                        onChange={(e) => setEditingSettings({ ...editingSettings, hero_subtitle: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Texto Sobre
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={editingSettings.about_text}
-                        onChange={(e) => setEditingSettings({ ...editingSettings, about_text: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Habilidades (separadas por vírgula)
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={Array.isArray(editingSettings.skills) ? editingSettings.skills.join(', ') : editingSettings.skills}
-                        onChange={(e) => setEditingSettings({
-                          ...editingSettings,
-                          skills: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)
-                        })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Foto de Perfil
-                      </label>
-                      <ImageUpload
-                        currentImage={editingSettings.profile_image_url}
-                        onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
-                        folder="profile"
-                        recommendedSize="400x400px"
-                      />
+                    
+                    {/* Quarta linha: Foto de Perfil */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Foto de Perfil
+                        </label>
+                        <ImageUpload
+                          currentImage={editingSettings.profile_image_url}
+                          onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
+                          folder="profile"
+                          recommendedSize="400x400px"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Link para Aula Experimental
+                        </label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="text"
+                            value={editingSettings.class_link || ''}
+                            onChange={(e) => setEditingSettings({ ...editingSettings, class_link: e.target.value })}
+                            placeholder="https://wa.me/5511999999999"
+                            className="flex-1 p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          />
+                          <Link className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Link para WhatsApp, Calendly ou qualquer página de agendamento
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-6">
                     <button
                       onClick={async () => {
@@ -1004,7 +833,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           setLoading(true);
                           await updateSettings(editingSettings);
                           setEditingSettings(null);
-                          showSuccessMessage('✅ Configurações atualizadas com sucesso!');
+                          showSuccessMessage('✅ Configurações atualizadas com sucesso no Supabase!');
                         } catch (error) {
                           console.error('❌ Erro ao atualizar configurações:', error);
                           showSuccessMessage('❌ Erro ao atualizar configurações: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
@@ -1040,45 +869,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                   </button>
                 </div>
                 {settings ? (
-                  <div className="space-y-4 text-gray-300 text-sm sm:text-base">
-                    <div>
-                      <strong className="text-cyan-400">Título:</strong> {settings.site_title}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4 text-gray-300 text-sm sm:text-base">
+                      <div>
+                        <strong className="text-cyan-400">Título:</strong> {settings.site_title}
+                      </div>
+                      <div>
+                        <strong className="text-cyan-400">Descrição:</strong> {settings.site_description}
+                      </div>
+                      <div>
+                        <strong className="text-cyan-400">Hero Título:</strong> {settings.hero_title}
+                      </div>
+                      <div>
+                        <strong className="text-cyan-400">Hero Subtítulo:</strong> {settings.hero_subtitle}
+                      </div>
+                      <div>
+                        <strong className="text-cyan-400">Sobre:</strong> {settings.about_text}
+                      </div>
+                      <div>
+                        <strong className="text-cyan-400">Link Aula Experimental:</strong> {settings.class_link || 'Não configurado'}
+                      </div>
                     </div>
-                    <div>
-                      <strong className="text-cyan-400">Descrição:</strong> {settings.site_description}
-                    </div>
-                    <div>
-                      <strong className="text-cyan-400">Hero Título:</strong> {settings.hero_title}
-                    </div>
-                    <div>
-                      <strong className="text-cyan-400">Hero Subtítulo:</strong> {settings.hero_subtitle}
-                    </div>
-                    <div>
-                      <strong className="text-cyan-400">Sobre:</strong> {settings.about_text}
-                    </div>
-                    <div>
-                      <strong className="text-cyan-400">Foto de Perfil:</strong>
-                      {settings.profile_image_url ? (
-                        <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mt-2">
-                          <img
-                            src={settings.profile_image_url}
-                            alt="Profile"
-                            className="w-16 h-16 object-cover rounded-full"
-                          />
-                          <span className="text-green-400">✅ Configurada</span>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <strong className="text-cyan-400 block mb-2">Foto de Perfil:</strong>
+                        {settings.profile_image_url ? (
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                            <img
+                              src={settings.profile_image_url}
+                              alt="Profile"
+                              className="w-32 h-32 object-cover rounded-full border-2 border-cyan-500/30"
+                            />
+                            <span className="text-green-400">✅ Configurada</span>
+                          </div>
+                        ) : (
+                          <span className="text-yellow-400 ml-2">⚠️ Não configurada</span>
+                        )}
+                      </div>
+                      <div>
+                        <strong className="text-cyan-400 block mb-2">Habilidades:</strong>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(Array.isArray(settings.skills) ? settings.skills : []).map((skill, index) => (
+                            <span key={index} className="px-2 sm:px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs sm:text-sm">
+                              {skill}
+                            </span>
+                          ))}
                         </div>
-                      ) : (
-                        <span className="text-yellow-400 ml-2">⚠️ Não configurada</span>
-                      )}
-                    </div>
-                    <div>
-                      <strong className="text-cyan-400">Habilidades:</strong>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {(Array.isArray(settings.skills) ? settings.skills : []).map((skill, index) => (
-                          <span key={index} className="px-2 sm:px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs sm:text-sm">
-                            {skill}
-                          </span>
-                        ))}
                       </div>
                     </div>
                   </div>
