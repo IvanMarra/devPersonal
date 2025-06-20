@@ -22,18 +22,13 @@ const hasValidCredentials = !!(
 
 console.log('✅ Credenciais válidas:', hasValidCredentials);
 
-// Criar cliente Supabase SIMPLIFICADO
+// Criar cliente Supabase com configuração simplificada
 export const supabase = hasValidCredentials 
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false
-      },
-      global: {
-        headers: {
-          'X-Client-Info': 'deviem-portfolio'
-        }
       }
     })
   : null;
@@ -81,7 +76,7 @@ export interface SiteSettings {
   updated_at?: string;
 }
 
-// SISTEMA DE AUTENTICAÇÃO SIMPLIFICADO
+// Função para autenticar usuário admin no Supabase
 export const authenticateAdmin = async (username: string, password: string) => {
   try {
     console.log('🔐 Autenticando admin...');
@@ -107,6 +102,7 @@ export const authenticateAdmin = async (username: string, password: string) => {
   }
 };
 
+// Função para verificar se admin está autenticado
 export const isAdminAuthenticated = () => {
   const token = localStorage.getItem('deviem_admin_token');
   const session = localStorage.getItem('deviem_admin_session');
@@ -131,6 +127,7 @@ export const isAdminAuthenticated = () => {
   return false;
 };
 
+// Função para fazer logout
 export const logoutAdmin = () => {
   console.log('🚪 Fazendo logout completo...');
   
@@ -209,26 +206,6 @@ export const projectsService = {
     console.log('➕ Criando projeto no Supabase:', project.title);
     
     return withErrorHandling(async () => {
-      // Tentar usar RPC para bypass de RLS
-      try {
-        console.log('🔍 Tentando usar RPC para criar projeto...');
-        const { data: rpcData, error: rpcError } = await supabase!.rpc('create_project', {
-          p_title: project.title,
-          p_description: project.description,
-          p_tech: project.tech,
-          p_image_url: project.image_url
-        });
-        
-        if (!rpcError && rpcData) {
-          console.log('✅ Projeto criado com sucesso via RPC:', rpcData);
-          return rpcData;
-        }
-        
-        console.log('⚠️ RPC falhou, tentando método padrão...');
-      } catch (rpcErr) {
-        console.log('⚠️ Erro ao usar RPC:', rpcErr);
-      }
-      
       // Método padrão
       const { data, error } = await supabase!
         .from('projects')
@@ -255,28 +232,6 @@ export const projectsService = {
     console.log('📝 Atualizando projeto no Supabase:', id);
     
     return withErrorHandling(async () => {
-      // Tentar usar RPC para bypass de RLS
-      try {
-        console.log('🔍 Tentando usar RPC para atualizar projeto...');
-        const { data: rpcData, error: rpcError } = await supabase!.rpc('update_project', {
-          p_id: id,
-          p_title: project.title,
-          p_description: project.description,
-          p_tech: project.tech,
-          p_image_url: project.image_url
-        });
-        
-        if (!rpcError && rpcData) {
-          console.log('✅ Projeto atualizado com sucesso via RPC:', rpcData);
-          return rpcData;
-        }
-        
-        console.log('⚠️ RPC falhou, tentando método padrão...');
-      } catch (rpcErr) {
-        console.log('⚠️ Erro ao usar RPC:', rpcErr);
-      }
-      
-      // Método padrão
       const updateData: any = {};
       if (project.title !== undefined) updateData.title = project.title;
       if (project.description !== undefined) updateData.description = project.description;
@@ -304,24 +259,6 @@ export const projectsService = {
     console.log('🗑️ Deletando projeto no Supabase:', id);
     
     return withErrorHandling(async () => {
-      // Tentar usar RPC para bypass de RLS
-      try {
-        console.log('🔍 Tentando usar RPC para deletar projeto...');
-        const { data: rpcData, error: rpcError } = await supabase!.rpc('delete_project', {
-          p_id: id
-        });
-        
-        if (!rpcError && rpcData) {
-          console.log('✅ Projeto deletado com sucesso via RPC');
-          return true;
-        }
-        
-        console.log('⚠️ RPC falhou, tentando método padrão...');
-      } catch (rpcErr) {
-        console.log('⚠️ Erro ao usar RPC:', rpcErr);
-      }
-      
-      // Método padrão
       const { error } = await supabase!
         .from('projects')
         .delete()

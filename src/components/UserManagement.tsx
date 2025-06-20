@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Trash2, Save, X, Eye, EyeOff, Shield, Key, UserPlus, AlertTriangle } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, Save, X, Eye, EyeOff, Shield, Key, UserPlus } from 'lucide-react';
 
 interface User {
   id: string;
