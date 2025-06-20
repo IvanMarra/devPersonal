@@ -150,10 +150,6 @@ git push -u origin main
 - `site_settings`: Configurações do site
 - Storage bucket: `deviem-images`
 
-### 🔐 Acesso Administrativo
-
-- Digite "deviem" em qualquer lugar do site para acessar o admin
-- Credenciais: `deviem_admin` / `DevIem2024@Secure!`
 
 ### 🎨 Personalização
 

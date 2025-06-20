@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, CheckCircle, XCircle, AlertCircle, RefreshCw, Info, ExternalLink, Settings } from 'lucide-react';
+import { Database, CheckCircle, XCircle, AlertCircle, RefreshCw, Info, ExternalLink, Settings, Zap } from 'lucide-react';
 import { isSupabaseConfigured, getEnvironmentInfo, testSupabaseConnection } from '../lib/supabase';
 import SupabaseSetupGuide from './SupabaseSetupGuide';
 
@@ -9,6 +9,7 @@ const SupabaseStatus: React.FC = () => {
   const [errorType, setErrorType] = useState<'config' | 'network' | 'cors' | 'unknown'>('unknown');
   const [showDetails, setShowDetails] = useState(false);
   const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const checkConnection = async () => {
     setStatus('checking');
@@ -34,6 +35,7 @@ const SupabaseStatus: React.FC = () => {
       if (result.success) {
         setStatus('connected');
         setError(null);
+        console.log('✅ Supabase conectado com sucesso!');
       } else {
         setStatus('error');
         setError(result.error || 'Erro desconhecido');
@@ -63,11 +65,41 @@ const SupabaseStatus: React.FC = () => {
     }
   };
 
+  const forceRefresh = async () => {
+    setIsRefreshing(true);
+    console.log('🔄 FORÇANDO refresh completo dos dados...');
+    
+    try {
+      // Limpar cache do localStorage se existir
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.includes('supabase') || key.includes('cache')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Recarregar a página para garantir estado limpo
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao forçar refresh:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     checkConnection();
+    
+    // Auto-refresh a cada 30 segundos
+    const interval = setInterval(checkConnection, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const getStatusIcon = () => {
+    if (isRefreshing) {
+      return <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />;
+    }
+    
     switch (status) {
       case 'checking':
         return <RefreshCw className="w-4 h-4 animate-spin" />;
@@ -81,6 +113,8 @@ const SupabaseStatus: React.FC = () => {
   };
 
   const getStatusText = () => {
+    if (isRefreshing) return 'Atualizando...';
+    
     switch (status) {
       case 'checking':
         return 'Verificando...';
@@ -94,6 +128,8 @@ const SupabaseStatus: React.FC = () => {
   };
 
   const getStatusColor = () => {
+    if (isRefreshing) return 'text-cyan-400';
+    
     switch (status) {
       case 'checking':
         return 'text-cyan-400';
@@ -123,6 +159,16 @@ const SupabaseStatus: React.FC = () => {
             Supabase: {getStatusText()}
           </span>
           
+          {/* Force Refresh Button */}
+          <button
+            onClick={forceRefresh}
+            disabled={isRefreshing}
+            className="p-1 hover:bg-gray-700 rounded transition-colors disabled:opacity-50"
+            title="Forçar atualização completa"
+          >
+            <Zap className="w-3 h-3 text-purple-400" />
+          </button>
+          
           {/* Setup Guide Button */}
           {(status === 'disconnected' || status === 'error') && (
             <button
@@ -141,7 +187,7 @@ const SupabaseStatus: React.FC = () => {
           >
             <Info className="w-3 h-3 text-gray-400" />
           </button>
-          {status !== 'checking' && (
+          {status !== 'checking' && !isRefreshing && (
             <button
               onClick={checkConnection}
               className="p-1 hover:bg-gray-700 rounded transition-colors"
@@ -221,6 +267,16 @@ const SupabaseStatus: React.FC = () => {
                   <p className="text-gray-400 text-xs break-all">URL: {envInfo.supabaseUrl}</p>
                 </div>
               )}
+              <div className="mt-2 pt-2 border-t border-gray-700">
+                <button
+                  onClick={forceRefresh}
+                  disabled={isRefreshing}
+                  className="w-full px-2 py-1 bg-purple-500/20 border border-purple-400 text-purple-400 rounded text-xs hover:bg-purple-500/30 transition-all duration-300 disabled:opacity-50"
+                >
+                  <Zap className="w-3 h-3 inline mr-1" />
+                  {isRefreshing ? 'Atualizando...' : 'Forçar Refresh'}
+                </button>
+              </div>
             </div>
           </div>
         )}

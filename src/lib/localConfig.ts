@@ -1,6 +1,11 @@
 // Configuração para desenvolvimento local sem Supabase
 export const LOCAL_MODE = {
-  enabled: !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://seu-projeto-id.supabase.co',
+  // Forçar modo local apenas se as variáveis não estiverem configuradas OU forem valores de exemplo
+  enabled: !import.meta.env.VITE_SUPABASE_URL || 
+           import.meta.env.VITE_SUPABASE_URL === 'https://seu-projeto-id.supabase.co' ||
+           import.meta.env.VITE_SUPABASE_URL.includes('your_actual_supabase_url_here') ||
+           !import.meta.env.VITE_SUPABASE_ANON_KEY ||
+           import.meta.env.VITE_SUPABASE_ANON_KEY.includes('your_actual_supabase_anon_key_here'),
   
   // Dados mock para desenvolvimento local
   mockData: {
@@ -115,7 +120,16 @@ export const LOCAL_MODE = {
 };
 
 // Função para verificar se está em modo local
-export const isLocalMode = () => LOCAL_MODE.enabled;
+export const isLocalMode = () => {
+  const result = LOCAL_MODE.enabled;
+  console.log('🔍 Verificando modo local:', {
+    hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+    hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+    url: import.meta.env.VITE_SUPABASE_URL,
+    isLocalMode: result
+  });
+  return result;
+};
 
 // Função para obter dados mock
 export const getMockData = () => LOCAL_MODE.mockData;

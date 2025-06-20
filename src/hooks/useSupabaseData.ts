@@ -7,7 +7,8 @@ import {
   Project,
   Testimonial,
   Talk,
-  SiteSettings
+  SiteSettings,
+  isSupabaseConfigured
 } from '../lib/supabase';
 import { isLocalMode, getMockData } from '../lib/localConfig';
 
@@ -49,6 +50,20 @@ const useForceUpdate = () => {
   return forceUpdate;
 };
 
+// Função para determinar se deve usar dados reais ou mock
+const shouldUseRealData = () => {
+  const isConfigured = isSupabaseConfigured();
+  const isLocal = isLocalMode();
+  
+  console.log('🔍 Verificando fonte de dados:', {
+    isSupabaseConfigured: isConfigured,
+    isLocalMode: isLocal,
+    decision: isConfigured && !isLocal ? 'REAL' : 'MOCK'
+  });
+  
+  return isConfigured && !isLocal;
+};
+
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,31 +76,30 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      // Se estiver em modo local, usar dados mock
-      if (isLocalMode()) {
-        console.log('🔄 Modo local ativo - usando dados mock para projetos');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Usando dados mock para projetos');
         const mockData = getMockData();
         setProjects(mockData.projects);
         setLoading(false);
         return;
       }
       
-      console.log('🔄 Buscando projetos do Supabase...');
+      console.log('🌐 Buscando projetos do Supabase...');
       
       const data = await projectsService.getAll();
-      console.log('✅ Projetos carregados:', data?.length || 0);
+      console.log('✅ Projetos carregados do Supabase:', data?.length || 0);
       
       if (data && data.length > 0) {
         setProjects(data);
         console.log('📊 Projetos atualizados no estado:', data.length);
       } else {
-        // Fallback apenas se não houver dados no Supabase
-        console.log('⚠️ Usando dados fallback para projetos');
+        console.log('⚠️ Nenhum projeto encontrado no Supabase, usando dados mock');
         const mockData = getMockData();
         setProjects(mockData.projects);
       }
       
-      // Forçar re-render
       forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao carregar projetos:', err);
@@ -112,33 +126,28 @@ export const useProjects = () => {
 
   const addProject = async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando adição de projeto');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando adição de projeto');
         const newProject = { ...project, id: Date.now() };
         setProjects(prev => {
           const updated = [newProject, ...prev];
-          console.log('📊 Projetos após adição (local):', updated.length);
+          console.log('📊 Projetos após adição (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return newProject;
       }
       
-      console.log('➕ Adicionando projeto:', project.title);
+      console.log('➕ Adicionando projeto no Supabase:', project.title);
       const newProject = await projectsService.create(project);
       
       if (newProject) {
-        console.log('✅ Projeto adicionado com sucesso');
-        // Atualização IMEDIATA local
-        setProjects(prev => {
-          const updated = [newProject, ...prev];
-          console.log('📊 Projetos após adição:', updated.length);
-          return updated;
-        });
-        // Notificação GLOBAL
+        console.log('✅ Projeto adicionado com sucesso no Supabase');
+        // Recarregar dados do Supabase para garantir sincronização
+        await fetchProjects(true);
         dataSyncManager.notify();
-        // Forçar re-render
-        forceUpdate();
         return newProject;
       }
     } catch (err) {
@@ -149,32 +158,27 @@ export const useProjects = () => {
 
   const updateProject = async (id: number, project: Partial<Project>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando atualização de projeto');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando atualização de projeto');
         setProjects(prev => {
           const updated = prev.map(p => p.id === id ? { ...p, ...project } : p);
-          console.log('📊 Projetos após atualização (local):', updated.length);
+          console.log('📊 Projetos após atualização (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return { ...project, id } as Project;
       }
       
-      console.log('📝 Atualizando projeto:', id);
+      console.log('📝 Atualizando projeto no Supabase:', id);
       const updatedProject = await projectsService.update(id, project);
       
       if (updatedProject) {
-        console.log('✅ Projeto atualizado com sucesso');
-        // Atualização IMEDIATA local
-        setProjects(prev => {
-          const updated = prev.map(p => p.id === id ? updatedProject : p);
-          console.log('📊 Projetos após atualização:', updated.length);
-          return updated;
-        });
-        // Notificação GLOBAL
+        console.log('✅ Projeto atualizado com sucesso no Supabase');
+        // Recarregar dados do Supabase para garantir sincronização
+        await fetchProjects(true);
         dataSyncManager.notify();
-        // Forçar re-render
-        forceUpdate();
         return updatedProject;
       }
     } catch (err) {
@@ -185,30 +189,25 @@ export const useProjects = () => {
 
   const deleteProject = async (id: number) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando exclusão de projeto');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando exclusão de projeto');
         setProjects(prev => {
           const updated = prev.filter(p => p.id !== id);
-          console.log('📊 Projetos após exclusão (local):', updated.length);
+          console.log('📊 Projetos após exclusão (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return;
       }
       
-      console.log('🗑️ Deletando projeto:', id);
+      console.log('🗑️ Deletando projeto no Supabase:', id);
       await projectsService.delete(id);
-      console.log('✅ Projeto deletado com sucesso');
-      // Atualização IMEDIATA local
-      setProjects(prev => {
-        const updated = prev.filter(p => p.id !== id);
-        console.log('📊 Projetos após exclusão:', updated.length);
-        return updated;
-      });
-      // Notificação GLOBAL
+      console.log('✅ Projeto deletado com sucesso no Supabase');
+      // Recarregar dados do Supabase para garantir sincronização
+      await fetchProjects(true);
       dataSyncManager.notify();
-      // Forçar re-render
-      forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao deletar projeto:', err);
       throw err;
@@ -238,24 +237,26 @@ export const useTestimonials = () => {
       setLoading(true);
       setError(null);
       
-      if (isLocalMode()) {
-        console.log('🔄 Modo local ativo - usando dados mock para depoimentos');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Usando dados mock para depoimentos');
         const mockData = getMockData();
         setTestimonials(mockData.testimonials);
         setLoading(false);
         return;
       }
       
-      console.log('🔄 Buscando depoimentos do Supabase...');
+      console.log('🌐 Buscando depoimentos do Supabase...');
       
       const data = await testimonialsService.getAll();
-      console.log('✅ Depoimentos carregados:', data?.length || 0);
+      console.log('✅ Depoimentos carregados do Supabase:', data?.length || 0);
       
       if (data && data.length > 0) {
         setTestimonials(data);
         console.log('📊 Depoimentos atualizados no estado:', data.length);
       } else {
-        console.log('⚠️ Usando dados fallback para depoimentos');
+        console.log('⚠️ Nenhum depoimento encontrado no Supabase, usando dados mock');
         const mockData = getMockData();
         setTestimonials(mockData.testimonials);
       }
@@ -284,30 +285,27 @@ export const useTestimonials = () => {
 
   const addTestimonial = async (testimonial: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando adição de depoimento');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando adição de depoimento');
         const newTestimonial = { ...testimonial, id: Date.now() };
         setTestimonials(prev => {
           const updated = [newTestimonial, ...prev];
-          console.log('📊 Depoimentos após adição (local):', updated.length);
+          console.log('📊 Depoimentos após adição (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return newTestimonial;
       }
       
-      console.log('➕ Adicionando depoimento:', testimonial.name);
+      console.log('➕ Adicionando depoimento no Supabase:', testimonial.name);
       const newTestimonial = await testimonialsService.create(testimonial);
       
       if (newTestimonial) {
-        console.log('✅ Depoimento adicionado com sucesso');
-        setTestimonials(prev => {
-          const updated = [newTestimonial, ...prev];
-          console.log('📊 Depoimentos após adição:', updated.length);
-          return updated;
-        });
+        console.log('✅ Depoimento adicionado com sucesso no Supabase');
+        await fetchTestimonials(true);
         dataSyncManager.notify();
-        forceUpdate();
         return newTestimonial;
       }
     } catch (err) {
@@ -318,29 +316,26 @@ export const useTestimonials = () => {
 
   const updateTestimonial = async (id: number, testimonial: Partial<Testimonial>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando atualização de depoimento');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando atualização de depoimento');
         setTestimonials(prev => {
           const updated = prev.map(t => t.id === id ? { ...t, ...testimonial } : t);
-          console.log('📊 Depoimentos após atualização (local):', updated.length);
+          console.log('📊 Depoimentos após atualização (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return { ...testimonial, id } as Testimonial;
       }
       
-      console.log('📝 Atualizando depoimento:', id);
+      console.log('📝 Atualizando depoimento no Supabase:', id);
       const updatedTestimonial = await testimonialsService.update(id, testimonial);
       
       if (updatedTestimonial) {
-        console.log('✅ Depoimento atualizado com sucesso');
-        setTestimonials(prev => {
-          const updated = prev.map(t => t.id === id ? updatedTestimonial : t);
-          console.log('📊 Depoimentos após atualização:', updated.length);
-          return updated;
-        });
+        console.log('✅ Depoimento atualizado com sucesso no Supabase');
+        await fetchTestimonials(true);
         dataSyncManager.notify();
-        forceUpdate();
         return updatedTestimonial;
       }
     } catch (err) {
@@ -351,27 +346,24 @@ export const useTestimonials = () => {
 
   const deleteTestimonial = async (id: number) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando exclusão de depoimento');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando exclusão de depoimento');
         setTestimonials(prev => {
           const updated = prev.filter(t => t.id !== id);
-          console.log('📊 Depoimentos após exclusão (local):', updated.length);
+          console.log('📊 Depoimentos após exclusão (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return;
       }
       
-      console.log('🗑️ Deletando depoimento:', id);
+      console.log('🗑️ Deletando depoimento no Supabase:', id);
       await testimonialsService.delete(id);
-      console.log('✅ Depoimento deletado com sucesso');
-      setTestimonials(prev => {
-        const updated = prev.filter(t => t.id !== id);
-        console.log('📊 Depoimentos após exclusão:', updated.length);
-        return updated;
-      });
+      console.log('✅ Depoimento deletado com sucesso no Supabase');
+      await fetchTestimonials(true);
       dataSyncManager.notify();
-      forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao deletar depoimento:', err);
       throw err;
@@ -401,24 +393,26 @@ export const useTalks = () => {
       setLoading(true);
       setError(null);
       
-      if (isLocalMode()) {
-        console.log('🔄 Modo local ativo - usando dados mock para palestras');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Usando dados mock para palestras');
         const mockData = getMockData();
         setTalks(mockData.talks);
         setLoading(false);
         return;
       }
       
-      console.log('🔄 Buscando palestras do Supabase...');
+      console.log('🌐 Buscando palestras do Supabase...');
       
       const data = await talksService.getAll();
-      console.log('✅ Palestras carregadas:', data?.length || 0);
+      console.log('✅ Palestras carregadas do Supabase:', data?.length || 0);
       
       if (data && data.length > 0) {
         setTalks(data);
         console.log('📊 Palestras atualizadas no estado:', data.length);
       } else {
-        console.log('⚠️ Usando dados fallback para palestras');
+        console.log('⚠️ Nenhuma palestra encontrada no Supabase, usando dados mock');
         const mockData = getMockData();
         setTalks(mockData.talks);
       }
@@ -447,30 +441,27 @@ export const useTalks = () => {
 
   const addTalk = async (talk: Omit<Talk, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando adição de palestra');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando adição de palestra');
         const newTalk = { ...talk, id: Date.now() };
         setTalks(prev => {
           const updated = [newTalk, ...prev];
-          console.log('📊 Palestras após adição (local):', updated.length);
+          console.log('📊 Palestras após adição (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return newTalk;
       }
       
-      console.log('➕ Adicionando palestra:', talk.title);
+      console.log('➕ Adicionando palestra no Supabase:', talk.title);
       const newTalk = await talksService.create(talk);
       
       if (newTalk) {
-        console.log('✅ Palestra adicionada com sucesso');
-        setTalks(prev => {
-          const updated = [newTalk, ...prev];
-          console.log('📊 Palestras após adição:', updated.length);
-          return updated;
-        });
+        console.log('✅ Palestra adicionada com sucesso no Supabase');
+        await fetchTalks(true);
         dataSyncManager.notify();
-        forceUpdate();
         return newTalk;
       }
     } catch (err) {
@@ -481,29 +472,26 @@ export const useTalks = () => {
 
   const updateTalk = async (id: number, talk: Partial<Talk>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando atualização de palestra');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando atualização de palestra');
         setTalks(prev => {
           const updated = prev.map(t => t.id === id ? { ...t, ...talk } : t);
-          console.log('📊 Palestras após atualização (local):', updated.length);
+          console.log('📊 Palestras após atualização (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return { ...talk, id } as Talk;
       }
       
-      console.log('📝 Atualizando palestra:', id);
+      console.log('📝 Atualizando palestra no Supabase:', id);
       const updatedTalk = await talksService.update(id, talk);
       
       if (updatedTalk) {
-        console.log('✅ Palestra atualizada com sucesso');
-        setTalks(prev => {
-          const updated = prev.map(t => t.id === id ? updatedTalk : t);
-          console.log('📊 Palestras após atualização:', updated.length);
-          return updated;
-        });
+        console.log('✅ Palestra atualizada com sucesso no Supabase');
+        await fetchTalks(true);
         dataSyncManager.notify();
-        forceUpdate();
         return updatedTalk;
       }
     } catch (err) {
@@ -514,27 +502,24 @@ export const useTalks = () => {
 
   const deleteTalk = async (id: number) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando exclusão de palestra');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando exclusão de palestra');
         setTalks(prev => {
           const updated = prev.filter(t => t.id !== id);
-          console.log('📊 Palestras após exclusão (local):', updated.length);
+          console.log('📊 Palestras após exclusão (mock):', updated.length);
           return updated;
         });
         dataSyncManager.notify();
         return;
       }
       
-      console.log('🗑️ Deletando palestra:', id);
+      console.log('🗑️ Deletando palestra no Supabase:', id);
       await talksService.delete(id);
-      console.log('✅ Palestra deletada com sucesso');
-      setTalks(prev => {
-        const updated = prev.filter(t => t.id !== id);
-        console.log('📊 Palestras após exclusão:', updated.length);
-        return updated;
-      });
+      console.log('✅ Palestra deletada com sucesso no Supabase');
+      await fetchTalks(true);
       dataSyncManager.notify();
-      forceUpdate();
     } catch (err) {
       console.error('❌ Erro ao deletar palestra:', err);
       throw err;
@@ -564,24 +549,26 @@ export const useSiteSettings = () => {
       setLoading(true);
       setError(null);
       
-      if (isLocalMode()) {
-        console.log('🔄 Modo local ativo - usando configurações mock');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Usando configurações mock');
         const mockData = getMockData();
         setSettings(mockData.settings);
         setLoading(false);
         return;
       }
       
-      console.log('🔄 Buscando configurações do Supabase...');
+      console.log('🌐 Buscando configurações do Supabase...');
       
       const data = await settingsService.get();
-      console.log('✅ Configurações carregadas:', data ? 'Sim' : 'Não');
+      console.log('✅ Configurações carregadas do Supabase:', data ? 'Sim' : 'Não');
       
       if (data) {
         setSettings(data);
         console.log('📊 Configurações atualizadas no estado');
       } else {
-        console.log('⚠️ Usando configurações fallback');
+        console.log('⚠️ Nenhuma configuração encontrada no Supabase, usando dados mock');
         const mockData = getMockData();
         setSettings(mockData.settings);
       }
@@ -610,22 +597,23 @@ export const useSiteSettings = () => {
 
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {
     try {
-      if (isLocalMode()) {
-        console.log('⚠️ Modo local - simulando atualização de configurações');
+      const useRealData = shouldUseRealData();
+      
+      if (!useRealData) {
+        console.log('📦 Modo mock - simulando atualização de configurações');
         const updated = { ...settings, ...newSettings } as SiteSettings;
         setSettings(updated);
         dataSyncManager.notify();
         return updated;
       }
       
-      console.log('📝 Atualizando configurações do site');
+      console.log('📝 Atualizando configurações no Supabase');
       const updatedSettings = await settingsService.update(newSettings);
       
       if (updatedSettings) {
-        console.log('✅ Configurações atualizadas com sucesso');
-        setSettings(updatedSettings);
+        console.log('✅ Configurações atualizadas com sucesso no Supabase');
+        await fetchSettings(true);
         dataSyncManager.notify();
-        forceUpdate();
         return updatedSettings;
       }
     } catch (err) {
@@ -656,7 +644,7 @@ export const useDataSync = () => {
       dataSyncManager.notify();
       
       // Aguardar um pouco para garantir que todos os componentes processaram
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       console.log('✅ Sincronização global concluída');
     } catch (error) {

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X } from 'lucide-react';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
+import SupabaseStatus from './components/SupabaseStatus';
+import VersionInfo from './components/VersionInfo';
+import { useFrontendData } from './hooks/useSupabaseData';
 
 // Matrix rain effect component
 const MatrixRain = () => {
@@ -164,6 +167,9 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
+  // Usar dados do Supabase
+  const { projects, testimonials, talks, settings, refreshAllData } = useFrontendData();
+
   useEffect(() => {
     // Verificar se já está autenticado
     const token = localStorage.getItem('deviem_admin_token');
@@ -235,11 +241,23 @@ function App() {
     };
   }, [isAuthenticated]);
 
+  // Auto-refresh dos dados a cada 30 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refresh dos dados...');
+      refreshAllData();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [refreshAllData]);
+
   const handleLogin = (success: boolean) => {
     if (success) {
       setIsAuthenticated(true);
       setShowLogin(false);
       setIsAdminOpen(true);
+      // Forçar refresh dos dados após login
+      refreshAllData();
     } else {
       setShowLogin(false);
     }
@@ -247,12 +265,16 @@ function App() {
 
   const handleAdminClose = () => {
     setIsAdminOpen(false);
+    // Forçar refresh dos dados após fechar admin
+    refreshAllData();
   };
 
   const handleBackToFrontend = () => {
     setIsAdminOpen(false);
     setShowLogin(false);
     setActiveSection('home');
+    // Forçar refresh dos dados
+    refreshAllData();
   };
 
   const sections = [
@@ -264,95 +286,15 @@ function App() {
     { id: 'classes', title: 'Aulas Particulares', icon: GraduationCap },
   ];
 
-  const projects = [
-    {
-      id: 1,
-      title: "Sistema Bancário Seguro",
-      description: "Plataforma bancária com múltiplas camadas de segurança e detecção de fraudes em tempo real.",
-      tech: ["Java", "Spring Boot", "PostgreSQL", "Redis"],
-      image_url: "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 2,
-      title: "E-commerce Inteligente",
-      description: "Plataforma de comércio eletrônico com IA para recomendações personalizadas.",
-      tech: ["React", "Node.js", "MongoDB", "TensorFlow"],
-      image_url: "https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 3,
-      title: "App Mobile Saúde",
-      description: "Aplicativo para monitoramento de saúde com IoT e análise preditiva.",
-      tech: ["React Native", "Python", "AWS", "IoT"],
-      image_url: "https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 4,
-      title: "Sistema de Cybersecurity",
-      description: "Plataforma de monitoramento e prevenção de ataques cibernéticos para o Governo Federal.",
-      tech: ["Python", "Machine Learning", "Elasticsearch", "Kibana"],
-      image_url: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800"
-    }
-  ];
-
-  const testimonials = [
-    {
-      id: 1,
-      name: "Ana Silva",
-      role: "CTO - TechCorp",
-      text: "O DevIem transformou nossa arquitetura de segurança. Sua experiência em cybersecurity salvou nossa empresa de múltiplos ataques.",
-      avatar_url: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"
-    },
-    {
-      id: 2,
-      name: "Carlos Santos",
-      role: "Desenvolvedor Junior",
-      text: "A mentoria do DevIem foi fundamental na minha transição de carreira. Em 6 meses saí de iniciante para desenvolvedor pleno.",
-      avatar_url: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200"
-    },
-    {
-      id: 3,
-      name: "Maria Oliveira",
-      role: "Gerente de TI - Gov Federal",
-      text: "Profissional excepcional. Já nos ajudou a prevenir ataques críticos à infraestrutura nacional.",
-      avatar_url: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=200"
-    },
-    {
-      id: 4,
-      name: "João Pereira",
-      role: "CEO - StartupTech",
-      text: "Contratamos o DevIem para desenvolver nossa plataforma. Entregou um sistema robusto e escalável que suporta milhares de usuários.",
-      avatar_url: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200"
-    }
-  ];
-
-  const talks = [
-    {
-      id: 1,
-      title: "Segurança Cibernética na Era da IA",
-      description: "Como a inteligência artificial está transformando o cenário de segurança digital e quais são os novos desafios para proteção de dados.",
-      tags: ["Cybersecurity", "AI", "Data Protection"],
-      image_url: "https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 2,
-      title: "Transição de Carreira para Tech",
-      description: "Estratégias práticas para profissionais que desejam migrar para área de tecnologia, com foco em desenvolvimento de software.",
-      tags: ["Career", "Mentoring", "Development"],
-      image_url: "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 3,
-      title: "Arquitetura de Software Moderna",
-      description: "Melhores práticas em arquitetura de software, microserviços, containerização e deploy automatizado.",
-      tags: ["Architecture", "Microservices", "DevOps"],
-      image_url: "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=800"
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       <MatrixRain />
+      
+      {/* Supabase Status */}
+      <SupabaseStatus />
+      
+      {/* Version Info */}
+      <VersionInfo />
       
       {/* Custom CSS */}
       <style dangerouslySetInnerHTML={{
@@ -554,20 +496,19 @@ function App() {
           <div className="text-center z-10 px-6">
             <div className="mb-8">
               <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 text-cyan-400 glitch-text">
-                DEVIEM
+                {settings?.hero_title || 'DEVIEM'}
               </h1>
               <div className="text-lg md:text-xl lg:text-2xl text-purple-400 typing-effect">
-                Desenvolvedor • Mentor • Especialista em IA • Ethical Hacker
+                {settings?.hero_subtitle || 'Desenvolvedor • Mentor • Especialista em IA • Ethical Hacker'}
               </div>
             </div>
             
             <div className="mb-8 text-gray-300 max-w-2xl mx-auto">
               <p className="text-base md:text-lg mb-4">
-                Mais de 20 anos transformando ideias em realidade digital
+                {settings?.about_text || 'Mais de 20 anos transformando ideias em realidade digital'}
               </p>
               <p className="text-sm md:text-base">
-                Especialista em desenvolvimento web/mobile, inteligência artificial, 
-                cybersecurity e mentor de transição de carreira
+                {settings?.site_description || 'Especialista em desenvolvimento web/mobile, inteligência artificial, cybersecurity e mentor de transição de carreira'}
               </p>
             </div>
 
@@ -608,13 +549,21 @@ function App() {
               <div className="lg:col-span-1 flex justify-center">
                 <div className="relative">
                   <div className="cyber-border rounded-full p-1">
-                    <div className="w-48 md:w-64 h-48 md:h-64 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-cyan-400/50 floating-animation">
-                      <div className="text-center">
-                        <Terminal className="w-12 md:w-16 h-12 md:h-16 text-cyan-400 mx-auto mb-2" />
-                        <p className="text-cyan-400 font-bold">DevIem</p>
-                        <p className="text-purple-400 text-sm">20+ anos</p>
+                    {settings?.profile_image_url ? (
+                      <img
+                        src={settings.profile_image_url}
+                        alt="DevIem"
+                        className="w-48 md:w-64 h-48 md:h-64 object-cover rounded-full floating-animation"
+                      />
+                    ) : (
+                      <div className="w-48 md:w-64 h-48 md:h-64 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-cyan-400/50 floating-animation">
+                        <div className="text-center">
+                          <Terminal className="w-12 md:w-16 h-12 md:h-16 text-cyan-400 mx-auto mb-2" />
+                          <p className="text-cyan-400 font-bold">DevIem</p>
+                          <p className="text-purple-400 text-sm">20+ anos</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   
                   {/* Floating elements around the image */}
@@ -639,11 +588,7 @@ function App() {
                       Especialidades
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                      {[
-                        "JavaScript/TypeScript", "Python", "Java", "C#", "PHP", "React", "Angular", "Vue.js",
-                        "Node.js", "Spring Boot", ".NET", "Laravel", "Docker", "Kubernetes", "AWS", "Azure",
-                        "Machine Learning", "AI Tools", "Cybersecurity", "Ethical Hacking", "Penetration Testing"
-                      ].map((skill, index) => (
+                      {(settings?.skills || []).map((skill, index) => (
                         <div key={index} className="bg-gray-900/50 p-2 rounded text-xs md:text-sm text-cyan-400 border border-cyan-500/20 hover:border-cyan-400 transition-all duration-300">
                           {skill}
                         </div>
@@ -716,7 +661,7 @@ function App() {
                 <div key={project.id} className="project-card rounded-xl p-6 card-hover group">
                   <div className="relative overflow-hidden rounded-lg mb-6">
                     <img
-                      src={project.image_url}
+                      src={project.image_url || "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=800"}
                       alt={project.title}
                       className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
                     />
@@ -762,7 +707,7 @@ function App() {
                   <div className="flex items-center space-x-4 mb-6">
                     <div className="relative">
                       <img
-                        src={testimonial.avatar_url}
+                        src={testimonial.avatar_url || "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"}
                         alt={testimonial.name}
                         className="w-16 h-16 object-cover rounded-full avatar-glow"
                       />
@@ -813,7 +758,7 @@ function App() {
                   <div className="flex flex-col lg:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-8">
                     <div className="flex-shrink-0">
                       <img
-                        src={talk.image_url}
+                        src={talk.image_url || "https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=800"}
                         alt={talk.title}
                         className="w-full lg:w-48 h-32 lg:h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
                       />

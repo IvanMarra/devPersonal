@@ -8,16 +8,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [2.2.0] - 2025-01-19
 
 ### 🔧 Correções Críticas
-
 - Corrigido erro de MIME type no Vite para arquivos JavaScript
 - Resolvidos problemas de TypeScript no tsconfig.node.json
-- Corrigida sequência de acesso admin para "deviem" (antes era "admin")
+- Corrigida sequência de acesso admin para "deviem" (anteriormente "admin")
 
 ### 🔄 Sistema de Sincronização
-- Implementado DataSyncManager para sincronização FORÇADA de dados.
-- Sistema de force update para atualizações imediatas no frontend.
-- Logs detalhados para debugging de operações CRUD.
-- Sincronização automática entre admin e frontend.
+- Implementado DataSyncManager para sincronização FORÇADA de dados
+- Sistema de force update para atualizações imediatas no frontend
+- Logs detalhados para debugging de operações CRUD
+- Sincronização automática entre admin e frontend
 
 ### 👥 Gerenciamento de Usuários
 - Sistema completo de gerenciamento de usuários
