@@ -29,28 +29,28 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
       const notificationTypes = [
         {
           type: 'success' as const,
-          title: 'Upload Concluído',
-          message: 'Imagem do projeto foi enviada com sucesso'
-        },
-        {
-          type: 'info' as const,
-          title: 'Novo Visitante',
-          message: 'Alguém está visualizando seu portfolio agora'
-        },
-        {
-          type: 'warning' as const,
-          title: 'Backup Recomendado',
-          message: 'Faça backup dos seus dados regularmente'
-        },
-        {
-          type: 'success' as const,
           title: 'Dados Sincronizados',
-          message: 'Todas as alterações foram salvas no Supabase'
+          message: 'Todas as alterações foram salvas no Supabase com sucesso'
         },
         {
           type: 'info' as const,
           title: 'Sistema Atualizado',
-          message: 'Nova versão do admin panel disponível'
+          message: 'Nova versão do admin panel disponível com melhorias'
+        },
+        {
+          type: 'warning' as const,
+          title: 'Backup Recomendado',
+          message: 'Faça backup dos seus dados regularmente para segurança'
+        },
+        {
+          type: 'success' as const,
+          title: 'CRUD Funcionando',
+          message: 'Sistema de CRUD agora grava em tempo real no banco de dados'
+        },
+        {
+          type: 'info' as const,
+          title: 'Responsividade Ativa',
+          message: 'Dashboard agora é 100% responsivo em todos os dispositivos'
         }
       ];
 
@@ -141,7 +141,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ className = '' 
         )}
       </button>
 
-      {/* Notification Panel - POSICIONADO À DIREITA E CORRIGIDO */}
+      {/* Notification Panel - CORRIGIDO: Posicionado à direita com largura adequada */}
       {isOpen && (
         <>
           {/* Overlay */}

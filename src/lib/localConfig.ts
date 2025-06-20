@@ -7,7 +7,7 @@ export const LOCAL_MODE = {
            !import.meta.env.VITE_SUPABASE_ANON_KEY ||
            import.meta.env.VITE_SUPABASE_ANON_KEY.includes('your_actual_supabase_anon_key_here'),
   
-  // Dados mock para desenvolvimento local
+  // Dados mock APENAS para fallback quando Supabase não retorna dados
   mockData: {
     projects: [
       {
@@ -131,5 +131,8 @@ export const isLocalMode = () => {
   return result;
 };
 
-// Função para obter dados mock
-export const getMockData = () => LOCAL_MODE.mockData;
+// Função para obter dados mock APENAS como fallback
+export const getMockData = () => {
+  console.log('📦 Retornando dados mock como fallback');
+  return LOCAL_MODE.mockData;
+};
