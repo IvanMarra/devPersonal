@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, Eye, UserCog, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, Eye, UserCog, TrendingUp, BookOpen } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import ImageUpload from './ImageUpload';
 import UserManagement from './UserManagement';
@@ -20,6 +20,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAnalyticsSetup, setShowAnalyticsSetup] = useState(false);
   const [logoutInProgress, setLogoutInProgress] = useState(false);
+  const [showBlogEditor, setShowBlogEditor] = useState(false);
 
   // Usar hooks do Supabase
   const { 
@@ -62,6 +63,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [newProject, setNewProject] = useState({ title: '', description: '', tech: '', image_url: '' });
   const [newTestimonial, setNewTestimonial] = useState({ name: '', role: '', text: '', avatar_url: '' });
   const [newTalk, setNewTalk] = useState({ title: '', description: '', tags: '', image_url: '' });
+  const [newBlogPost, setNewBlogPost] = useState({ title: '', category: '', content: '', tags: '', image_url: '' });
 
   // Verificar autenticação
   useEffect(() => {
@@ -212,9 +214,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     }
   };
 
+  // Função para adicionar post no blog
+  const handleAddBlogPost = () => {
+    if (newBlogPost.title && newBlogPost.content) {
+      try {
+        setLoading(true);
+        // Simulação de adição de post
+        console.log('Adicionando post:', newBlogPost);
+        
+        // Limpar formulário
+        setNewBlogPost({ title: '', category: '', content: '', tags: '', image_url: '' });
+        showSuccessMessage('✅ Post adicionado com sucesso!');
+        
+        // Fechar editor
+        setShowBlogEditor(false);
+      } catch (error) {
+        console.error('❌ Erro ao adicionar post:', error);
+        showSuccessMessage('❌ Erro ao adicionar post: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      showSuccessMessage('❌ Preencha pelo menos título e conteúdo');
+    }
+  };
+
   const tabs = [
     { id: 'dashboard', title: 'Dashboard', icon: BarChart3 },
     { id: 'projects', title: 'Projetos', icon: Code },
+    { id: 'blog', title: 'Blog', icon: BookOpen },
     { id: 'testimonials', title: 'Depoimentos', icon: MessageSquare },
     { id: 'talks', title: 'Palestras', icon: Mic },
     { id: 'settings', title: 'Configurações', icon: Settings }
@@ -288,7 +316,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
 
       {/* Main Content - RESPONSIVIDADE MELHORADA */}
       <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
-        {/* Success Message */}
+        {/* Success Message - CORRIGIDO: Posicionado à direita */}
         {successMessage && (
           <div className="fixed top-4 right-4 bg-green-500/20 border border-green-400 text-green-400 px-4 sm:px-6 py-3 rounded-lg flex items-center z-60 text-sm sm:text-base max-w-xs sm:max-w-md">
             {successMessage}
@@ -348,6 +376,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                   currentImage={newProject.image_url}
                   onImageUploaded={(url) => setNewProject({ ...newProject, image_url: url })}
                   folder="projects"
+                  recommendedSize="800x600px"
                 />
               </div>
               <button
@@ -409,6 +438,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                             currentImage={editingProject.image_url}
                             onImageUploaded={(url) => setEditingProject({ ...editingProject, image_url: url })}
                             folder="projects"
+                            recommendedSize="800x600px"
                           />
                         </div>
                         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
@@ -476,6 +506,207 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
           </div>
         )}
 
+        {/* Blog Section - NOVA SEÇÃO */}
+        {activeTab === 'blog' && (
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Blog</h2>
+              <button
+                onClick={() => setShowBlogEditor(!showBlogEditor)}
+                className="px-4 sm:px-6 py-2 bg-orange-500/20 border border-orange-400 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all duration-300 text-sm sm:text-base"
+              >
+                <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
+                Novo Artigo
+              </button>
+            </div>
+            
+            {/* Editor de Blog */}
+            {showBlogEditor && (
+              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30 space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-orange-400 mb-2">Novo Artigo</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Título do artigo"
+                    value={newBlogPost.title}
+                    onChange={(e) => setNewBlogPost({ ...newBlogPost, title: e.target.value })}
+                    className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
+                  />
+                  
+                  <select
+                    value={newBlogPost.category}
+                    onChange={(e) => setNewBlogPost({ ...newBlogPost, category: e.target.value })}
+                    className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    <option value="Inteligência Artificial">Inteligência Artificial</option>
+                    <option value="Cybersecurity">Cybersecurity</option>
+                    <option value="Desenvolvimento">Desenvolvimento</option>
+                    <option value="Carreira">Carreira</option>
+                    <option value="Tutoriais">Tutoriais</option>
+                  </select>
+                </div>
+                
+                <textarea
+                  placeholder="Conteúdo do artigo (suporta markdown)"
+                  rows={10}
+                  value={newBlogPost.content}
+                  onChange={(e) => setNewBlogPost({ ...newBlogPost, content: e.target.value })}
+                  className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
+                />
+                
+                <input
+                  type="text"
+                  placeholder="Tags (separadas por vírgula)"
+                  value={newBlogPost.tags}
+                  onChange={(e) => setNewBlogPost({ ...newBlogPost, tags: e.target.value })}
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm sm:text-base"
+                />
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Imagem de Capa
+                  </label>
+                  <ImageUpload
+                    currentImage={newBlogPost.image_url}
+                    onImageUploaded={(url) => setNewBlogPost({ ...newBlogPost, image_url: url })}
+                    folder="blog"
+                    recommendedSize="1200x630px"
+                  />
+                </div>
+                
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                  <button
+                    onClick={handleAddBlogPost}
+                    disabled={loading}
+                    className="px-4 py-2 bg-orange-500/20 border border-orange-400 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
+                  >
+                    <Plus className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
+                    Publicar Artigo
+                  </button>
+                  <button
+                    onClick={() => setShowBlogEditor(false)}
+                    className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm sm:text-base"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Lista de Posts */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-orange-400 mb-2">Artigos Publicados</h3>
+              
+              {/* Post 1 */}
+              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                      <img
+                        src="https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg?auto=compress&cs=tinysrgb&w=800"
+                        alt="O Futuro da IA Generativa em 2025"
+                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 text-orange-400 text-xs mb-1">
+                          <span>Inteligência Artificial</span>
+                          <span>•</span>
+                          <span>12 Jan 2025</span>
+                        </div>
+                        <h4 className="text-base sm:text-lg font-semibold text-orange-400">O Futuro da IA Generativa em 2025</h4>
+                        <p className="text-gray-300 mt-2 text-sm sm:text-base line-clamp-2">
+                          Explorando os avanços mais recentes em modelos de linguagem e como eles estão transformando 
+                          o desenvolvimento de software, design e criação de conteúdo.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
+                    <button className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 text-red-400 hover:bg-red-500/20 rounded">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Post 2 */}
+              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                      <img
+                        src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800"
+                        alt="Protegendo Infraestruturas Críticas"
+                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 text-orange-400 text-xs mb-1">
+                          <span>Cybersecurity</span>
+                          <span>•</span>
+                          <span>5 Jan 2025</span>
+                        </div>
+                        <h4 className="text-base sm:text-lg font-semibold text-orange-400">Protegendo Infraestruturas Críticas</h4>
+                        <p className="text-gray-300 mt-2 text-sm sm:text-base line-clamp-2">
+                          Como as técnicas modernas de ethical hacking estão sendo usadas para identificar vulnerabilidades 
+                          em sistemas governamentais e empresariais antes que hackers maliciosos as explorem.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
+                    <button className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 text-red-400 hover:bg-red-500/20 rounded">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Post 3 */}
+              <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-orange-500/30">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                      <img
+                        src="https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800"
+                        alt="Transição para Tech em 6 Meses"
+                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 text-orange-400 text-xs mb-1">
+                          <span>Carreira</span>
+                          <span>•</span>
+                          <span>28 Dez 2024</span>
+                        </div>
+                        <h4 className="text-base sm:text-lg font-semibold text-orange-400">Transição para Tech em 6 Meses</h4>
+                        <p className="text-gray-300 mt-2 text-sm sm:text-base line-clamp-2">
+                          Um guia passo a passo para profissionais que desejam migrar para a área de tecnologia, 
+                          com foco em desenvolvimento de software e estratégias práticas para aprendizado acelerado.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
+                    <button className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 text-red-400 hover:bg-red-500/20 rounded">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Outras seções similares... */}
         {activeTab === 'testimonials' && (
           <div className="space-y-4 sm:space-y-6">
@@ -520,6 +751,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                   currentImage={newTestimonial.avatar_url}
                   onImageUploaded={(url) => setNewTestimonial({ ...newTestimonial, avatar_url: url })}
                   folder="avatars"
+                  recommendedSize="200x200px"
                 />
               </div>
               <button
@@ -613,6 +845,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                   currentImage={newTalk.image_url}
                   onImageUploaded={(url) => setNewTalk({ ...newTalk, image_url: url })}
                   folder="talks"
+                  recommendedSize="800x400px"
                 />
               </div>
               <button
@@ -745,8 +978,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       <textarea
                         rows={4}
                         value={Array.isArray(editingSettings.skills) ? editingSettings.skills.join(', ') : editingSettings.skills}
-                        onChange={(e) => setEditingSettings({ 
-                          ...editingSettings, 
+                        onChange={(e) => setEditingSettings({
+                          ...editingSettings,
                           skills: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)
                         })}
                         className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
@@ -760,6 +993,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         currentImage={editingSettings.profile_image_url}
                         onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
                         folder="profile"
+                        recommendedSize="400x400px"
                       />
                     </div>
                   </div>

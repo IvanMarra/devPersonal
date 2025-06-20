@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X } from 'lucide-react';
+import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X, BookOpen } from 'lucide-react';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
 import SupabaseStatus from './components/SupabaseStatus';
@@ -140,7 +140,10 @@ const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
           {sections.map((section: any, index: number) => (
             <button
               key={section.id}
-              onClick={() => onSectionChange(section.id)}
+              onClick={() => {
+                onSectionChange(section.id);
+                setIsOpen(false); // Fechar menu ao clicar
+              }}
               className={`w-full flex items-center space-x-3 px-4 py-4 rounded-lg transition-all duration-300 text-left ${
                 activeSection === section.id
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400 shadow-cyan-glow'
@@ -157,6 +160,25 @@ const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
           ))}
         </nav>
       </div>
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes slideInRight {
+            from {
+              opacity: 0;
+              transform: translateX(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+
+          .shadow-cyan-glow {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+          }
+        `
+      }} />
     </>
   );
 };
@@ -281,6 +303,7 @@ function App() {
     { id: 'home', title: 'Início', icon: Terminal },
     { id: 'about', title: 'Sobre', icon: Eye },
     { id: 'projects', title: 'Projetos', icon: Code },
+    { id: 'blog', title: 'Blog', icon: BookOpen },
     { id: 'testimonials', title: 'Depoimentos', icon: MessageSquare },
     { id: 'talks', title: 'Palestras', icon: Mic },
     { id: 'classes', title: 'Aulas Particulares', icon: GraduationCap },
@@ -428,6 +451,12 @@ function App() {
             border: 1px solid rgba(34, 197, 94, 0.2);
           }
 
+          .blog-card {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+          }
+
           .avatar-glow {
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
             animation: avatar-pulse 2s ease-in-out infinite alternate;
@@ -476,7 +505,7 @@ function App() {
               font-size: 2rem !important;
             }
             
-            .project-card, .testimonial-card, .talk-card {
+            .project-card, .testimonial-card, .talk-card, .blog-card {
               margin: 0.5rem 0;
             }
           }
@@ -570,7 +599,7 @@ function App() {
 
       {/* About Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'about' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Sobre DevIem
@@ -682,7 +711,7 @@ function App() {
 
       {/* Projects Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'projects' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Projetos Desenvolvidos
@@ -725,9 +754,229 @@ function App() {
         </section>
       )}
 
+      {/* Blog Section - NOVA SEÇÃO */}
+      {activeSection === 'blog' && (
+        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
+          <div className="container mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+              Blog
+            </h2>
+            
+            <div className="max-w-4xl mx-auto">
+              {/* Artigos do Blog */}
+              <div className="space-y-8">
+                {/* Artigo 1 */}
+                <div className="blog-card rounded-xl p-6 card-hover">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-1/3">
+                      <img 
+                        src="https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg?auto=compress&cs=tinysrgb&w=800" 
+                        alt="Inteligência Artificial" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="md:w-2/3 space-y-4">
+                      <div className="flex items-center space-x-2 text-orange-400 text-sm">
+                        <span>Inteligência Artificial</span>
+                        <span>•</span>
+                        <span>12 Jan 2025</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-orange-400">O Futuro da IA Generativa em 2025</h3>
+                      <p className="text-gray-300 text-sm">
+                        Explorando os avanços mais recentes em modelos de linguagem e como eles estão transformando 
+                        o desenvolvimento de software, design e criação de conteúdo.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #IA
+                        </span>
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #MachineLearning
+                        </span>
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #Futuro
+                        </span>
+                      </div>
+                      <button className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center">
+                        Ler artigo completo
+                        <ChevronDown className="w-4 h-4 ml-1 rotate-270" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Artigo 2 */}
+                <div className="blog-card rounded-xl p-6 card-hover">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-1/3">
+                      <img 
+                        src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800" 
+                        alt="Cybersecurity" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="md:w-2/3 space-y-4">
+                      <div className="flex items-center space-x-2 text-orange-400 text-sm">
+                        <span>Cybersecurity</span>
+                        <span>•</span>
+                        <span>5 Jan 2025</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-orange-400">Protegendo Infraestruturas Críticas</h3>
+                      <p className="text-gray-300 text-sm">
+                        Como as técnicas modernas de ethical hacking estão sendo usadas para identificar vulnerabilidades 
+                        em sistemas governamentais e empresariais antes que hackers maliciosos as explorem.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #Cybersecurity
+                        </span>
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #EthicalHacking
+                        </span>
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #Segurança
+                        </span>
+                      </div>
+                      <button className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center">
+                        Ler artigo completo
+                        <ChevronDown className="w-4 h-4 ml-1 rotate-270" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Artigo 3 */}
+                <div className="blog-card rounded-xl p-6 card-hover">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-1/3">
+                      <img 
+                        src="https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800" 
+                        alt="Transição de Carreira" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="md:w-2/3 space-y-4">
+                      <div className="flex items-center space-x-2 text-orange-400 text-sm">
+                        <span>Carreira</span>
+                        <span>•</span>
+                        <span>28 Dez 2024</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-orange-400">Transição para Tech em 6 Meses</h3>
+                      <p className="text-gray-300 text-sm">
+                        Um guia passo a passo para profissionais que desejam migrar para a área de tecnologia, 
+                        com foco em desenvolvimento de software e estratégias práticas para aprendizado acelerado.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #Carreira
+                        </span>
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #Desenvolvimento
+                        </span>
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          #Mentoria
+                        </span>
+                      </div>
+                      <button className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center">
+                        Ler artigo completo
+                        <ChevronDown className="w-4 h-4 ml-1 rotate-270" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Categorias e Tags */}
+              <div className="mt-12 grid md:grid-cols-2 gap-6">
+                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
+                  <h3 className="text-lg font-bold text-cyan-400 mb-4">Categorias</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Inteligência Artificial</span>
+                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">8</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Cybersecurity</span>
+                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">6</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Desenvolvimento</span>
+                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">12</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Carreira</span>
+                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">5</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Tutoriais</span>
+                      <span className="bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded-full text-xs">9</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
+                  <h3 className="text-lg font-bold text-purple-400 mb-4">Tags Populares</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #IA
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #MachineLearning
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #Cybersecurity
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #EthicalHacking
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #React
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #JavaScript
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #Python
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #Carreira
+                    </span>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                      #Mentoria
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Newsletter */}
+              <div className="mt-12 bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="md:w-2/3">
+                    <h3 className="text-lg font-bold text-cyan-400 mb-2">Inscreva-se na Newsletter</h3>
+                    <p className="text-gray-300 text-sm">
+                      Receba artigos, tutoriais e dicas exclusivas diretamente no seu email.
+                    </p>
+                  </div>
+                  <div className="md:w-1/3 flex">
+                    <input 
+                      type="email" 
+                      placeholder="Seu email" 
+                      className="flex-1 p-3 bg-black border border-gray-600 rounded-l-lg text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+                    />
+                    <button className="px-4 py-3 bg-cyan-500/20 border-y border-r border-cyan-400 text-cyan-400 rounded-r-lg hover:bg-cyan-500/30 transition-all duration-300">
+                      Inscrever
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Testimonials Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'testimonials' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Depoimentos
@@ -778,7 +1027,7 @@ function App() {
 
       {/* Talks Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'talks' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Palestras & Eventos
@@ -828,9 +1077,9 @@ function App() {
         </section>
       )}
 
-      {/* Classes Section - RESPONSIVIDADE MELHORADA */}
+      {/* Classes Section - RESPONSIVIDADE MELHORADA E EDITÁVEL */}
       {activeSection === 'classes' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 pb-16 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Aulas Particulares
@@ -885,6 +1134,106 @@ function App() {
                 </div>
               </div>
 
+              {/* Planos de Aula */}
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                {/* Plano Básico */}
+                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30 flex flex-col">
+                  <h4 className="text-lg font-bold text-cyan-400 mb-2">Plano Básico</h4>
+                  <div className="text-3xl font-bold text-white mb-4">R$ 120<span className="text-sm font-normal text-gray-400">/hora</span></div>
+                  <ul className="space-y-2 text-gray-300 text-sm flex-grow mb-6">
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>4 horas mensais</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Suporte por email</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Material didático</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-red-400 mr-2">✗</div>
+                      <span className="text-gray-500">Projetos práticos</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-red-400 mr-2">✗</div>
+                      <span className="text-gray-500">Mentoria de carreira</span>
+                    </li>
+                  </ul>
+                  <button className="w-full px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300">
+                    Selecionar Plano
+                  </button>
+                </div>
+
+                {/* Plano Intermediário */}
+                <div className="bg-gray-900/50 p-6 rounded-lg border-2 border-purple-400 flex flex-col relative">
+                  <div className="absolute -top-3 right-4 bg-purple-400 text-black px-3 py-1 text-xs font-bold rounded-full">
+                    POPULAR
+                  </div>
+                  <h4 className="text-lg font-bold text-purple-400 mb-2">Plano Intermediário</h4>
+                  <div className="text-3xl font-bold text-white mb-4">R$ 100<span className="text-sm font-normal text-gray-400">/hora</span></div>
+                  <ul className="space-y-2 text-gray-300 text-sm flex-grow mb-6">
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>8 horas mensais</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Suporte por WhatsApp</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Material didático</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Projetos práticos</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-red-400 mr-2">✗</div>
+                      <span className="text-gray-500">Mentoria de carreira</span>
+                    </li>
+                  </ul>
+                  <button className="w-full px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300">
+                    Selecionar Plano
+                  </button>
+                </div>
+
+                {/* Plano Avançado */}
+                <div className="bg-gray-900/50 p-6 rounded-lg border border-green-500/30 flex flex-col">
+                  <h4 className="text-lg font-bold text-green-400 mb-2">Plano Avançado</h4>
+                  <div className="text-3xl font-bold text-white mb-4">R$ 90<span className="text-sm font-normal text-gray-400">/hora</span></div>
+                  <ul className="space-y-2 text-gray-300 text-sm flex-grow mb-6">
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>12 horas mensais</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Suporte prioritário</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Material didático</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Projetos práticos</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="text-green-400 mr-2">✓</div>
+                      <span>Mentoria de carreira</span>
+                    </li>
+                  </ul>
+                  <button className="w-full px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300">
+                    Selecionar Plano
+                  </button>
+                </div>
+              </div>
+
+              {/* CTA */}
               <div className="text-center">
                 <button className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow">
                   <MessageSquare className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />

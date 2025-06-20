@@ -87,7 +87,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           {sections.map((section, index) => (
             <button
               key={section.id}
-              onClick={() => onSectionChange(section.id)}
+              onClick={() => {
+                onSectionChange(section.id);
+                setIsOpen(false); // Fechar menu ao clicar em um item
+              }}
               className={`w-full flex items-center space-x-3 px-4 py-4 rounded-lg transition-all duration-300 text-left ${
                 activeSection === section.id
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400 shadow-cyan-glow'
