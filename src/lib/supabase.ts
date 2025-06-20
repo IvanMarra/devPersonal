@@ -23,70 +23,24 @@ if (!isProduction) {
   });
 }
 
-// Create a mock client when environment variables are missing
-const createMockClient = () => ({
-  from: () => ({
-    select: () => ({ 
-      order: () => Promise.resolve({ 
-        data: null, 
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-      }),
-      single: () => Promise.resolve({ 
-        data: null, 
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-      }),
-      limit: () => Promise.resolve({ 
-        data: null, 
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-      })
-    }),
-    insert: () => ({ 
-      select: () => ({ 
-        single: () => Promise.resolve({ 
-          data: null, 
-          error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-        }) 
-      }) 
-    }),
-    update: () => ({ 
-      eq: () => ({ 
-        select: () => ({ 
-          single: () => Promise.resolve({ 
-            data: null, 
-            error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-          }) 
-        }) 
-      }) 
-    }),
-    delete: () => ({ 
-      eq: () => Promise.resolve({ 
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-      }) 
-    })
-  }),
-  storage: {
-    from: () => ({
-      upload: () => Promise.resolve({ 
-        data: null, 
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.') 
-      }),
-      getPublicUrl: () => ({ 
-        data: { publicUrl: '' } 
-      }),
-      listBuckets: () => Promise.resolve({
-        data: null,
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.')
-      }),
-      remove: () => Promise.resolve({
-        error: new Error('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.')
-      })
-    })
-  }
-});
-
+// Criar cliente Supabase com configurações otimizadas
 export const supabase = hasSupabaseConfig 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : createMockClient();
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false, // Não persistir sessão para operações anônimas
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      },
+      global: {
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        }
+      }
+    })
+  : null;
 
 // Types for our database tables
 export interface Project {
@@ -134,9 +88,13 @@ export interface SiteSettings {
 // Enhanced error handling wrapper
 const withErrorHandling = async <T>(operation: () => Promise<T>, fallbackValue: T | null = null): Promise<T | null> => {
   try {
+    if (!supabase) {
+      console.warn('⚠️ Supabase não configurado, retornando fallback');
+      return fallbackValue;
+    }
     return await operation();
   } catch (error) {
-    console.warn('Supabase operation failed:', error);
+    console.warn('⚠️ Operação Supabase falhou:', error);
     return fallbackValue;
   }
 };
@@ -145,54 +103,89 @@ const withErrorHandling = async <T>(operation: () => Promise<T>, fallbackValue: 
 export const projectsService = {
   async getAll() {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('🔍 Buscando projetos do Supabase...');
+      const { data, error } = await supabase!
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.warn('Erro ao buscar projetos do Supabase:', error.message);
-        return null;
+        console.error('❌ Erro ao buscar projetos:', error);
+        throw error;
       }
-      return data;
-    }, null);
+      
+      console.log('✅ Projetos encontrados:', data?.length || 0);
+      return data || [];
+    }, []);
   },
 
   async create(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('➕ Criando projeto no Supabase:', project.title);
+      
+      const { data, error } = await supabase!
         .from('projects')
-        .insert([project])
+        .insert([{
+          title: project.title,
+          description: project.description,
+          tech: project.tech,
+          image_url: project.image_url
+        }])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao criar projeto:', error);
+        throw error;
+      }
+      
+      console.log('✅ Projeto criado com sucesso:', data);
       return data;
     });
   },
 
   async update(id: number, project: Partial<Project>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('📝 Atualizando projeto no Supabase:', id);
+      
+      const updateData: any = {};
+      if (project.title !== undefined) updateData.title = project.title;
+      if (project.description !== undefined) updateData.description = project.description;
+      if (project.tech !== undefined) updateData.tech = project.tech;
+      if (project.image_url !== undefined) updateData.image_url = project.image_url;
+      
+      const { data, error } = await supabase!
         .from('projects')
-        .update(project)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao atualizar projeto:', error);
+        throw error;
+      }
+      
+      console.log('✅ Projeto atualizado com sucesso:', data);
       return data;
     });
   },
 
   async delete(id: number) {
     return withErrorHandling(async () => {
-      const { error } = await supabase
+      console.log('🗑️ Deletando projeto no Supabase:', id);
+      
+      const { error } = await supabase!
         .from('projects')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao deletar projeto:', error);
+        throw error;
+      }
+      
+      console.log('✅ Projeto deletado com sucesso');
       return true;
     });
   }
@@ -201,54 +194,89 @@ export const projectsService = {
 export const testimonialsService = {
   async getAll() {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('🔍 Buscando depoimentos do Supabase...');
+      const { data, error } = await supabase!
         .from('testimonials')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.warn('Erro ao buscar depoimentos do Supabase:', error.message);
-        return null;
+        console.error('❌ Erro ao buscar depoimentos:', error);
+        throw error;
       }
-      return data;
-    }, null);
+      
+      console.log('✅ Depoimentos encontrados:', data?.length || 0);
+      return data || [];
+    }, []);
   },
 
   async create(testimonial: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('➕ Criando depoimento no Supabase:', testimonial.name);
+      
+      const { data, error } = await supabase!
         .from('testimonials')
-        .insert([testimonial])
+        .insert([{
+          name: testimonial.name,
+          role: testimonial.role,
+          text: testimonial.text,
+          avatar_url: testimonial.avatar_url
+        }])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao criar depoimento:', error);
+        throw error;
+      }
+      
+      console.log('✅ Depoimento criado com sucesso:', data);
       return data;
     });
   },
 
   async update(id: number, testimonial: Partial<Testimonial>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('📝 Atualizando depoimento no Supabase:', id);
+      
+      const updateData: any = {};
+      if (testimonial.name !== undefined) updateData.name = testimonial.name;
+      if (testimonial.role !== undefined) updateData.role = testimonial.role;
+      if (testimonial.text !== undefined) updateData.text = testimonial.text;
+      if (testimonial.avatar_url !== undefined) updateData.avatar_url = testimonial.avatar_url;
+      
+      const { data, error } = await supabase!
         .from('testimonials')
-        .update(testimonial)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao atualizar depoimento:', error);
+        throw error;
+      }
+      
+      console.log('✅ Depoimento atualizado com sucesso:', data);
       return data;
     });
   },
 
   async delete(id: number) {
     return withErrorHandling(async () => {
-      const { error } = await supabase
+      console.log('🗑️ Deletando depoimento no Supabase:', id);
+      
+      const { error } = await supabase!
         .from('testimonials')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao deletar depoimento:', error);
+        throw error;
+      }
+      
+      console.log('✅ Depoimento deletado com sucesso');
       return true;
     });
   }
@@ -257,54 +285,89 @@ export const testimonialsService = {
 export const talksService = {
   async getAll() {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('🔍 Buscando palestras do Supabase...');
+      const { data, error } = await supabase!
         .from('talks')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.warn('Erro ao buscar palestras do Supabase:', error.message);
-        return null;
+        console.error('❌ Erro ao buscar palestras:', error);
+        throw error;
       }
-      return data;
-    }, null);
+      
+      console.log('✅ Palestras encontradas:', data?.length || 0);
+      return data || [];
+    }, []);
   },
 
   async create(talk: Omit<Talk, 'id' | 'created_at' | 'updated_at'>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('➕ Criando palestra no Supabase:', talk.title);
+      
+      const { data, error } = await supabase!
         .from('talks')
-        .insert([talk])
+        .insert([{
+          title: talk.title,
+          description: talk.description,
+          tags: talk.tags,
+          image_url: talk.image_url
+        }])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao criar palestra:', error);
+        throw error;
+      }
+      
+      console.log('✅ Palestra criada com sucesso:', data);
       return data;
     });
   },
 
   async update(id: number, talk: Partial<Talk>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('📝 Atualizando palestra no Supabase:', id);
+      
+      const updateData: any = {};
+      if (talk.title !== undefined) updateData.title = talk.title;
+      if (talk.description !== undefined) updateData.description = talk.description;
+      if (talk.tags !== undefined) updateData.tags = talk.tags;
+      if (talk.image_url !== undefined) updateData.image_url = talk.image_url;
+      
+      const { data, error } = await supabase!
         .from('talks')
-        .update(talk)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao atualizar palestra:', error);
+        throw error;
+      }
+      
+      console.log('✅ Palestra atualizada com sucesso:', data);
       return data;
     });
   },
 
   async delete(id: number) {
     return withErrorHandling(async () => {
-      const { error } = await supabase
+      console.log('🗑️ Deletando palestra no Supabase:', id);
+      
+      const { error } = await supabase!
         .from('talks')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao deletar palestra:', error);
+        throw error;
+      }
+      
+      console.log('✅ Palestra deletada com sucesso');
       return true;
     });
   }
@@ -313,30 +376,49 @@ export const talksService = {
 export const settingsService = {
   async get() {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('🔍 Buscando configurações do Supabase...');
+      const { data, error } = await supabase!
         .from('site_settings')
         .select('*')
         .eq('id', 1)
         .single();
       
       if (error) {
-        console.warn('Erro ao buscar configurações do Supabase:', error.message);
-        return null;
+        console.error('❌ Erro ao buscar configurações:', error);
+        throw error;
       }
+      
+      console.log('✅ Configurações encontradas:', !!data);
       return data;
     }, null);
   },
 
   async update(settings: Partial<SiteSettings>) {
     return withErrorHandling(async () => {
-      const { data, error } = await supabase
+      console.log('📝 Atualizando configurações no Supabase');
+      
+      const updateData: any = {};
+      if (settings.site_title !== undefined) updateData.site_title = settings.site_title;
+      if (settings.site_description !== undefined) updateData.site_description = settings.site_description;
+      if (settings.hero_title !== undefined) updateData.hero_title = settings.hero_title;
+      if (settings.hero_subtitle !== undefined) updateData.hero_subtitle = settings.hero_subtitle;
+      if (settings.about_text !== undefined) updateData.about_text = settings.about_text;
+      if (settings.skills !== undefined) updateData.skills = settings.skills;
+      if (settings.profile_image_url !== undefined) updateData.profile_image_url = settings.profile_image_url;
+      
+      const { data, error } = await supabase!
         .from('site_settings')
-        .update(settings)
+        .update(updateData)
         .eq('id', 1)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao atualizar configurações:', error);
+        throw error;
+      }
+      
+      console.log('✅ Configurações atualizadas com sucesso:', data);
       return data;
     });
   }
@@ -349,19 +431,23 @@ export const storageService = {
       const fileExt = file.name.split('.').pop();
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-      const { data, error } = await supabase.storage
+      const { data, error } = await supabase!.storage
         .from('deviem-images')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao fazer upload:', error);
+        throw error;
+      }
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = supabase!.storage
         .from('deviem-images')
         .getPublicUrl(fileName);
 
+      console.log('✅ Upload realizado com sucesso:', publicUrl);
       return publicUrl;
     });
   },
@@ -374,11 +460,16 @@ export const storageService = {
       const folder = urlParts[urlParts.length - 2];
       const filePath = `${folder}/${fileName}`;
 
-      const { error } = await supabase.storage
+      const { error } = await supabase!.storage
         .from('deviem-images')
         .remove([filePath]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao deletar imagem:', error);
+        throw error;
+      }
+      
+      console.log('✅ Imagem deletada com sucesso');
       return true;
     });
   }
@@ -386,7 +477,7 @@ export const storageService = {
 
 // Utility function to check if Supabase is configured
 export const isSupabaseConfigured = () => {
-  return hasSupabaseConfig;
+  return hasSupabaseConfig && !!supabase;
 };
 
 // Function to get environment info
@@ -401,11 +492,13 @@ export const getEnvironmentInfo = () => {
 
 // Test connection function with timeout
 export const testSupabaseConnection = async (timeoutMs: number = 5000): Promise<{ success: boolean; error?: string }> => {
-  if (!hasSupabaseConfig) {
+  if (!hasSupabaseConfig || !supabase) {
     return { success: false, error: 'Supabase não configurado' };
   }
 
   try {
+    console.log('🔍 Testando conexão com Supabase...');
+    
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -417,9 +510,11 @@ export const testSupabaseConnection = async (timeoutMs: number = 5000): Promise<
     clearTimeout(timeoutId);
 
     if (error) {
+      console.error('❌ Erro na conexão:', error);
       return { success: false, error: error.message };
     }
 
+    console.log('✅ Conexão com Supabase bem-sucedida');
     return { success: true };
   } catch (error) {
     if (error instanceof Error) {

@@ -10,7 +10,7 @@ import {
   SiteSettings,
   isSupabaseConfigured
 } from '../lib/supabase';
-import { isLocalMode, getMockData } from '../lib/localConfig';
+import { getMockData } from '../lib/localConfig';
 
 // Sistema de eventos globais para sincronização FORÇADA
 class DataSyncManager {
@@ -53,15 +53,13 @@ const useForceUpdate = () => {
 // Função para determinar se deve usar dados reais ou mock
 const shouldUseRealData = () => {
   const isConfigured = isSupabaseConfigured();
-  const isLocal = isLocalMode();
   
   console.log('🔍 Verificando fonte de dados:', {
     isSupabaseConfigured: isConfigured,
-    isLocalMode: isLocal,
-    decision: isConfigured && !isLocal ? 'REAL' : 'MOCK'
+    decision: isConfigured ? 'SUPABASE' : 'MOCK'
   });
   
-  return isConfigured && !isLocal;
+  return isConfigured;
 };
 
 export const useProjects = () => {
@@ -89,13 +87,12 @@ export const useProjects = () => {
       console.log('🌐 Buscando projetos do Supabase...');
       
       const data = await projectsService.getAll();
-      console.log('✅ Projetos carregados do Supabase:', data?.length || 0);
       
       if (data && data.length > 0) {
         setProjects(data);
         console.log('📊 Projetos atualizados no estado:', data.length);
       } else {
-        console.log('⚠️ Nenhum projeto encontrado no Supabase, usando dados mock');
+        console.log('⚠️ Nenhum projeto encontrado, usando dados mock');
         const mockData = getMockData();
         setProjects(mockData.projects);
       }
@@ -149,6 +146,8 @@ export const useProjects = () => {
         await fetchProjects(true);
         dataSyncManager.notify();
         return newProject;
+      } else {
+        throw new Error('Falha ao criar projeto no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao adicionar projeto:', err);
@@ -180,6 +179,8 @@ export const useProjects = () => {
         await fetchProjects(true);
         dataSyncManager.notify();
         return updatedProject;
+      } else {
+        throw new Error('Falha ao atualizar projeto no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar projeto:', err);
@@ -250,13 +251,12 @@ export const useTestimonials = () => {
       console.log('🌐 Buscando depoimentos do Supabase...');
       
       const data = await testimonialsService.getAll();
-      console.log('✅ Depoimentos carregados do Supabase:', data?.length || 0);
       
       if (data && data.length > 0) {
         setTestimonials(data);
         console.log('📊 Depoimentos atualizados no estado:', data.length);
       } else {
-        console.log('⚠️ Nenhum depoimento encontrado no Supabase, usando dados mock');
+        console.log('⚠️ Nenhum depoimento encontrado, usando dados mock');
         const mockData = getMockData();
         setTestimonials(mockData.testimonials);
       }
@@ -307,6 +307,8 @@ export const useTestimonials = () => {
         await fetchTestimonials(true);
         dataSyncManager.notify();
         return newTestimonial;
+      } else {
+        throw new Error('Falha ao criar depoimento no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao adicionar depoimento:', err);
@@ -337,6 +339,8 @@ export const useTestimonials = () => {
         await fetchTestimonials(true);
         dataSyncManager.notify();
         return updatedTestimonial;
+      } else {
+        throw new Error('Falha ao atualizar depoimento no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar depoimento:', err);
@@ -406,13 +410,12 @@ export const useTalks = () => {
       console.log('🌐 Buscando palestras do Supabase...');
       
       const data = await talksService.getAll();
-      console.log('✅ Palestras carregadas do Supabase:', data?.length || 0);
       
       if (data && data.length > 0) {
         setTalks(data);
         console.log('📊 Palestras atualizadas no estado:', data.length);
       } else {
-        console.log('⚠️ Nenhuma palestra encontrada no Supabase, usando dados mock');
+        console.log('⚠️ Nenhuma palestra encontrada, usando dados mock');
         const mockData = getMockData();
         setTalks(mockData.talks);
       }
@@ -463,6 +466,8 @@ export const useTalks = () => {
         await fetchTalks(true);
         dataSyncManager.notify();
         return newTalk;
+      } else {
+        throw new Error('Falha ao criar palestra no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao adicionar palestra:', err);
@@ -493,6 +498,8 @@ export const useTalks = () => {
         await fetchTalks(true);
         dataSyncManager.notify();
         return updatedTalk;
+      } else {
+        throw new Error('Falha ao atualizar palestra no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar palestra:', err);
@@ -562,13 +569,12 @@ export const useSiteSettings = () => {
       console.log('🌐 Buscando configurações do Supabase...');
       
       const data = await settingsService.get();
-      console.log('✅ Configurações carregadas do Supabase:', data ? 'Sim' : 'Não');
       
       if (data) {
         setSettings(data);
         console.log('📊 Configurações atualizadas no estado');
       } else {
-        console.log('⚠️ Nenhuma configuração encontrada no Supabase, usando dados mock');
+        console.log('⚠️ Nenhuma configuração encontrada, usando dados mock');
         const mockData = getMockData();
         setSettings(mockData.settings);
       }
@@ -615,6 +621,8 @@ export const useSiteSettings = () => {
         await fetchSettings(true);
         dataSyncManager.notify();
         return updatedSettings;
+      } else {
+        throw new Error('Falha ao atualizar configurações no Supabase');
       }
     } catch (err) {
       console.error('❌ Erro ao atualizar configurações:', err);

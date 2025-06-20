@@ -352,83 +352,86 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-gray-900 border-r border-cyan-500/30 p-6 overflow-y-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-bold text-cyan-400">Admin Panel</h2>
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col lg:flex-row">
+      {/* Sidebar - RESPONSIVO */}
+      <div className="w-full lg:w-64 bg-gray-900 border-b lg:border-b-0 lg:border-r border-cyan-500/30 p-4 lg:p-6 overflow-y-auto">
+        <div className="flex items-center justify-between mb-6 lg:mb-8">
+          <h2 className="text-lg lg:text-xl font-bold text-cyan-400">Admin Panel</h2>
           <div className="flex items-center space-x-2">
             <NotificationSystem />
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white lg:hidden"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        <nav className="space-y-2">
+        {/* Navigation - RESPONSIVO */}
+        <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+              className={`w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-2 lg:px-4 py-2 lg:py-3 rounded-lg transition-all duration-300 text-sm lg:text-base ${
                 activeTab === tab.id
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400'
                   : 'text-gray-400 hover:text-cyan-400 hover:bg-gray-800'
               }`}
             >
-              <tab.icon className="w-5 h-5" />
-              <span>{tab.title}</span>
+              <tab.icon className="w-4 lg:w-5 h-4 lg:h-5" />
+              <span className="hidden sm:inline">{tab.title}</span>
             </button>
           ))}
         </nav>
 
-        <div className="mt-8 pt-8 border-t border-gray-700 space-y-3">
+        {/* Action Buttons - RESPONSIVO */}
+        <div className="mt-6 lg:mt-8 pt-6 lg:pt-8 border-t border-gray-700 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-3">
           <button
             onClick={() => setShowAnalyticsSetup(true)}
-            className="w-full px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 flex items-center justify-center"
+            className="px-2 lg:px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
           >
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Google Analytics
+            <TrendingUp className="w-3 lg:w-4 h-3 lg:h-4 mr-1 lg:mr-2" />
+            <span className="hidden sm:inline">Analytics</span>
           </button>
           <button
             onClick={() => setShowUserManagement(true)}
-            className="w-full px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300 flex items-center justify-center"
+            className="px-2 lg:px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
           >
-            <UserCog className="w-4 h-4 mr-2" />
-            Usuários
+            <UserCog className="w-3 lg:w-4 h-3 lg:h-4 mr-1 lg:mr-2" />
+            <span className="hidden sm:inline">Usuários</span>
           </button>
           <button
             onClick={onBackToFrontend}
-            className="w-full px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 flex items-center justify-center"
+            className="px-2 lg:px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
           >
-            <Eye className="w-4 h-4 mr-2" />
-            Ver Site
+            <Eye className="w-3 lg:w-4 h-3 lg:h-4 mr-1 lg:mr-2" />
+            <span className="hidden sm:inline">Ver Site</span>
           </button>
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300"
+            className="px-2 lg:px-4 py-2 bg-red-500/20 border border-red-400 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-300 flex items-center justify-center text-xs lg:text-sm"
           >
-            Sair
+            <span className="hidden sm:inline">Sair</span>
+            <span className="sm:hidden">🚪</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      {/* Main Content - RESPONSIVO */}
+      <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
         {/* Success Message */}
         {successMessage && (
-          <div className="fixed top-4 right-4 bg-green-500/20 border border-green-400 text-green-400 px-6 py-3 rounded-lg flex items-center z-60">
+          <div className="fixed top-4 right-4 bg-green-500/20 border border-green-400 text-green-400 px-4 lg:px-6 py-2 lg:py-3 rounded-lg flex items-center z-60 text-sm lg:text-base">
             {successMessage}
           </div>
         )}
 
         {/* Loading Indicator */}
         {(loading || projectsLoading || testimonialsLoading || talksLoading || settingsLoading) && (
-          <div className="fixed top-4 right-4 bg-cyan-500/20 border border-cyan-400 text-cyan-400 px-4 py-2 rounded-lg flex items-center z-60">
-            <Loader className="w-4 h-4 mr-2 animate-spin" />
+          <div className="fixed top-4 right-4 bg-cyan-500/20 border border-cyan-400 text-cyan-400 px-3 lg:px-4 py-2 rounded-lg flex items-center z-60 text-sm">
+            <Loader className="w-3 lg:w-4 h-3 lg:h-4 mr-2 animate-spin" />
             Processando...
           </div>
         )}
@@ -436,31 +439,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         {activeTab === 'dashboard' && <AdminDashboard />}
 
         {activeTab === 'projects' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-cyan-400">Gerenciar Projetos</h2>
+          <div className="space-y-4 lg:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Gerenciar Projetos</h2>
               <div className="text-sm text-gray-400">
                 Total: {projects.length} projetos
               </div>
             </div>
             
-            {/* Adicionar novo projeto */}
-            <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-              <h3 className="text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Projeto</h3>
-              <div className="grid md:grid-cols-2 gap-4">
+            {/* Adicionar novo projeto - RESPONSIVO */}
+            <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
+              <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Projeto</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Título do projeto"
                   value={newProject.title}
                   onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
                 />
                 <input
                   type="text"
                   placeholder="Tecnologias (separadas por vírgula)"
                   value={newProject.tech}
                   onChange={(e) => setNewProject({ ...newProject, tech: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
                 />
               </div>
               <textarea
@@ -468,7 +471,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                 rows={3}
                 value={newProject.description}
                 onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4 text-sm lg:text-base"
               />
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -483,25 +486,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               <button
                 onClick={handleAddProject}
                 disabled={loading}
-                className="mt-4 px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50"
+                className="mt-4 px-4 lg:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
               >
-                <Plus className="w-4 h-4 inline mr-2" />
+                <Plus className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                 Adicionar Projeto
               </button>
             </div>
 
-            {/* Lista de projetos */}
+            {/* Lista de projetos - RESPONSIVO */}
             <div className="space-y-4">
               {projects.map((project) => (
-                <div key={project.id} className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
+                <div key={project.id} className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-purple-500/30">
                   {editingProject?.id === project.id ? (
                     <div className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input
                           type="text"
                           value={editingProject.title}
                           onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white"
+                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                         />
                         <input
                           type="text"
@@ -510,14 +513,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                             ...editingProject, 
                             tech: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
                           })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white"
+                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                         />
                       </div>
                       <textarea
                         value={editingProject.description}
                         onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
                         rows={3}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -529,40 +532,40 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           folder="projects"
                         />
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                         <button
                           onClick={handleUpdateProject}
                           disabled={loading}
-                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50"
+                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
                         >
-                          <Save className="w-4 h-4 inline mr-2" />
+                          <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                           Salvar
                         </button>
                         <button
                           onClick={() => setEditingProject(null)}
-                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300"
+                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
                         >
                           Cancelar
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                       <div className="flex-1">
-                        <div className="flex items-start space-x-4">
+                        <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                           {project.image_url && (
                             <img
                               src={project.image_url}
                               alt={project.title}
-                              className="w-20 h-20 object-cover rounded-lg"
+                              className="w-full sm:w-20 h-40 sm:h-20 object-cover rounded-lg"
                             />
                           )}
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-purple-400">{project.title}</h4>
-                            <p className="text-gray-300 mt-2">{project.description}</p>
+                            <h4 className="text-base lg:text-lg font-semibold text-purple-400">{project.title}</h4>
+                            <p className="text-gray-300 mt-2 text-sm lg:text-base">{project.description}</p>
                             <div className="flex flex-wrap gap-2 mt-3">
                               {(Array.isArray(project.tech) ? project.tech : []).map((tech, index) => (
-                                <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-sm">
+                                <span key={index} className="px-2 lg:px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs lg:text-sm">
                                   {tech}
                                 </span>
                               ))}
@@ -570,19 +573,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           </div>
                         </div>
                       </div>
-                      <div className="flex space-x-2 ml-4">
+                      <div className="flex space-x-2">
                         <button 
                           onClick={() => setEditingProject(project)}
                           className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3 lg:w-4 h-3 lg:h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteProject(project.id)}
                           disabled={loading}
                           className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 lg:w-4 h-3 lg:h-4" />
                         </button>
                       </div>
                     </div>
@@ -594,31 +597,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         )}
 
         {activeTab === 'testimonials' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-cyan-400">Gerenciar Depoimentos</h2>
+          <div className="space-y-4 lg:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Gerenciar Depoimentos</h2>
               <div className="text-sm text-gray-400">
                 Total: {testimonials.length} depoimentos
               </div>
             </div>
             
-            {/* Adicionar novo depoimento */}
-            <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-              <h3 className="text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Depoimento</h3>
-              <div className="grid md:grid-cols-2 gap-4">
+            {/* Adicionar novo depoimento - RESPONSIVO */}
+            <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
+              <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Adicionar Novo Depoimento</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Nome do cliente"
                   value={newTestimonial.name}
                   onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
                 />
                 <input
                   type="text"
                   placeholder="Cargo/Empresa"
                   value={newTestimonial.role}
                   onChange={(e) => setNewTestimonial({ ...newTestimonial, role: e.target.value })}
-                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400"
+                  className="p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm lg:text-base"
                 />
               </div>
               <textarea
@@ -626,7 +629,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                 rows={3}
                 value={newTestimonial.text}
                 onChange={(e) => setNewTestimonial({ ...newTestimonial, text: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mt-4 text-sm lg:text-base"
               />
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -641,38 +644,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               <button
                 onClick={handleAddTestimonial}
                 disabled={loading}
-                className="mt-4 px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50"
+                className="mt-4 px-4 lg:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
               >
-                <Plus className="w-4 h-4 inline mr-2" />
+                <Plus className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                 Adicionar Depoimento
               </button>
             </div>
 
-            {/* Lista de depoimentos */}
+            {/* Lista de depoimentos - RESPONSIVO */}
             <div className="space-y-4">
               {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
+                <div key={testimonial.id} className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-purple-500/30">
                   {editingTestimonial?.id === testimonial.id ? (
                     <div className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input
                           type="text"
                           value={editingTestimonial.name}
                           onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white"
+                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                         />
                         <input
                           type="text"
                           value={editingTestimonial.role}
                           onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
-                          className="p-3 bg-black border border-gray-600 rounded-lg text-white"
+                          className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                         />
                       </div>
                       <textarea
                         value={editingTestimonial.text}
                         onChange={(e) => setEditingTestimonial({ ...editingTestimonial, text: e.target.value })}
                         rows={3}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -684,54 +687,54 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           folder="avatars"
                         />
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                         <button
                           onClick={handleUpdateTestimonial}
                           disabled={loading}
-                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50"
+                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
                         >
-                          <Save className="w-4 h-4 inline mr-2" />
+                          <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                           Salvar
                         </button>
                         <button
                           onClick={() => setEditingTestimonial(null)}
-                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300"
+                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
                         >
                           Cancelar
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                         {testimonial.avatar_url && (
                           <img
                             src={testimonial.avatar_url}
                             alt={testimonial.name}
-                            className="w-16 h-16 object-cover rounded-full"
+                            className="w-16 h-16 object-cover rounded-full mx-auto sm:mx-0"
                           />
                         )}
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h4 className="text-lg font-semibold text-purple-400">{testimonial.name}</h4>
+                        <div className="flex-1 text-center sm:text-left">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 mb-2">
+                            <h4 className="text-base lg:text-lg font-semibold text-purple-400">{testimonial.name}</h4>
                             <span className="text-gray-400 text-sm">{testimonial.role}</span>
                           </div>
-                          <p className="text-gray-300 italic">"{testimonial.text}"</p>
+                          <p className="text-gray-300 italic text-sm lg:text-base">"{testimonial.text}"</p>
                         </div>
                       </div>
-                      <div className="flex space-x-2 ml-4">
+                      <div className="flex space-x-2 justify-center lg:justify-start">
                         <button 
                           onClick={() => setEditingTestimonial(testimonial)}
                           className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3 lg:w-4 h-3 lg:h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteTestimonial(testimonial.id)}
                           disabled={loading}
                           className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 lg:w-4 h-3 lg:h-4" />
                         </button>
                       </div>
                     </div>
@@ -743,37 +746,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         )}
 
         {activeTab === 'talks' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-cyan-400">Gerenciar Palestras</h2>
+          <div className="space-y-4 lg:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Gerenciar Palestras</h2>
               <div className="text-sm text-gray-400">
                 Total: {talks.length} palestras
               </div>
             </div>
             
-            {/* Adicionar nova palestra */}
-            <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-              <h3 className="text-lg font-semibold text-cyan-400 mb-4">Adicionar Nova Palestra</h3>
+            {/* Adicionar nova palestra - RESPONSIVO */}
+            <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
+              <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Adicionar Nova Palestra</h3>
               <input
                 type="text"
                 placeholder="Título da palestra"
                 value={newTalk.title}
                 onChange={(e) => setNewTalk({ ...newTalk, title: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm lg:text-base"
               />
               <textarea
                 placeholder="Descrição da palestra"
                 rows={3}
                 value={newTalk.description}
                 onChange={(e) => setNewTalk({ ...newTalk, description: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm lg:text-base"
               />
               <input
                 type="text"
                 placeholder="Tags (separadas por vírgula)"
                 value={newTalk.tags}
                 onChange={(e) => setNewTalk({ ...newTalk, tags: e.target.value })}
-                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4"
+                className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white placeholder-gray-400 mb-4 text-sm lg:text-base"
               />
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -788,30 +791,30 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               <button
                 onClick={handleAddTalk}
                 disabled={loading}
-                className="px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50"
+                className="px-4 lg:px-6 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
               >
-                <Plus className="w-4 h-4 inline mr-2" />
+                <Plus className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                 Adicionar Palestra
               </button>
             </div>
 
-            {/* Lista de palestras */}
+            {/* Lista de palestras - RESPONSIVO */}
             <div className="space-y-4">
               {talks.map((talk) => (
-                <div key={talk.id} className="bg-gray-900/50 p-6 rounded-lg border border-purple-500/30">
+                <div key={talk.id} className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-purple-500/30">
                   {editingTalk?.id === talk.id ? (
                     <div className="space-y-4">
                       <input
                         type="text"
                         value={editingTalk.title}
                         onChange={(e) => setEditingTalk({ ...editingTalk, title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                       <textarea
                         value={editingTalk.description}
                         onChange={(e) => setEditingTalk({ ...editingTalk, description: e.target.value })}
                         rows={3}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                       <input
                         type="text"
@@ -820,7 +823,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           ...editingTalk, 
                           tags: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
                         })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -832,58 +835,58 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           folder="talks"
                         />
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                         <button
                           onClick={handleUpdateTalk}
                           disabled={loading}
-                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50"
+                          className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
                         >
-                          <Save className="w-4 h-4 inline mr-2" />
+                          <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                           Salvar
                         </button>
                         <button
                           onClick={() => setEditingTalk(null)}
-                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300"
+                          className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
                         >
                           Cancelar
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                         {talk.image_url && (
                           <img
                             src={talk.image_url}
                             alt={talk.title}
-                            className="w-20 h-20 object-cover rounded-lg"
+                            className="w-full sm:w-20 h-40 sm:h-20 object-cover rounded-lg"
                           />
                         )}
                         <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-purple-400">{talk.title}</h4>
-                          <p className="text-gray-300 mt-2">{talk.description}</p>
+                          <h4 className="text-base lg:text-lg font-semibold text-purple-400">{talk.title}</h4>
+                          <p className="text-gray-300 mt-2 text-sm lg:text-base">{talk.description}</p>
                           <div className="flex flex-wrap gap-2 mt-3">
                             {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, index) => (
-                              <span key={index} className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                              <span key={index} className="px-2 lg:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs lg:text-sm">
                                 {tag}
                               </span>
                             ))}
                           </div>
                         </div>
                       </div>
-                      <div className="flex space-x-2 ml-4">
+                      <div className="flex space-x-2 justify-center lg:justify-start">
                         <button 
                           onClick={() => setEditingTalk(talk)}
                           className="p-2 text-cyan-400 hover:bg-cyan-500/20 rounded"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3 lg:w-4 h-3 lg:h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteTalk(talk.id)}
                           disabled={loading}
                           className="p-2 text-red-400 hover:bg-red-500/20 rounded disabled:opacity-50"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 lg:w-4 h-3 lg:h-4" />
                         </button>
                       </div>
                     </div>
@@ -895,13 +898,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-cyan-400">Configurações do Site</h2>
+          <div className="space-y-4 lg:space-y-6">
+            <h2 className="text-xl lg:text-2xl font-bold text-cyan-400">Configurações do Site</h2>
             
             {editingSettings ? (
-              <div className="space-y-6">
-                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-                  <h3 className="text-lg font-semibold text-cyan-400 mb-4">Editar Configurações</h3>
+              <div className="space-y-4 lg:space-y-6">
+                <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
+                  <h3 className="text-base lg:text-lg font-semibold text-cyan-400 mb-4">Editar Configurações</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -911,7 +914,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         type="text"
                         value={editingSettings.site_title}
                         onChange={(e) => setEditingSettings({ ...editingSettings, site_title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                     </div>
                     <div>
@@ -922,7 +925,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         rows={3}
                         value={editingSettings.site_description}
                         onChange={(e) => setEditingSettings({ ...editingSettings, site_description: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                     </div>
                     <div>
@@ -933,7 +936,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         type="text"
                         value={editingSettings.hero_title}
                         onChange={(e) => setEditingSettings({ ...editingSettings, hero_title: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                     </div>
                     <div>
@@ -944,7 +947,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         type="text"
                         value={editingSettings.hero_subtitle}
                         onChange={(e) => setEditingSettings({ ...editingSettings, hero_subtitle: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                     </div>
                     <div>
@@ -955,7 +958,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         rows={3}
                         value={editingSettings.about_text}
                         onChange={(e) => setEditingSettings({ ...editingSettings, about_text: e.target.value })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                     </div>
                     <div>
@@ -969,7 +972,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           ...editingSettings, 
                           skills: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)
                         })}
-                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
+                        className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm lg:text-base"
                       />
                     </div>
                     <div>
@@ -983,18 +986,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       />
                     </div>
                   </div>
-                  <div className="flex space-x-2 mt-6">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-6">
                     <button
                       onClick={handleUpdateSettings}
                       disabled={loading}
-                      className="px-6 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50"
+                      className="px-4 lg:px-6 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm lg:text-base"
                     >
-                      <Save className="w-4 h-4 inline mr-2" />
+                      <Save className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                       Salvar Configurações
                     </button>
                     <button
                       onClick={() => setEditingSettings(null)}
-                      className="px-6 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300"
+                      className="px-4 lg:px-6 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm lg:text-base"
                     >
                       Cancelar
                     </button>
@@ -1002,19 +1005,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-cyan-400">Configurações Atuais</h3>
+              <div className="bg-gray-900/50 p-4 lg:p-6 rounded-lg border border-cyan-500/30">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+                  <h3 className="text-base lg:text-lg font-semibold text-cyan-400">Configurações Atuais</h3>
                   <button
                     onClick={() => setEditingSettings(settings)}
-                    className="px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300"
+                    className="px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 text-sm lg:text-base"
                   >
-                    <Edit className="w-4 h-4 inline mr-2" />
+                    <Edit className="w-3 lg:w-4 h-3 lg:h-4 inline mr-2" />
                     Editar
                   </button>
                 </div>
                 {settings && (
-                  <div className="space-y-4 text-gray-300">
+                  <div className="space-y-4 text-gray-300 text-sm lg:text-base">
                     <div>
                       <strong className="text-cyan-400">Título:</strong> {settings.site_title}
                     </div>
@@ -1037,7 +1040,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           <img
                             src={settings.profile_image_url}
                             alt="Profile"
-                            className="w-16 h-16 object-cover rounded-full"
+                            className="w-12 lg:w-16 h-12 lg:h-16 object-cover rounded-full"
                           />
                           <span className="text-green-400">✅ Configurada</span>
                         </div>
@@ -1049,7 +1052,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       <strong className="text-cyan-400">Habilidades:</strong>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {(Array.isArray(settings.skills) ? settings.skills : []).map((skill, index) => (
-                          <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
+                          <span key={index} className="px-2 lg:px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs lg:text-sm">
                             {skill}
                           </span>
                         ))}
