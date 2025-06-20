@@ -73,6 +73,47 @@ export interface SiteSettings {
   about_text: string;
   skills: string[];
   profile_image_url?: string;
+  class_link?: string;
+  updated_at?: string;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  image_url?: string;
+  tags: string[];
+  category: string;
+  published_at: string;
+  author: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ClassPlan {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  duration: string;
+  features: string[];
+  image_url?: string;
+  is_featured: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ClassSettings {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  cta_text: string;
+  cta_link: string;
+  methodology: string[];
+  areas: string[];
   updated_at?: string;
 }
 
@@ -513,6 +554,7 @@ export const settingsService = {
       if (settings.about_text !== undefined) updateData.about_text = settings.about_text;
       if (settings.skills !== undefined) updateData.skills = settings.skills;
       if (settings.profile_image_url !== undefined) updateData.profile_image_url = settings.profile_image_url;
+      if (settings.class_link !== undefined) updateData.class_link = settings.class_link;
       
       const { data, error } = await supabase!
         .from('site_settings')
@@ -528,6 +570,306 @@ export const settingsService = {
       
       console.log('✅ Configurações atualizadas com sucesso:', data);
       return data;
+    });
+  }
+};
+
+// Blog service
+export const blogService = {
+  async getAll() {
+    console.log('🔍 Buscando posts do blog do Supabase...');
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('published_at', { ascending: false });
+      
+      if (error) {
+        console.error('❌ Erro ao buscar posts do blog:', error);
+        throw error;
+      }
+      
+      console.log('✅ Posts do blog encontrados:', data?.length || 0);
+      return data || [];
+    } catch (error) {
+      console.error('❌ Erro ao buscar posts do blog:', error);
+      throw error;
+    }
+  },
+
+  async getBySlug(slug: string) {
+    console.log('🔍 Buscando post do blog por slug:', slug);
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao buscar post do blog:', error);
+        throw error;
+      }
+      
+      console.log('✅ Post do blog encontrado:', !!data);
+      return data;
+    } catch (error) {
+      console.error('❌ Erro ao buscar post do blog:', error);
+      throw error;
+    }
+  },
+
+  async create(post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) {
+    console.log('➕ Criando post do blog no Supabase:', post.title);
+    
+    return withErrorHandling(async () => {
+      const { data, error } = await supabase!
+        .from('blog_posts')
+        .insert([{
+          title: post.title,
+          slug: post.slug,
+          content: post.content,
+          excerpt: post.excerpt,
+          image_url: post.image_url,
+          tags: post.tags,
+          category: post.category,
+          published_at: post.published_at,
+          author: post.author
+        }])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao criar post do blog:', error);
+        throw error;
+      }
+      
+      console.log('✅ Post do blog criado com sucesso:', data);
+      return data;
+    });
+  },
+
+  async update(id: number, post: Partial<BlogPost>) {
+    console.log('📝 Atualizando post do blog no Supabase:', id);
+    
+    return withErrorHandling(async () => {
+      const updateData: any = {};
+      if (post.title !== undefined) updateData.title = post.title;
+      if (post.slug !== undefined) updateData.slug = post.slug;
+      if (post.content !== undefined) updateData.content = post.content;
+      if (post.excerpt !== undefined) updateData.excerpt = post.excerpt;
+      if (post.image_url !== undefined) updateData.image_url = post.image_url;
+      if (post.tags !== undefined) updateData.tags = post.tags;
+      if (post.category !== undefined) updateData.category = post.category;
+      if (post.published_at !== undefined) updateData.published_at = post.published_at;
+      if (post.author !== undefined) updateData.author = post.author;
+      
+      const { data, error } = await supabase!
+        .from('blog_posts')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar post do blog:', error);
+        throw error;
+      }
+      
+      console.log('✅ Post do blog atualizado com sucesso:', data);
+      return data;
+    });
+  },
+
+  async delete(id: number) {
+    console.log('🗑️ Deletando post do blog no Supabase:', id);
+    
+    return withErrorHandling(async () => {
+      const { error } = await supabase!
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Erro ao deletar post do blog:', error);
+        throw error;
+      }
+      
+      console.log('✅ Post do blog deletado com sucesso');
+      return true;
+    });
+  }
+};
+
+// Classes service
+export const classesService = {
+  async getSettings() {
+    console.log('🔍 Buscando configurações de aulas do Supabase...');
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
+        .from('class_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao buscar configurações de aulas:', error);
+        throw error;
+      }
+      
+      console.log('✅ Configurações de aulas encontradas:', !!data);
+      return data;
+    } catch (error) {
+      console.error('❌ Erro ao buscar configurações de aulas:', error);
+      throw error;
+    }
+  },
+
+  async updateSettings(settings: Partial<ClassSettings>) {
+    console.log('📝 Atualizando configurações de aulas no Supabase');
+    
+    return withErrorHandling(async () => {
+      const updateData: any = {};
+      if (settings.title !== undefined) updateData.title = settings.title;
+      if (settings.subtitle !== undefined) updateData.subtitle = settings.subtitle;
+      if (settings.description !== undefined) updateData.description = settings.description;
+      if (settings.cta_text !== undefined) updateData.cta_text = settings.cta_text;
+      if (settings.cta_link !== undefined) updateData.cta_link = settings.cta_link;
+      if (settings.methodology !== undefined) updateData.methodology = settings.methodology;
+      if (settings.areas !== undefined) updateData.areas = settings.areas;
+      
+      const { data, error } = await supabase!
+        .from('class_settings')
+        .update(updateData)
+        .eq('id', 1)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar configurações de aulas:', error);
+        throw error;
+      }
+      
+      console.log('✅ Configurações de aulas atualizadas com sucesso:', data);
+      return data;
+    });
+  },
+
+  async getPlans() {
+    console.log('🔍 Buscando planos de aula do Supabase...');
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
+        .from('class_plans')
+        .select('*')
+        .order('is_featured', { ascending: false });
+      
+      if (error) {
+        console.error('❌ Erro ao buscar planos de aula:', error);
+        throw error;
+      }
+      
+      console.log('✅ Planos de aula encontrados:', data?.length || 0);
+      return data || [];
+    } catch (error) {
+      console.error('❌ Erro ao buscar planos de aula:', error);
+      throw error;
+    }
+  },
+
+  async createPlan(plan: Omit<ClassPlan, 'id' | 'created_at' | 'updated_at'>) {
+    console.log('➕ Criando plano de aula no Supabase:', plan.title);
+    
+    return withErrorHandling(async () => {
+      const { data, error } = await supabase!
+        .from('class_plans')
+        .insert([{
+          title: plan.title,
+          description: plan.description,
+          price: plan.price,
+          duration: plan.duration,
+          features: plan.features,
+          image_url: plan.image_url,
+          is_featured: plan.is_featured
+        }])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao criar plano de aula:', error);
+        throw error;
+      }
+      
+      console.log('✅ Plano de aula criado com sucesso:', data);
+      return data;
+    });
+  },
+
+  async updatePlan(id: number, plan: Partial<ClassPlan>) {
+    console.log('📝 Atualizando plano de aula no Supabase:', id);
+    
+    return withErrorHandling(async () => {
+      const updateData: any = {};
+      if (plan.title !== undefined) updateData.title = plan.title;
+      if (plan.description !== undefined) updateData.description = plan.description;
+      if (plan.price !== undefined) updateData.price = plan.price;
+      if (plan.duration !== undefined) updateData.duration = plan.duration;
+      if (plan.features !== undefined) updateData.features = plan.features;
+      if (plan.image_url !== undefined) updateData.image_url = plan.image_url;
+      if (plan.is_featured !== undefined) updateData.is_featured = plan.is_featured;
+      
+      const { data, error } = await supabase!
+        .from('class_plans')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar plano de aula:', error);
+        throw error;
+      }
+      
+      console.log('✅ Plano de aula atualizado com sucesso:', data);
+      return data;
+    });
+  },
+
+  async deletePlan(id: number) {
+    console.log('🗑️ Deletando plano de aula no Supabase:', id);
+    
+    return withErrorHandling(async () => {
+      const { error } = await supabase!
+        .from('class_plans')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Erro ao deletar plano de aula:', error);
+        throw error;
+      }
+      
+      console.log('✅ Plano de aula deletado com sucesso');
+      return true;
     });
   }
 };

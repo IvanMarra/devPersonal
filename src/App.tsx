@@ -5,7 +5,7 @@ import AdminPanel from './components/AdminPanel';
 import SupabaseStatus from './components/SupabaseStatus';
 import VersionInfo from './components/VersionInfo';
 import { useFrontendData } from './hooks/useSupabaseData';
-import BlogPost from './components/BlogPost.tsx';
+import BlogPost from './components/BlogPost';
 
 // Matrix rain effect component
 const MatrixRain = () => {
@@ -189,142 +189,10 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [activeBlogPost, setActiveBlogPost] = useState<string | null>(null);
+  const [activeBlogPost, setActiveBlogPost] = useState<any>(null);
 
   // Usar dados do Supabase
   const { projects, testimonials, talks, settings, refreshAllData } = useFrontendData();
-
-  // Blog posts de exemplo
-  const blogPosts = [
-    {
-      id: 1,
-      slug: 'introducao-seguranca-cibernetica',
-      title: 'Introdução à Segurança Cibernética',
-      excerpt: 'Uma introdução aos conceitos básicos de segurança cibernética e como proteger seus dados.',
-      content: `
-        <h2>Introdução à Segurança Cibernética</h2>
-        <p>A segurança cibernética é um campo em constante evolução que se concentra na proteção de sistemas, redes e programas contra ataques digitais. Esses ataques geralmente visam acessar, alterar ou destruir informações sensíveis, extorquir dinheiro dos usuários ou interromper processos de negócios normais.</p>
-        
-        <h3>Por que a segurança cibernética é importante?</h3>
-        <p>Com o aumento da dependência de tecnologia e o crescimento do número de dispositivos conectados à internet, há mais dados sensíveis sendo compartilhados online do que nunca. Isso cria um cenário perfeito para cibercriminosos que buscam explorar vulnerabilidades.</p>
-        
-        <h3>Princípios básicos de segurança cibernética</h3>
-        <ul>
-          <li><strong>Confidencialidade:</strong> Garantir que informações sensíveis sejam acessíveis apenas a pessoas autorizadas.</li>
-          <li><strong>Integridade:</strong> Manter a precisão e confiabilidade dos dados durante todo o seu ciclo de vida.</li>
-          <li><strong>Disponibilidade:</strong> Garantir que sistemas e dados estejam disponíveis quando necessário.</li>
-        </ul>
-        
-        <h3>Tipos comuns de ameaças cibernéticas</h3>
-        <ol>
-          <li><strong>Malware:</strong> Software malicioso projetado para danificar ou interromper sistemas.</li>
-          <li><strong>Phishing:</strong> Tentativas de obter informações sensíveis através de e-mails ou sites fraudulentos.</li>
-          <li><strong>Ataques de negação de serviço (DoS):</strong> Sobrecarregam sistemas para torná-los inacessíveis.</li>
-          <li><strong>Ransomware:</strong> Criptografa dados e exige pagamento para restaurá-los.</li>
-        </ol>
-        
-        <h3>Como se proteger</h3>
-        <p>Algumas medidas básicas de proteção incluem:</p>
-        <ul>
-          <li>Manter software e sistemas operacionais atualizados</li>
-          <li>Usar senhas fortes e gerenciadores de senhas</li>
-          <li>Implementar autenticação de dois fatores</li>
-          <li>Fazer backup regular de dados importantes</li>
-          <li>Educar-se sobre práticas seguras online</li>
-        </ul>
-        
-        <p>A segurança cibernética é responsabilidade de todos. Ao adotar práticas seguras, você não apenas protege seus próprios dados, mas também contribui para um ambiente digital mais seguro para todos.</p>
-      `,
-      image_url: 'https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200',
-      tags: ['Cybersecurity', 'Beginners', 'Data Protection'],
-      category: 'Security',
-      published_at: '2025-01-15T10:00:00Z',
-      author: 'DevIem',
-      reading_time: '5 min'
-    },
-    {
-      id: 2,
-      slug: 'iniciar-carreira-desenvolvimento-web',
-      title: 'Como Iniciar sua Carreira em Desenvolvimento Web',
-      excerpt: 'Guia completo para quem deseja iniciar uma carreira em desenvolvimento web em 2025.',
-      content: `
-        <h2>Como Iniciar sua Carreira em Desenvolvimento Web em 2025</h2>
-        <p>O desenvolvimento web continua sendo uma das carreiras mais promissoras e acessíveis na área de tecnologia. Com a crescente digitalização dos negócios, a demanda por desenvolvedores web qualificados só aumenta a cada ano.</p>
-        
-        <h3>Por onde começar?</h3>
-        <p>Iniciar uma carreira em desenvolvimento web pode parecer intimidador, mas com um plano estruturado, é possível progredir de forma consistente:</p>
-        
-        <h4>1. Aprenda os fundamentos</h4>
-        <ul>
-          <li><strong>HTML:</strong> A linguagem de marcação que estrutura o conteúdo web</li>
-          <li><strong>CSS:</strong> Responsável pelo estilo e aparência visual</li>
-          <li><strong>JavaScript:</strong> Linguagem de programação que torna as páginas interativas</li>
-        </ul>
-        
-        <h4>2. Escolha uma especialização</h4>
-        <p>O desenvolvimento web se divide principalmente em:</p>
-        <ul>
-          <li><strong>Frontend:</strong> Foco na interface do usuário (React, Angular, Vue.js)</li>
-          <li><strong>Backend:</strong> Foco na lógica do servidor e banco de dados (Node.js, Python, PHP)</li>
-          <li><strong>Fullstack:</strong> Combinação de ambos</li>
-        </ul>
-        
-        <h4>3. Aprenda frameworks modernos</h4>
-        <p>Em 2025, os frameworks mais relevantes incluem:</p>
-        <ul>
-          <li>React e Next.js para frontend</li>
-          <li>Node.js e Express para backend</li>
-          <li>Tailwind CSS para estilização</li>
-          <li>Supabase ou Firebase para backend-as-a-service</li>
-        </ul>
-        
-        <h4>4. Construa projetos práticos</h4>
-        <p>Nada substitui a experiência prática. Construa projetos como:</p>
-        <ul>
-          <li>Um portfólio pessoal</li>
-          <li>Um clone de site popular</li>
-          <li>Uma aplicação CRUD simples</li>
-          <li>Um blog ou loja virtual</li>
-        </ul>
-        
-        <h4>5. Aprenda controle de versão</h4>
-        <p>Git e GitHub são essenciais para qualquer desenvolvedor moderno.</p>
-        
-        <h3>Recursos para aprendizado</h3>
-        <ul>
-          <li>Plataformas como freeCodeCamp, Codecademy e The Odin Project</li>
-          <li>Documentação oficial das tecnologias</li>
-          <li>YouTube para tutoriais práticos</li>
-          <li>Bootcamps intensivos para aprendizado acelerado</li>
-        </ul>
-        
-        <h3>Construindo seu portfólio</h3>
-        <p>Seu portfólio é sua vitrine profissional. Inclua:</p>
-        <ul>
-          <li>Projetos pessoais bem documentados</li>
-          <li>Contribuições para projetos open source</li>
-          <li>Pequenos experimentos e demonstrações de conceitos</li>
-        </ul>
-        
-        <h3>Encontrando seu primeiro emprego</h3>
-        <p>Estratégias para conseguir sua primeira oportunidade:</p>
-        <ul>
-          <li>Estágios e programas de trainee</li>
-          <li>Trabalho freelance em plataformas como Upwork</li>
-          <li>Networking em eventos e comunidades de tecnologia</li>
-          <li>Participação em hackathons</li>
-        </ul>
-        
-        <p>Lembre-se: persistência é a chave. O desenvolvimento web é uma jornada de aprendizado contínuo, mas os resultados valem a pena!</p>
-      `,
-      image_url: 'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200',
-      tags: ['Career', 'Web Development', 'Beginners'],
-      category: 'Career',
-      published_at: '2025-01-10T14:30:00Z',
-      author: 'DevIem',
-      reading_time: '7 min'
-    }
-  ];
 
   useEffect(() => {
     // Verificar se já está autenticado
@@ -433,22 +301,210 @@ function App() {
     refreshAllData();
   };
 
+  // Exemplo de posts do blog
+  const blogPosts = [
+    {
+      id: 1,
+      slug: "introducao-seguranca-cibernetica",
+      title: "Introdução à Segurança Cibernética",
+      content: `<p>A segurança cibernética é um campo em constante evolução que se concentra na proteção de sistemas, redes e programas contra ataques digitais. Esses ataques cibernéticos geralmente visam acessar, alterar ou destruir informações sensíveis; extorquir dinheiro dos usuários; ou interromper processos de negócios normais.</p>
+      
+      <p>Implementar medidas eficazes de segurança cibernética é particularmente desafiador hoje em dia porque existem mais dispositivos do que pessoas, e os atacantes estão se tornando cada vez mais inovadores.</p>
+      
+      <h2>Por que a segurança cibernética é importante?</h2>
+      
+      <p>Na era digital de hoje, onde quase tudo está conectado à internet, a segurança cibernética é mais crucial do que nunca. Governos, militares, corporações, instituições financeiras e médicas coletam, processam e armazenam quantidades sem precedentes de dados em computadores e outros dispositivos.</p>
+      
+      <p>Uma parte significativa desses dados pode ser informação sensível, seja propriedade intelectual, dados financeiros, informações pessoais ou diferentes tipos de dados para os quais o acesso não autorizado ou a exposição podem ter consequências negativas.</p>
+      
+      <h2>Elementos da segurança cibernética</h2>
+      
+      <p>A segurança cibernética eficaz tem múltiplas camadas de proteção espalhadas pelos computadores, redes, programas ou dados que se pretende manter seguros. Em uma organização, as pessoas, processos e tecnologia devem se complementar para criar uma defesa eficaz contra ataques cibernéticos.</p>
+      
+      <h3>1. Segurança de Rede</h3>
+      <p>Proteger a rede contra invasores, tanto direcionados quanto oportunistas.</p>
+      
+      <h3>2. Segurança de Aplicativos</h3>
+      <p>Aplicativos precisam ser constantemente atualizados e testados para garantir que estejam livres de vulnerabilidades.</p>
+      
+      <h3>3. Segurança de Endpoint</h3>
+      <p>Proteger dispositivos finais como computadores, smartphones e tablets.</p>
+      
+      <h3>4. Segurança de Dados</h3>
+      <p>Manter a integridade e privacidade dos dados, tanto em repouso quanto em trânsito.</p>
+      
+      <h3>5. Gestão de Identidade</h3>
+      <p>Autenticação de usuários e determinação de quais recursos eles têm permissão para acessar.</p>
+      
+      <h3>6. Segurança em Nuvem</h3>
+      <p>Proteger dados e aplicativos que estão na nuvem.</p>
+      
+      <h2>Ameaças comuns à segurança cibernética</h2>
+      
+      <p>As ameaças à segurança cibernética estão em constante evolução, mas algumas das mais comuns incluem:</p>
+      
+      <ul>
+        <li><strong>Malware:</strong> Software malicioso como vírus, worms, spyware e ransomware.</li>
+        <li><strong>Phishing:</strong> Envio de e-mails fraudulentos que parecem vir de fontes confiáveis.</li>
+        <li><strong>Ataques de engenharia social:</strong> Manipulação psicológica para enganar usuários e fazê-los quebrar procedimentos de segurança.</li>
+        <li><strong>Ataques de negação de serviço (DoS):</strong> Inundar sistemas, servidores ou redes com tráfego para esgotar recursos e largura de banda.</li>
+      </ul>
+      
+      <h2>Como se proteger</h2>
+      
+      <p>Aqui estão algumas medidas básicas que indivíduos e organizações podem tomar para melhorar sua postura de segurança cibernética:</p>
+      
+      <ul>
+        <li>Manter software e sistemas operacionais atualizados</li>
+        <li>Usar senhas fortes e gerenciadores de senhas</li>
+        <li>Implementar autenticação de dois fatores</li>
+        <li>Ser cauteloso com anexos de e-mail e links</li>
+        <li>Fazer backup regular dos dados</li>
+        <li>Usar software antivírus e anti-malware</li>
+        <li>Educar-se sobre as melhores práticas de segurança cibernética</li>
+      </ul>
+      
+      <p>A segurança cibernética é uma responsabilidade compartilhada que requer a atenção e ações de toda a sociedade, desde o governo e empresas até indivíduos. Ao tomar medidas para melhorar nossa postura de segurança cibernética, podemos nos proteger melhor contra ameaças cibernéticas.</p>`,
+      excerpt: "Uma introdução aos conceitos básicos de segurança cibernética e como proteger seus dados.",
+      image_url: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      tags: ["Cybersecurity", "Beginners", "Data Protection"],
+      category: "Security",
+      published_at: "2025-01-15T10:00:00Z",
+      author: "DevIem",
+      reading_time: "8 min"
+    },
+    {
+      id: 2,
+      slug: "iniciar-carreira-desenvolvimento-web",
+      title: "Como Iniciar sua Carreira em Desenvolvimento Web",
+      content: `<p>O desenvolvimento web continua sendo uma das carreiras mais promissoras e acessíveis na área de tecnologia. Com a crescente digitalização dos negócios e serviços, a demanda por desenvolvedores web qualificados só aumenta a cada ano.</p>
+      
+      <p>Se você está considerando iniciar uma carreira nessa área, este guia vai ajudá-lo a entender os primeiros passos e o caminho a seguir.</p>
+      
+      <h2>Por que escolher desenvolvimento web?</h2>
+      
+      <p>Antes de mergulhar nos detalhes técnicos, é importante entender por que o desenvolvimento web pode ser uma excelente escolha de carreira:</p>
+      
+      <ul>
+        <li><strong>Barreira de entrada relativamente baixa</strong> - Você pode começar a aprender com recursos gratuitos online</li>
+        <li><strong>Alta demanda</strong> - Empresas de todos os tamanhos precisam de desenvolvedores web</li>
+        <li><strong>Flexibilidade</strong> - Possibilidade de trabalho remoto e horários flexíveis</li>
+        <li><strong>Salários competitivos</strong> - Mesmo para desenvolvedores iniciantes</li>
+        <li><strong>Constante evolução</strong> - Sempre há algo novo para aprender</li>
+      </ul>
+      
+      <h2>Fundamentos essenciais</h2>
+      
+      <p>Todo desenvolvedor web precisa dominar três tecnologias fundamentais:</p>
+      
+      <h3>1. HTML (HyperText Markup Language)</h3>
+      <p>HTML é a espinha dorsal de qualquer página web. É uma linguagem de marcação que define a estrutura do conteúdo. Aprenda sobre tags, elementos, atributos e como criar documentos HTML bem estruturados.</p>
+      
+      <h3>2. CSS (Cascading Style Sheets)</h3>
+      <p>CSS é responsável pela aparência visual das páginas web. Com CSS, você pode controlar cores, fontes, espaçamento, layouts e muito mais. Estude seletores, propriedades, valores e como criar designs responsivos.</p>
+      
+      <h3>3. JavaScript</h3>
+      <p>JavaScript é a linguagem de programação que torna as páginas web interativas. É essencial para criar funcionalidades dinâmicas. Aprenda sobre variáveis, funções, eventos, manipulação do DOM e conceitos de programação.</p>
+      
+      <h2>Escolhendo seu caminho</h2>
+      
+      <p>Após dominar os fundamentos, você pode escolher se especializar em uma das seguintes áreas:</p>
+      
+      <h3>Desenvolvimento Frontend</h3>
+      <p>Focado na parte visual e interativa dos sites - o que os usuários veem e com o que interagem. Além dos fundamentos, você deve aprender:</p>
+      <ul>
+        <li>Frameworks JavaScript como React, Angular ou Vue.js</li>
+        <li>Pré-processadores CSS como Sass ou Less</li>
+        <li>Ferramentas de build como Webpack ou Vite</li>
+        <li>Testes de interface</li>
+      </ul>
+      
+      <h3>Desenvolvimento Backend</h3>
+      <p>Concentra-se na lógica do servidor, bancos de dados e APIs. Você precisará aprender:</p>
+      <ul>
+        <li>Uma linguagem de servidor como Node.js, Python, PHP, Ruby ou Java</li>
+        <li>Bancos de dados SQL e/ou NoSQL</li>
+        <li>APIs RESTful e GraphQL</li>
+        <li>Autenticação e autorização</li>
+        <li>Segurança de aplicações web</li>
+      </ul>
+      
+      <h3>Desenvolvimento Full Stack</h3>
+      <p>Combina habilidades de frontend e backend, permitindo que você trabalhe em todas as camadas de uma aplicação web.</p>
+      
+      <h2>Construindo seu portfólio</h2>
+      
+      <p>Um portfólio sólido é essencial para conseguir seu primeiro emprego. Aqui estão algumas dicas:</p>
+      
+      <ul>
+        <li>Crie projetos pessoais que demonstrem suas habilidades</li>
+        <li>Contribua para projetos open source</li>
+        <li>Recrie sites populares para praticar</li>
+        <li>Documente seu processo de aprendizado em um blog</li>
+        <li>Hospede seus projetos online para que recrutadores possam vê-los</li>
+      </ul>
+      
+      <h2>Recursos para aprendizado</h2>
+      
+      <p>Existem inúmeros recursos disponíveis para aprender desenvolvimento web:</p>
+      
+      <ul>
+        <li><strong>Plataformas de cursos online:</strong> Udemy, Coursera, freeCodeCamp</li>
+        <li><strong>Documentação oficial:</strong> MDN Web Docs, W3Schools</li>
+        <li><strong>Tutoriais interativos:</strong> Codecademy, Frontend Mentor</li>
+        <li><strong>Comunidades:</strong> Stack Overflow, Dev.to, GitHub</li>
+        <li><strong>Bootcamps:</strong> Para aprendizado intensivo e estruturado</li>
+      </ul>
+      
+      <h2>Dicas para iniciantes</h2>
+      
+      <ol>
+        <li><strong>Seja consistente</strong> - Estude um pouco todos os dias</li>
+        <li><strong>Pratique muito</strong> - Programação se aprende fazendo</li>
+        <li><strong>Não tenha medo de errar</strong> - Bugs e erros fazem parte do processo</li>
+        <li><strong>Participe de comunidades</strong> - Networking é fundamental</li>
+        <li><strong>Mantenha-se atualizado</strong> - A tecnologia evolui rapidamente</li>
+      </ol>
+      
+      <p>Lembre-se que o desenvolvimento web é uma jornada contínua de aprendizado. Mesmo os profissionais mais experientes estão sempre aprendendo algo novo. Seja paciente consigo mesmo e celebre cada pequena vitória ao longo do caminho.</p>
+      
+      <p>Boa sorte em sua jornada como desenvolvedor web!</p>`,
+      excerpt: "Guia completo para quem deseja iniciar uma carreira em desenvolvimento web em 2025.",
+      image_url: "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      tags: ["Career", "Web Development", "Beginners"],
+      category: "Career",
+      published_at: "2025-01-10T14:30:00Z",
+      author: "DevIem",
+      reading_time: "10 min"
+    }
+  ];
+
+  // Mostrar post do blog ou voltar para a lista
+  const handleBlogPostClick = (post: any) => {
+    setActiveBlogPost(post);
+    window.scrollTo(0, 0);
+  };
+
+  const handleBackToBlog = () => {
+    setActiveBlogPost(null);
+    window.scrollTo(0, 0);
+  };
+
   const sections = [
     { id: 'home', title: 'Início', icon: Terminal },
     { id: 'about', title: 'Sobre', icon: Eye },
     { id: 'projects', title: 'Projetos', icon: Code },
     { id: 'testimonials', title: 'Depoimentos', icon: MessageSquare },
     { id: 'talks', title: 'Palestras', icon: Mic },
-    { id: 'blog', title: 'Blog', icon: FileText },
     { id: 'classes', title: 'Aulas Particulares', icon: GraduationCap },
+    { id: 'blog', title: 'Blog', icon: FileText },
   ];
 
-  // Renderizar post do blog se estiver ativo
+  // Se estiver visualizando um post do blog
   if (activeBlogPost) {
-    const post = blogPosts.find(post => post.slug === activeBlogPost);
-    if (post) {
-      return <BlogPost post={post} onBack={() => setActiveBlogPost(null)} />;
-    }
+    return (
+      <BlogPost post={activeBlogPost} onBack={handleBackToBlog} />
+    );
   }
 
   return (
@@ -695,7 +751,7 @@ function App() {
 
       {/* Hero Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'home' && (
-        <section className="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6 mb-16">
           <div className="text-center z-10 w-full max-w-4xl">
             <div className="mb-8">
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold mb-4 text-cyan-400 glitch-text">
@@ -741,7 +797,7 @@ function App() {
 
       {/* About Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'about' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Sobre DevIem
@@ -853,7 +909,7 @@ function App() {
 
       {/* Projects Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'projects' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Projetos Desenvolvidos
@@ -898,7 +954,7 @@ function App() {
 
       {/* Testimonials Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'testimonials' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Depoimentos
@@ -949,7 +1005,7 @@ function App() {
 
       {/* Talks Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'talks' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Palestras & Eventos
@@ -999,267 +1055,15 @@ function App() {
         </section>
       )}
 
-      {/* Blog Section - NOVA SEÇÃO */}
-      {activeSection === 'blog' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
-          <div className="container mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
-              Blog & Artigos
-            </h2>
-            
-            <div className="max-w-5xl mx-auto">
-              {/* Featured Post */}
-              {blogPosts.length > 0 && (
-                <div 
-                  className="blog-card rounded-xl p-4 sm:p-6 card-hover group mb-8 cursor-pointer"
-                  onClick={() => setActiveBlogPost(blogPosts[0].slug)}
-                >
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="relative overflow-hidden rounded-lg">
-                      <img
-                        src={blogPosts[0].image_url}
-                        alt={blogPosts[0].title}
-                        className="w-full h-48 sm:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          {blogPosts[0].category}
-                        </span>
-                        {blogPosts[0].tags.slice(0, 2).map((tag, index) => (
-                          <span key={index} className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs border border-purple-500/30">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <h3 className="text-xl sm:text-2xl font-bold text-orange-400 group-hover:text-cyan-400 transition-colors duration-300">
-                        {blogPosts[0].title}
-                      </h3>
-                      
-                      <p className="text-gray-300 text-sm sm:text-base">
-                        {blogPosts[0].excerpt}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span>{new Date(blogPosts[0].published_at).toLocaleDateString('pt-BR')}</span>
-                        <span>{blogPosts[0].reading_time} de leitura</span>
-                      </div>
-                      
-                      <button 
-                        className="px-4 py-2 bg-orange-500/20 border border-orange-400 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all duration-300 text-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveBlogPost(blogPosts[0].slug);
-                        }}
-                      >
-                        Ler artigo completo
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Other Posts */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {blogPosts.slice(1).map((post) => (
-                  <div 
-                    key={post.id} 
-                    className="blog-card rounded-xl p-4 card-hover group cursor-pointer"
-                    onClick={() => setActiveBlogPost(post.slug)}
-                  >
-                    <div className="relative overflow-hidden rounded-lg mb-4">
-                      <img
-                        src={post.image_url}
-                        alt={post.title}
-                        className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-1">
-                        <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                          {post.category}
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-lg font-bold text-orange-400 group-hover:text-cyan-400 transition-colors duration-300 line-clamp-2">
-                        {post.title}
-                      </h3>
-                      
-                      <p className="text-gray-300 text-sm line-clamp-3">
-                        {post.excerpt}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
-                        <span>{post.reading_time}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Placeholder para mais posts */}
-                <div className="blog-card rounded-xl p-4 border border-dashed border-gray-700 flex flex-col items-center justify-center h-64 text-center">
-                  <FileText className="w-12 h-12 text-gray-600 mb-4" />
-                  <p className="text-gray-500">Mais artigos em breve</p>
-                  <p className="text-gray-600 text-sm mt-2">Fique ligado para novos conteúdos</p>
-                </div>
-              </div>
-              
-              {/* Newsletter */}
-              <div className="mt-12 bg-gray-900/50 p-6 rounded-xl border border-purple-500/30">
-                <div className="grid md:grid-cols-2 gap-6 items-center">
-                  <div>
-                    <h3 className="text-xl font-bold text-purple-400 mb-2">Inscreva-se na Newsletter</h3>
-                    <p className="text-gray-300 text-sm">Receba artigos, tutoriais e dicas diretamente no seu email.</p>
-                  </div>
-                  <div className="flex">
-                    <input
-                      type="email"
-                      placeholder="Seu melhor email"
-                      className="flex-1 p-3 bg-black border border-gray-600 rounded-l-lg text-white"
-                    />
-                    <button className="px-4 py-3 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-r-lg hover:bg-purple-500/30 transition-all duration-300">
-                      Inscrever
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Classes Section - RESPONSIVIDADE MELHORADA */}
       {activeSection === 'classes' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-16">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Aulas Particulares
             </h2>
             
             <div className="max-w-4xl mx-auto">
-              {/* Introdução */}
-              <div className="text-center mb-12">
-                <h3 className="text-xl sm:text-2xl font-bold text-purple-400 mb-4">Aprenda com um especialista</h3>
-                <p className="text-gray-300 max-w-2xl mx-auto">
-                  Aulas personalizadas para seu nível e objetivos, com foco em projetos práticos e aplicação real.
-                  Desenvolva habilidades que o mercado realmente valoriza.
-                </p>
-              </div>
-              
-              {/* Planos */}
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-12">
-                {/* Plano Básico */}
-                <div className="bg-gray-900/50 p-6 rounded-xl border border-cyan-500/30 relative card-hover">
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-cyan-400 mb-2">Plano Básico</h3>
-                    <p className="text-gray-300 text-sm">Ideal para iniciantes que desejam aprender os fundamentos.</p>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span className="text-2xl font-bold text-purple-400">R$150</span>
-                    <span className="text-gray-400 text-sm">/ aula</span>
-                  </div>
-                  
-                  <div className="text-sm text-gray-400 mb-2 flex items-center">
-                    <Clock className="w-4 h-4 mr-2 text-cyan-400" />
-                    1 hora por aula
-                  </div>
-                  
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>1 aula semanal</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Suporte por e-mail</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Material didático</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Certificado de conclusão</span>
-                    </li>
-                  </ul>
-                  
-                  <a 
-                    href={settings?.class_link || "https://wa.me/5511999999999"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full py-3 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg text-center hover:bg-cyan-500/30 transition-all duration-300"
-                  >
-                    Agendar Aula Experimental
-                  </a>
-                </div>
-                
-                {/* Plano Premium */}
-                <div className="bg-gray-900/50 p-6 rounded-xl border border-purple-500/30 relative card-hover">
-                  <div className="absolute -top-3 -right-3 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                    Recomendado
-                  </div>
-                  
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-purple-400 mb-2">Plano Premium</h3>
-                    <p className="text-gray-300 text-sm">Para quem deseja aprender de forma intensiva e com mais recursos.</p>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span className="text-2xl font-bold text-purple-400">R$250</span>
-                    <span className="text-gray-400 text-sm">/ aula</span>
-                  </div>
-                  
-                  <div className="text-sm text-gray-400 mb-2 flex items-center">
-                    <Clock className="w-4 h-4 mr-2 text-purple-400" />
-                    1.5 horas por aula
-                  </div>
-                  
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>2 aulas semanais</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Suporte por WhatsApp</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Material didático avançado</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Projetos práticos</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Certificado de conclusão</span>
-                    </li>
-                    <li className="flex items-start text-gray-300 text-sm">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Mentoria personalizada</span>
-                    </li>
-                  </ul>
-                  
-                  <a 
-                    href={settings?.class_link || "https://wa.me/5511999999999"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full py-3 bg-purple-500/20 border border-purple-400 text-purple-400 rounded-lg text-center hover:bg-purple-500/30 transition-all duration-300"
-                  >
-                    Agendar Aula Experimental
-                  </a>
-                </div>
-              </div>
-
               <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
                 <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
                   <GraduationCap className="w-8 sm:w-12 h-8 sm:h-12 text-cyan-400 mb-4" />
@@ -1308,19 +1112,198 @@ function App() {
                 </div>
               </div>
 
+              {/* Planos de Aula */}
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                {/* Plano Básico */}
+                <div className="bg-gray-900/50 p-6 rounded-lg border border-cyan-500/30 card-hover">
+                  <h3 className="text-xl font-bold text-cyan-400 mb-2">Plano Básico</h3>
+                  <p className="text-gray-300 mb-4">Ideal para iniciantes que desejam aprender os fundamentos.</p>
+                  
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-2xl font-bold text-purple-400">R$ 150</div>
+                    <div className="text-sm text-gray-400">1 hora por aula</div>
+                  </div>
+                  
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>1 aula semanal</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Suporte por e-mail</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Material didático</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Certificado de conclusão</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                {/* Plano Premium */}
+                <div className="bg-gray-900/50 p-6 rounded-lg border-2 border-purple-500/50 card-hover relative">
+                  <div className="absolute -top-3 -right-3 bg-purple-500 text-black px-3 py-1 rounded-full text-xs font-bold">
+                    Destaque
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-purple-400 mb-2">Plano Premium</h3>
+                  <p className="text-gray-300 mb-4">Para quem deseja aprender de forma intensiva e com mais recursos.</p>
+                  
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-2xl font-bold text-cyan-400">R$ 250</div>
+                    <div className="text-sm text-gray-400">1.5 horas por aula</div>
+                  </div>
+                  
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>2 aulas semanais</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Suporte por WhatsApp</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Material didático avançado</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Projetos práticos</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Certificado de conclusão</span>
+                    </li>
+                    <li className="flex items-center text-gray-300">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      <span>Mentoria personalizada</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
               <div className="text-center">
                 <a 
-                  href={settings?.class_link || "https://wa.me/5511999999999"}
-                  target="_blank"
+                  href={settings?.class_link || "https://wa.me/5511999999999"} 
+                  target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-block px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow"
+                  className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow inline-flex items-center"
                 >
-                  <MessageSquare className="w-5 h-5 inline mr-2" />
-                  Agendar Aula Experimental
+                  <MessageSquare className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />
+                  {settings?.cta_text || "Agendar Aula Experimental"}
                 </a>
-                <p className="text-gray-400 text-sm mt-4">
-                  Primeira aula com 50% de desconto para novos alunos!
-                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Blog Section */}
+      {activeSection === 'blog' && (
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-16">
+          <div className="container mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+              Blog & Artigos
+            </h2>
+            
+            <div className="max-w-5xl mx-auto">
+              {/* Featured Post */}
+              <div 
+                className="blog-card rounded-xl overflow-hidden mb-12 card-hover cursor-pointer"
+                onClick={() => handleBlogPostClick(blogPosts[0])}
+              >
+                <div className="relative">
+                  <img 
+                    src={blogPosts[0].image_url} 
+                    alt={blogPosts[0].title}
+                    className="w-full h-64 sm:h-80 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
+                  
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="px-3 py-1 bg-orange-500/30 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                        {blogPosts[0].category}
+                      </span>
+                      {blogPosts[0].tags.slice(0, 2).map((tag, index) => (
+                        <span key={index} className="px-3 py-1 bg-purple-500/30 text-purple-400 rounded-full text-xs border border-purple-500/30">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-cyan-400 mb-3">
+                      {blogPosts[0].title}
+                    </h3>
+                    
+                    <p className="text-gray-300 text-sm sm:text-base mb-4 line-clamp-2">
+                      {blogPosts[0].excerpt}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-400">
+                      <div className="flex items-center space-x-4">
+                        <span>{new Date(blogPosts[0].published_at).toLocaleDateString('pt-BR')}</span>
+                        <span>{blogPosts[0].reading_time} de leitura</span>
+                      </div>
+                      <span>{blogPosts[0].author}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Other Posts */}
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
+                {blogPosts.slice(1).map((post) => (
+                  <div 
+                    key={post.id} 
+                    className="blog-card rounded-xl overflow-hidden card-hover cursor-pointer"
+                    onClick={() => handleBlogPostClick(post)}
+                  >
+                    <div className="relative h-48">
+                      <img 
+                        src={post.image_url} 
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                      
+                      <div className="absolute top-3 left-3">
+                        <span className="px-3 py-1 bg-orange-500/30 text-orange-400 rounded-full text-xs border border-orange-500/30">
+                          {post.category}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-purple-400 mb-2 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      
+                      <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
+                        <span>{post.reading_time} de leitura</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Placeholder for more posts */}
+                <div className="blog-card rounded-xl overflow-hidden border border-dashed border-gray-700 flex items-center justify-center p-8 text-center">
+                  <div>
+                    <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-400 mb-2">Mais artigos em breve</h3>
+                    <p className="text-gray-500 text-sm">Estamos preparando conteúdo de qualidade para você</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
