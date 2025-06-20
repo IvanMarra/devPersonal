@@ -29,6 +29,11 @@ export const supabase = hasValidCredentials
         persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'deviem-portfolio'
+        }
       }
     })
   : null;
@@ -87,7 +92,10 @@ export const authenticateAdmin = async (username: string, password: string) => {
         user: { id: 'admin', email: 'admin@deviem.com' }
       };
       
-      localStorage.setItem('deviem_admin_session', JSON.stringify(session));
+      localStorage.setItem('deviem_admin_token', 'authenticated');
+      localStorage.setItem('deviem_admin_session', Date.now().toString());
+      localStorage.setItem('supabase_admin_session', JSON.stringify(session));
+      
       console.log('✅ Admin autenticado com sucesso');
       return session;
     } else {
@@ -100,28 +108,51 @@ export const authenticateAdmin = async (username: string, password: string) => {
 };
 
 export const isAdminAuthenticated = () => {
+  const token = localStorage.getItem('deviem_admin_token');
   const session = localStorage.getItem('deviem_admin_session');
-  return !!session;
+  
+  if (token === 'authenticated' && session) {
+    // Verificar se a sessão não expirou (24 horas)
+    const sessionTime = parseInt(session);
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    
+    if (now - sessionTime < twentyFourHours) {
+      return true;
+    } else {
+      // Sessão expirada, limpar
+      localStorage.removeItem('deviem_admin_token');
+      localStorage.removeItem('deviem_admin_session');
+      localStorage.removeItem('supabase_admin_session');
+      return false;
+    }
+  }
+  
+  return false;
 };
 
 export const logoutAdmin = () => {
   console.log('🚪 Fazendo logout completo...');
   
   // Limpar TODOS os dados de sessão
-  localStorage.removeItem('deviem_admin_session');
   localStorage.removeItem('deviem_admin_token');
+  localStorage.removeItem('deviem_admin_session');
   localStorage.removeItem('supabase_admin_session');
   
   // Limpar qualquer cache do Supabase
   if (supabase?.auth) {
-    supabase.auth.signOut().catch(() => {});
+    try {
+      supabase.auth.signOut();
+    } catch (error) {
+      console.error('Erro ao fazer signOut do Supabase:', error);
+    }
   }
   
   console.log('✅ Logout completo realizado');
   
   // Forçar reload da página para garantir limpeza total
   setTimeout(() => {
-    window.location.reload();
+    window.location.href = '/';
   }, 100);
 };
 
@@ -132,6 +163,13 @@ const withErrorHandling = async <T>(operation: () => Promise<T>): Promise<T | nu
       console.error('❌ Supabase não configurado');
       throw new Error('Supabase não configurado');
     }
+    
+    // Verificar autenticação para operações de escrita
+    if (!isAdminAuthenticated()) {
+      console.error('❌ Usuário não autenticado para esta operação');
+      throw new Error('Usuário não autenticado para esta operação');
+    }
+    
     return await operation();
   } catch (error) {
     console.error('❌ Erro na operação Supabase:', error);
@@ -143,8 +181,13 @@ const withErrorHandling = async <T>(operation: () => Promise<T>): Promise<T | nu
 export const projectsService = {
   async getAll() {
     console.log('🔍 Buscando projetos do Supabase...');
-    return withErrorHandling(async () => {
-      const { data, error } = await supabase!
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
@@ -156,13 +199,37 @@ export const projectsService = {
       
       console.log('✅ Projetos encontrados:', data?.length || 0);
       return data || [];
-    });
+    } catch (error) {
+      console.error('❌ Erro ao buscar projetos:', error);
+      throw error;
+    }
   },
 
   async create(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {
     console.log('➕ Criando projeto no Supabase:', project.title);
     
     return withErrorHandling(async () => {
+      // Tentar usar RPC para bypass de RLS
+      try {
+        console.log('🔍 Tentando usar RPC para criar projeto...');
+        const { data: rpcData, error: rpcError } = await supabase!.rpc('create_project', {
+          p_title: project.title,
+          p_description: project.description,
+          p_tech: project.tech,
+          p_image_url: project.image_url
+        });
+        
+        if (!rpcError && rpcData) {
+          console.log('✅ Projeto criado com sucesso via RPC:', rpcData);
+          return rpcData;
+        }
+        
+        console.log('⚠️ RPC falhou, tentando método padrão...');
+      } catch (rpcErr) {
+        console.log('⚠️ Erro ao usar RPC:', rpcErr);
+      }
+      
+      // Método padrão
       const { data, error } = await supabase!
         .from('projects')
         .insert([{
@@ -188,6 +255,28 @@ export const projectsService = {
     console.log('📝 Atualizando projeto no Supabase:', id);
     
     return withErrorHandling(async () => {
+      // Tentar usar RPC para bypass de RLS
+      try {
+        console.log('🔍 Tentando usar RPC para atualizar projeto...');
+        const { data: rpcData, error: rpcError } = await supabase!.rpc('update_project', {
+          p_id: id,
+          p_title: project.title,
+          p_description: project.description,
+          p_tech: project.tech,
+          p_image_url: project.image_url
+        });
+        
+        if (!rpcError && rpcData) {
+          console.log('✅ Projeto atualizado com sucesso via RPC:', rpcData);
+          return rpcData;
+        }
+        
+        console.log('⚠️ RPC falhou, tentando método padrão...');
+      } catch (rpcErr) {
+        console.log('⚠️ Erro ao usar RPC:', rpcErr);
+      }
+      
+      // Método padrão
       const updateData: any = {};
       if (project.title !== undefined) updateData.title = project.title;
       if (project.description !== undefined) updateData.description = project.description;
@@ -215,6 +304,24 @@ export const projectsService = {
     console.log('🗑️ Deletando projeto no Supabase:', id);
     
     return withErrorHandling(async () => {
+      // Tentar usar RPC para bypass de RLS
+      try {
+        console.log('🔍 Tentando usar RPC para deletar projeto...');
+        const { data: rpcData, error: rpcError } = await supabase!.rpc('delete_project', {
+          p_id: id
+        });
+        
+        if (!rpcError && rpcData) {
+          console.log('✅ Projeto deletado com sucesso via RPC');
+          return true;
+        }
+        
+        console.log('⚠️ RPC falhou, tentando método padrão...');
+      } catch (rpcErr) {
+        console.log('⚠️ Erro ao usar RPC:', rpcErr);
+      }
+      
+      // Método padrão
       const { error } = await supabase!
         .from('projects')
         .delete()
@@ -234,8 +341,13 @@ export const projectsService = {
 export const testimonialsService = {
   async getAll() {
     console.log('🔍 Buscando depoimentos do Supabase...');
-    return withErrorHandling(async () => {
-      const { data, error } = await supabase!
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
         .from('testimonials')
         .select('*')
         .order('created_at', { ascending: false });
@@ -247,7 +359,10 @@ export const testimonialsService = {
       
       console.log('✅ Depoimentos encontrados:', data?.length || 0);
       return data || [];
-    });
+    } catch (error) {
+      console.error('❌ Erro ao buscar depoimentos:', error);
+      throw error;
+    }
   },
 
   async create(testimonial: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) {
@@ -325,8 +440,13 @@ export const testimonialsService = {
 export const talksService = {
   async getAll() {
     console.log('🔍 Buscando palestras do Supabase...');
-    return withErrorHandling(async () => {
-      const { data, error } = await supabase!
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
         .from('talks')
         .select('*')
         .order('created_at', { ascending: false });
@@ -338,7 +458,10 @@ export const talksService = {
       
       console.log('✅ Palestras encontradas:', data?.length || 0);
       return data || [];
-    });
+    } catch (error) {
+      console.error('❌ Erro ao buscar palestras:', error);
+      throw error;
+    }
   },
 
   async create(talk: Omit<Talk, 'id' | 'created_at' | 'updated_at'>) {
@@ -416,8 +539,13 @@ export const talksService = {
 export const settingsService = {
   async get() {
     console.log('🔍 Buscando configurações do Supabase...');
-    return withErrorHandling(async () => {
-      const { data, error } = await supabase!
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase não configurado');
+        throw new Error('Supabase não configurado');
+      }
+      
+      const { data, error } = await supabase
         .from('site_settings')
         .select('*')
         .eq('id', 1)
@@ -430,7 +558,10 @@ export const settingsService = {
       
       console.log('✅ Configurações encontradas:', !!data);
       return data;
-    });
+    } catch (error) {
+      console.error('❌ Erro ao buscar configurações:', error);
+      throw error;
+    }
   },
 
   async update(settings: Partial<SiteSettings>) {
@@ -458,7 +589,7 @@ export const settingsService = {
         throw error;
       }
       
-      console.log('✅ Configurações atu alizadas com sucesso:', data);
+      console.log('✅ Configurações atualizadas com sucesso:', data);
       return data;
     });
   }

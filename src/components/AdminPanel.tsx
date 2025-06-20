@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, Users, MessageSquare, Code, Mic, Loader, ArrowLeft, Eye, Upload, Image as ImageIcon, Bell, UserCog, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, Eye, UserCog, TrendingUp } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import ImageUpload from './ImageUpload';
 import UserManagement from './UserManagement';
 import NotificationSystem from './NotificationSystem';
 import GoogleAnalyticsSetup from './GoogleAnalyticsSetup';
 import { useProjects, useTestimonials, useTalks, useSiteSettings } from '../hooks/useSupabaseData';
-import { logoutAdmin } from '../lib/supabase';
+import { logoutAdmin, isAdminAuthenticated } from '../lib/supabase';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -62,6 +62,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
   const [newProject, setNewProject] = useState({ title: '', description: '', tech: '', image_url: '' });
   const [newTestimonial, setNewTestimonial] = useState({ name: '', role: '', text: '', avatar_url: '' });
   const [newTalk, setNewTalk] = useState({ title: '', description: '', tags: '', image_url: '' });
+
+  // Verificar autenticação
+  useEffect(() => {
+    if (!isAdminAuthenticated()) {
+      console.log('❌ Usuário não autenticado, redirecionando...');
+      onBackToFrontend();
+    }
+  }, [onBackToFrontend]);
 
   const handleLogout = () => {
     console.log('🚪 Iniciando processo de logout completo...');
