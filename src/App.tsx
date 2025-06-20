@@ -5,7 +5,7 @@ import AdminPanel from './components/AdminPanel';
 import SupabaseStatus from './components/SupabaseStatus';
 import VersionInfo from './components/VersionInfo';
 import { useFrontendData } from './hooks/useSupabaseData';
-import BlogPost from './components/BlogPost';
+import BlogPost from './components/BlogPost.tsx';
 
 // Matrix rain effect component
 const MatrixRain = () => {
