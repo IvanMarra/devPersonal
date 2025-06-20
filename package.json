@@ -1,0 +1,96 @@
+{
+  "name": "deviem-portfolio",
+  "version": "2.2.1",
+  "private": true,
+  "type": "module",
+  "description": "Portfolio profissional do DevIem com área administrativa completa",
+  "author": "DevIem",
+  "keywords": [
+    "portfolio",
+    "react",
+    "typescript",
+    "supabase",
+    "cybersecurity",
+    "mentoring"
+  ],
+  "homepage": "https://deviem.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deviem/portfolio"
+  },
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview --host",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-google-recaptcha": "^3.1.0",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^4.5.2",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "changelog": {
+    "2.2.1": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 CORREÇÃO CRÍTICA: Resolvido problema de tela preta",
+        "🚀 Adicionado loading screen para evitar tela em branco",
+        "🛠️ Corrigidos problemas de TypeScript no tsconfig.node.json",
+        "⚡ Melhorado sistema de inicialização da aplicação",
+        "🔄 Implementado fallback em caso de erro de renderização",
+        "📱 Otimizado carregamento para melhor experiência do usuário",
+        "🎯 Corrigida configuração do Vite para JavaScript modules",
+        "✨ Adicionado sistema de logs detalhados para debugging"
+      ]
+    },
+    "2.2.0": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 Corrigido erro de MIME type no Vite para JavaScript",
+        "🔄 Implementado sistema de sincronização FORÇADA de dados",
+        "📊 Melhorado sistema de logs detalhados para debugging",
+        "🎯 Corrigida sequência de acesso admin para 'deviem' (era 'admin')",
+        "✨ Adicionado sistema completo de gerenciamento de usuários",
+        "🔐 Implementado alteração de senhas com validação robusta",
+        "👥 Criado sistema de roles (Admin/Editor) para usuários",
+        "🔑 Gerador automático de senhas seguras",
+        "📱 Melhorado design responsivo com animações cyberpunk",
+        "🎨 Adicionados efeitos visuais avançados (hover, glow, floating)",
+        "🌐 Configuração completa para deploy no Vercel",
+        "📝 Criados guias detalhados de configuração (Vercel + Supabase)",
+        "🛠️ Corrigidos problemas de TypeScript no tsconfig.node.json",
+        "⚡ Otimizado sistema de force update para atualizações imediatas",
+        "🔍 Implementado DataSyncManager para sincronização global"
+      ]
+    }
+  }
+}
