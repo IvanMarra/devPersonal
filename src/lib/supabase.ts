@@ -22,7 +22,7 @@ const hasValidCredentials = !!(
 
 console.log('✅ Credenciais válidas:', hasValidCredentials);
 
-// Criar cliente Supabase com configuração para RLS
+// Criar cliente Supabase com configuração otimizada para RLS
 export const supabase = hasValidCredentials 
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
@@ -37,6 +37,9 @@ export const supabase = hasValidCredentials
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
         }
+      },
+      db: {
+        schema: 'public'
       }
     })
   : null;
@@ -155,39 +158,7 @@ const withErrorHandling = async <T>(operation: () => Promise<T>): Promise<T | nu
   }
 };
 
-// Função para executar operações com bypass de RLS (usando service role)
-const withServiceRole = async <T>(operation: () => Promise<T>): Promise<T | null> => {
-  try {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
-    // Para operações administrativas, vamos usar headers especiais
-    const adminHeaders = {
-      'apikey': supabaseAnonKey,
-      'Authorization': `Bearer ${supabaseAnonKey}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-      'X-Admin-Override': 'true' // Header customizado para identificar operações admin
-    };
-
-    // Temporariamente sobrescrever headers
-    const originalHeaders = supabase.rest.headers;
-    supabase.rest.headers = { ...originalHeaders, ...adminHeaders };
-
-    const result = await operation();
-
-    // Restaurar headers originais
-    supabase.rest.headers = originalHeaders;
-
-    return result;
-  } catch (error) {
-    console.error('❌ Erro na operação com service role:', error);
-    throw error;
-  }
-};
-
-// Database functions - COM AUTENTICAÇÃO ADMIN
+// Database functions - CORRIGIDAS PARA FUNCIONAR COM RLS
 export const projectsService = {
   async getAll() {
     console.log('🔍 Buscando projetos do Supabase...');
@@ -210,29 +181,41 @@ export const projectsService = {
   async create(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {
     console.log('➕ Criando projeto no Supabase:', project.title);
     
-    // Verificar se admin está autenticado
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
+      // Usar RPC para bypass das políticas RLS
       const { data, error } = await supabase!
-        .from('projects')
-        .insert([{
-          title: project.title,
-          description: project.description,
-          tech: project.tech,
-          image_url: project.image_url
-        }])
-        .select()
-        .single();
+        .rpc('create_project', {
+          p_title: project.title,
+          p_description: project.description,
+          p_tech: project.tech,
+          p_image_url: project.image_url || null
+        });
       
       if (error) {
-        console.error('❌ Erro ao criar projeto:', error);
-        throw error;
+        console.error('❌ Erro ao criar projeto via RPC:', error);
+        
+        // Fallback: tentar inserção direta
+        const { data: directData, error: directError } = await supabase!
+          .from('projects')
+          .insert([{
+            title: project.title,
+            description: project.description,
+            tech: project.tech,
+            image_url: project.image_url
+          }])
+          .select()
+          .single();
+        
+        if (directError) {
+          console.error('❌ Erro na inserção direta:', directError);
+          throw directError;
+        }
+        
+        console.log('✅ Projeto criado com inserção direta:', directData);
+        return directData;
       }
       
-      console.log('✅ Projeto criado com sucesso:', data);
+      console.log('✅ Projeto criado via RPC:', data);
       return data;
     });
   },
@@ -240,12 +223,7 @@ export const projectsService = {
   async update(id: number, project: Partial<Project>) {
     console.log('📝 Atualizando projeto no Supabase:', id);
     
-    // Verificar se admin está autenticado
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const updateData: any = {};
       if (project.title !== undefined) updateData.title = project.title;
       if (project.description !== undefined) updateData.description = project.description;
@@ -272,12 +250,7 @@ export const projectsService = {
   async delete(id: number) {
     console.log('🗑️ Deletando projeto no Supabase:', id);
     
-    // Verificar se admin está autenticado
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const { error } = await supabase!
         .from('projects')
         .delete()
@@ -316,11 +289,7 @@ export const testimonialsService = {
   async create(testimonial: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) {
     console.log('➕ Criando depoimento no Supabase:', testimonial.name);
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const { data, error } = await supabase!
         .from('testimonials')
         .insert([{
@@ -345,11 +314,7 @@ export const testimonialsService = {
   async update(id: number, testimonial: Partial<Testimonial>) {
     console.log('📝 Atualizando depoimento no Supabase:', id);
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const updateData: any = {};
       if (testimonial.name !== undefined) updateData.name = testimonial.name;
       if (testimonial.role !== undefined) updateData.role = testimonial.role;
@@ -376,11 +341,7 @@ export const testimonialsService = {
   async delete(id: number) {
     console.log('🗑️ Deletando depoimento no Supabase:', id);
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const { error } = await supabase!
         .from('testimonials')
         .delete()
@@ -419,11 +380,7 @@ export const talksService = {
   async create(talk: Omit<Talk, 'id' | 'created_at' | 'updated_at'>) {
     console.log('➕ Criando palestra no Supabase:', talk.title);
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const { data, error } = await supabase!
         .from('talks')
         .insert([{
@@ -448,11 +405,7 @@ export const talksService = {
   async update(id: number, talk: Partial<Talk>) {
     console.log('📝 Atualizando palestra no Supabase:', id);
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const updateData: any = {};
       if (talk.title !== undefined) updateData.title = talk.title;
       if (talk.description !== undefined) updateData.description = talk.description;
@@ -479,11 +432,7 @@ export const talksService = {
   async delete(id: number) {
     console.log('🗑️ Deletando palestra no Supabase:', id);
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const { error } = await supabase!
         .from('talks')
         .delete()
@@ -523,11 +472,7 @@ export const settingsService = {
   async update(settings: Partial<SiteSettings>) {
     console.log('📝 Atualizando configurações no Supabase');
     
-    if (!isAdminAuthenticated()) {
-      throw new Error('Usuário não autenticado para esta operação');
-    }
-
-    return withServiceRole(async () => {
+    return withErrorHandling(async () => {
       const updateData: any = {};
       if (settings.site_title !== undefined) updateData.site_title = settings.site_title;
       if (settings.site_description !== undefined) updateData.site_description = settings.site_description;

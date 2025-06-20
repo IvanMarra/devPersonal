@@ -49,7 +49,7 @@ const useForceUpdate = () => {
   return forceUpdate;
 };
 
-// DADOS PADRÃO APENAS PARA CASOS DE ERRO CRÍTICO
+// DADOS PADRÃO APENAS PARA CASOS DE ERRO CRÍTICO - COM IMAGEM DE PERFIL
 const DEFAULT_DATA = {
   projects: [],
   testimonials: [],
@@ -65,7 +65,8 @@ const DEFAULT_DATA = {
       "JavaScript/TypeScript", "Python", "Java", "C#", "PHP", "React", "Angular", "Vue.js",
       "Node.js", "Spring Boot", ".NET", "Laravel", "Docker", "Kubernetes", "AWS", "Azure",
       "Machine Learning", "AI Tools", "Cybersecurity", "Ethical Hacking", "Penetration Testing"
-    ]
+    ],
+    profile_image_url: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
   }
 };
 
