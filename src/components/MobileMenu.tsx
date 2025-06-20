@@ -115,22 +115,24 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       </div>
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes slideInRight {
+            from {
+              opacity: 0;
+              transform: translateX(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
 
-        .shadow-cyan-glow {
-          box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-      `}</style>
+          .shadow-cyan-glow {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+          }
+        `
+      }} />
     </>
   );
 };
