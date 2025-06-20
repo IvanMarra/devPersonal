@@ -3,31 +3,30 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Verificar se estamos em produção e se as variáveis estão definidas e válidas
-const isProduction = import.meta.env.PROD;
-const hasSupabaseConfig = !!(
+// Log das variáveis para debug
+console.log('🔧 Variáveis de ambiente:', {
+  url: supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  keyLength: supabaseAnonKey?.length || 0
+});
+
+// Verificação RIGOROSA das credenciais
+const hasValidCredentials = !!(
   supabaseUrl && 
   supabaseAnonKey && 
   supabaseUrl.startsWith('https://') &&
-  !supabaseUrl.includes('your_actual_supabase_url_here') &&
-  !supabaseAnonKey.includes('your_actual_supabase_anon_key_here')
+  supabaseUrl.includes('.supabase.co') &&
+  supabaseAnonKey.startsWith('eyJ') &&
+  supabaseAnonKey.length > 100
 );
 
-// Log para debug (apenas em desenvolvimento)
-if (!isProduction) {
-  console.log('🔧 Configuração Supabase:', {
-    hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseAnonKey,
-    isProduction,
-    url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'não configurada'
-  });
-}
+console.log('✅ Credenciais válidas:', hasValidCredentials);
 
-// Criar cliente Supabase com configurações otimizadas
-export const supabase = hasSupabaseConfig 
+// Criar cliente Supabase APENAS se as credenciais forem válidas
+export const supabase = hasValidCredentials 
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        persistSession: false, // Não persistir sessão para operações anônimas
+        persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false
       },
@@ -86,24 +85,24 @@ export interface SiteSettings {
 }
 
 // Enhanced error handling wrapper
-const withErrorHandling = async <T>(operation: () => Promise<T>, fallbackValue: T | null = null): Promise<T | null> => {
+const withErrorHandling = async <T>(operation: () => Promise<T>): Promise<T | null> => {
   try {
     if (!supabase) {
-      console.warn('⚠️ Supabase não configurado, retornando fallback');
-      return fallbackValue;
+      console.error('❌ Supabase não configurado - cliente é null');
+      throw new Error('Supabase não configurado');
     }
     return await operation();
   } catch (error) {
-    console.warn('⚠️ Operação Supabase falhou:', error);
-    return fallbackValue;
+    console.error('❌ Erro na operação Supabase:', error);
+    throw error;
   }
 };
 
-// Database functions with better error handling
+// Database functions - SEM FALLBACK PARA MOCK
 export const projectsService = {
   async getAll() {
+    console.log('🔍 Buscando projetos do Supabase...');
     return withErrorHandling(async () => {
-      console.log('🔍 Buscando projetos do Supabase...');
       const { data, error } = await supabase!
         .from('projects')
         .select('*')
@@ -116,13 +115,12 @@ export const projectsService = {
       
       console.log('✅ Projetos encontrados:', data?.length || 0);
       return data || [];
-    }, []);
+    });
   },
 
   async create(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {
+    console.log('➕ Criando projeto no Supabase:', project.title);
     return withErrorHandling(async () => {
-      console.log('➕ Criando projeto no Supabase:', project.title);
-      
       const { data, error } = await supabase!
         .from('projects')
         .insert([{
@@ -145,9 +143,8 @@ export const projectsService = {
   },
 
   async update(id: number, project: Partial<Project>) {
+    console.log('📝 Atualizando projeto no Supabase:', id);
     return withErrorHandling(async () => {
-      console.log('📝 Atualizando projeto no Supabase:', id);
-      
       const updateData: any = {};
       if (project.title !== undefined) updateData.title = project.title;
       if (project.description !== undefined) updateData.description = project.description;
@@ -172,9 +169,8 @@ export const projectsService = {
   },
 
   async delete(id: number) {
+    console.log('🗑️ Deletando projeto no Supabase:', id);
     return withErrorHandling(async () => {
-      console.log('🗑️ Deletando projeto no Supabase:', id);
-      
       const { error } = await supabase!
         .from('projects')
         .delete()
@@ -193,8 +189,8 @@ export const projectsService = {
 
 export const testimonialsService = {
   async getAll() {
+    console.log('🔍 Buscando depoimentos do Supabase...');
     return withErrorHandling(async () => {
-      console.log('🔍 Buscando depoimentos do Supabase...');
       const { data, error } = await supabase!
         .from('testimonials')
         .select('*')
@@ -207,13 +203,12 @@ export const testimonialsService = {
       
       console.log('✅ Depoimentos encontrados:', data?.length || 0);
       return data || [];
-    }, []);
+    });
   },
 
   async create(testimonial: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) {
+    console.log('➕ Criando depoimento no Supabase:', testimonial.name);
     return withErrorHandling(async () => {
-      console.log('➕ Criando depoimento no Supabase:', testimonial.name);
-      
       const { data, error } = await supabase!
         .from('testimonials')
         .insert([{
@@ -236,9 +231,8 @@ export const testimonialsService = {
   },
 
   async update(id: number, testimonial: Partial<Testimonial>) {
+    console.log('📝 Atualizando depoimento no Supabase:', id);
     return withErrorHandling(async () => {
-      console.log('📝 Atualizando depoimento no Supabase:', id);
-      
       const updateData: any = {};
       if (testimonial.name !== undefined) updateData.name = testimonial.name;
       if (testimonial.role !== undefined) updateData.role = testimonial.role;
@@ -263,9 +257,8 @@ export const testimonialsService = {
   },
 
   async delete(id: number) {
+    console.log('🗑️ Deletando depoimento no Supabase:', id);
     return withErrorHandling(async () => {
-      console.log('🗑️ Deletando depoimento no Supabase:', id);
-      
       const { error } = await supabase!
         .from('testimonials')
         .delete()
@@ -284,8 +277,8 @@ export const testimonialsService = {
 
 export const talksService = {
   async getAll() {
+    console.log('🔍 Buscando palestras do Supabase...');
     return withErrorHandling(async () => {
-      console.log('🔍 Buscando palestras do Supabase...');
       const { data, error } = await supabase!
         .from('talks')
         .select('*')
@@ -298,13 +291,12 @@ export const talksService = {
       
       console.log('✅ Palestras encontradas:', data?.length || 0);
       return data || [];
-    }, []);
+    });
   },
 
   async create(talk: Omit<Talk, 'id' | 'created_at' | 'updated_at'>) {
+    console.log('➕ Criando palestra no Supabase:', talk.title);
     return withErrorHandling(async () => {
-      console.log('➕ Criando palestra no Supabase:', talk.title);
-      
       const { data, error } = await supabase!
         .from('talks')
         .insert([{
@@ -327,9 +319,8 @@ export const talksService = {
   },
 
   async update(id: number, talk: Partial<Talk>) {
+    console.log('📝 Atualizando palestra no Supabase:', id);
     return withErrorHandling(async () => {
-      console.log('📝 Atualizando palestra no Supabase:', id);
-      
       const updateData: any = {};
       if (talk.title !== undefined) updateData.title = talk.title;
       if (talk.description !== undefined) updateData.description = talk.description;
@@ -354,9 +345,8 @@ export const talksService = {
   },
 
   async delete(id: number) {
+    console.log('🗑️ Deletando palestra no Supabase:', id);
     return withErrorHandling(async () => {
-      console.log('🗑️ Deletando palestra no Supabase:', id);
-      
       const { error } = await supabase!
         .from('talks')
         .delete()
@@ -375,8 +365,8 @@ export const talksService = {
 
 export const settingsService = {
   async get() {
+    console.log('🔍 Buscando configurações do Supabase...');
     return withErrorHandling(async () => {
-      console.log('🔍 Buscando configurações do Supabase...');
       const { data, error } = await supabase!
         .from('site_settings')
         .select('*')
@@ -390,13 +380,12 @@ export const settingsService = {
       
       console.log('✅ Configurações encontradas:', !!data);
       return data;
-    }, null);
+    });
   },
 
   async update(settings: Partial<SiteSettings>) {
+    console.log('📝 Atualizando configurações no Supabase');
     return withErrorHandling(async () => {
-      console.log('📝 Atualizando configurações no Supabase');
-      
       const updateData: any = {};
       if (settings.site_title !== undefined) updateData.site_title = settings.site_title;
       if (settings.site_description !== undefined) updateData.site_description = settings.site_description;
@@ -424,7 +413,7 @@ export const settingsService = {
   }
 };
 
-// Storage functions with better error handling
+// Storage functions
 export const storageService = {
   async uploadImage(file: File, folder: string = 'general') {
     return withErrorHandling(async () => {
@@ -454,7 +443,6 @@ export const storageService = {
 
   async deleteImage(url: string) {
     return withErrorHandling(async () => {
-      // Extract file path from URL
       const urlParts = url.split('/');
       const fileName = urlParts[urlParts.length - 1];
       const folder = urlParts[urlParts.length - 2];
@@ -475,24 +463,24 @@ export const storageService = {
   }
 };
 
-// Utility function to check if Supabase is configured
+// Utility functions
 export const isSupabaseConfigured = () => {
-  return hasSupabaseConfig && !!supabase;
+  const result = hasValidCredentials && !!supabase;
+  console.log('🔍 isSupabaseConfigured:', result);
+  return result;
 };
 
-// Function to get environment info
 export const getEnvironmentInfo = () => {
   return {
-    isProduction,
-    hasSupabaseConfig,
+    isProduction: import.meta.env.PROD,
+    hasSupabaseConfig: hasValidCredentials,
     supabaseUrl: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'não configurada',
     hasAnonKey: !!supabaseAnonKey
   };
 };
 
-// Test connection function with timeout
 export const testSupabaseConnection = async (timeoutMs: number = 5000): Promise<{ success: boolean; error?: string }> => {
-  if (!hasSupabaseConfig || !supabase) {
+  if (!hasValidCredentials || !supabase) {
     return { success: false, error: 'Supabase não configurado' };
   }
 

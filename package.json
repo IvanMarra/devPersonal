@@ -1,6 +1,6 @@
 {
   "name": "deviem-portfolio",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "private": true,
   "type": "module",
   "description": "Portfolio profissional do DevIem com área administrativa completa",
@@ -59,6 +59,21 @@
     "npm": ">=8.0.0"
   },
   "changelog": {
+    "2.2.5": {
+      "date": "2025-01-19",
+      "changes": [
+        "🎯 CORREÇÃO DEFINITIVA: Sistema agora usa APENAS dados do Supabase",
+        "❌ REMOVIDOS DADOS MOCK: Eliminados completamente dados inline/mock",
+        "🔧 DETECÇÃO CORRIGIDA: Validação rigorosa das credenciais do Supabase",
+        "📊 LOGS DETALHADOS: Sistema de logs para debugging completo",
+        "⚡ CRUD REAL: Todas as operações agora gravam diretamente no banco",
+        "🗄️ BANCO COMO FONTE ÚNICA: Sistema depende 100% do Supabase",
+        "🔍 VALIDAÇÃO RIGOROSA: Verificação de URL e chave anônima",
+        "✨ ERRO CLARO: Mensagens específicas quando Supabase não está configurado",
+        "🔄 SINCRONIZAÇÃO REAL: Dados atualizados em tempo real do banco",
+        "🛡️ SEM FALLBACK: Sistema falha graciosamente se Supabase não estiver disponível"
+      ]
+    },
     "2.2.4": {
       "date": "2025-01-19",
       "changes": [
