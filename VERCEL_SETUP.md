@@ -12,8 +12,8 @@ Quando você vê essa mensagem no seu site no Vercel, significa que as variávei
 2. Selecione seu projeto (ou crie um novo)
 3. Vá em **Settings → API**
 4. Copie:
-   - **Project URL**: `https://xxxxxxxxxxx.supabase.co`
-   - **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+   - **Project URL**: `https://ognojswphapbphrjkrgj.supabase.co`
+   - **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nbm9qc3dwaGFwYnBocmprcmdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0MzYwMzMsImV4cCI6MjA2NTAxMjAzM30.-j0AanCHKLwltw-Ee6euCIiTtxp7qMWZC8sB0MmbuDI`
 
 ### 2. **Configurar no Vercel Dashboard**
 
