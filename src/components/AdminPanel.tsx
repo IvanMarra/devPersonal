@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, ArrowLeft, Eye, UserCog, TrendingUp, Book, Link, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, BarChart3, Settings, Database, MessageSquare, Code, Mic, Loader, Eye, UserCog, TrendingUp, Book, FileText } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import ImageUpload from './ImageUpload';
 import UserManagement from './UserManagement';
@@ -817,7 +817,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                             placeholder="https://wa.me/5511999999999"
                             className="flex-1 p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
                           />
-                          <Link className="w-5 h-5 text-gray-400" />
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                           Link para WhatsApp, Calendly ou qualquer página de agendamento

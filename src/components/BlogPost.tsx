@@ -13,7 +13,7 @@ interface BlogPostProps {
     category: string;
     published_at: string;
     author: string;
-    reading_time: string;
+    reading_time?: string;
   };
   onBack: () => void;
 }
@@ -28,6 +28,9 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
       year: 'numeric'
     });
   };
+
+  // Calcular tempo de leitura se não fornecido
+  const readingTime = post.reading_time || `${Math.ceil(post.content.length / 1000)} min`;
 
   // Posts relacionados de exemplo
   const relatedPosts = [
@@ -50,7 +53,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pb-20">
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-sm border-b border-cyan-500/30">
         <div className="container mx-auto px-4 sm:px-6 py-4">
@@ -105,7 +108,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
               </div>
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-2" />
-                {post.reading_time} de leitura
+                {readingTime} de leitura
               </div>
             </div>
             

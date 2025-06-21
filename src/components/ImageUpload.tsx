@@ -94,34 +94,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <span className="text-sm text-gray-400 mr-2">Tamanho recomendado: {recommendedSize}</span>
-          <button 
-            className="text-gray-400 hover:text-cyan-400 transition-colors"
-            onClick={() => setShowInfo(!showInfo)}
-          >
-            <Info className="w-4 h-4" />
-          </button>
-        </div>
-        <span className="text-xs text-gray-500">Máx: 5MB</span>
-      </div>
-
-      {showInfo && (
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm text-gray-300">
-          <h4 className="font-medium text-blue-400 mb-1">Dicas para imagens:</h4>
-          <ul className="space-y-1 text-xs">
-            <li>• Perfil: 400x400px (quadrada)</li>
-            <li>• Projetos: 800x600px (paisagem 4:3)</li>
-            <li>• Palestras: 800x400px (paisagem 2:1)</li>
-            <li>• Avatares: 200x200px (quadrada)</li>
-            <li>• Blog: 1200x630px (formato de compartilhamento)</li>
-            <li>• Formatos: JPG, PNG ou WebP (recomendado)</li>
-            <li>• Otimize suas imagens antes do upload para melhor performance</li>
-          </ul>
-        </div>
-      )}
-
       {currentImage ? (
         <div className="relative">
           <img
@@ -171,6 +143,34 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <span className="text-sm text-gray-400 mr-2">Tamanho recomendado: {recommendedSize}</span>
+          <button 
+            className="text-gray-400 hover:text-cyan-400 transition-colors"
+            onClick={() => setShowInfo(!showInfo)}
+          >
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
+        <span className="text-xs text-gray-500">Máx: 5MB</span>
+      </div>
+
+      {showInfo && (
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm text-gray-300">
+          <h4 className="font-medium text-blue-400 mb-1">Dicas para imagens:</h4>
+          <ul className="space-y-1 text-xs">
+            <li>• Perfil: 400x400px (quadrada)</li>
+            <li>• Projetos: 800x600px (paisagem 4:3)</li>
+            <li>• Palestras: 800x400px (paisagem 2:1)</li>
+            <li>• Avatares: 200x200px (quadrada)</li>
+            <li>• Blog: 1200x630px (formato de compartilhamento)</li>
+            <li>• Formatos: JPG, PNG ou WebP (recomendado)</li>
+            <li>• Otimize suas imagens antes do upload para melhor performance</li>
+          </ul>
         </div>
       )}
 
