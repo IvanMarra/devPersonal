@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X, FileText } from 'lucide-react';
+import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X, FileText, Clock } from 'lucide-react';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
 import SupabaseStatus from './components/SupabaseStatus';
@@ -701,7 +701,7 @@ function App() {
             </h2>
             
             <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {projects.map((project, index) => (
+              {(Array.isArray(projects) ? projects : []).map((project, index) => (
                 <div key={project.id} className="project-card rounded-xl p-4 sm:p-6 card-hover group">
                   <div className="relative overflow-hidden rounded-lg mb-4 sm:mb-6">
                     <img 
@@ -748,7 +748,7 @@ function App() {
             </h2>
             
             <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {testimonials.map((testimonial, index) => (
+              {(Array.isArray(testimonials) ? testimonials : []).map((testimonial, index) => (
                 <div key={testimonial.id} className="testimonial-card rounded-xl p-4 sm:p-6 card-hover group">
                   <div className="flex items-center space-x-4 mb-4 sm:mb-6">
                     <div className="relative">
@@ -804,7 +804,7 @@ function App() {
             </h2>
             
             <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
-              {talks.map((talk, index) => (
+              {(Array.isArray(talks) ? talks : []).map((talk, index) => (
                 <div key={talk.id} className="talk-card rounded-xl p-4 sm:p-6 lg:p-8 card-hover group">
                   <div className="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6 sm:lg:space-x-8">
                     <div className="flex-shrink-0 w-full lg:w-auto">
@@ -856,7 +856,7 @@ function App() {
             </h2>
             
             <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {blogPosts.map((post) => (
+              {(Array.isArray(blogPosts) ? blogPosts : []).map((post) => (
                 <div 
                   key={post.id} 
                   className="blog-card rounded-xl overflow-hidden card-hover group cursor-pointer"
@@ -974,7 +974,7 @@ function App() {
               </h3>
               
               <div className="grid md:grid-cols-2 gap-6 mb-12">
-                {classPlans.map((plan) => (
+                {(Array.isArray(classPlans) ? classPlans : []).map((plan) => (
                   <div 
                     key={plan.id} 
                     className={`bg-gray-900/50 p-6 rounded-lg ${
