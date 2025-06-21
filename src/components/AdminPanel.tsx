@@ -798,12 +798,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Foto de Perfil
                         </label>
-                        <ImageUpload
-                          currentImage={editingSettings.profile_image_url}
-                          onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
-                          folder="profile"
-                          recommendedSize="400x400px"
-                        />
+                        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                          <ImageUpload
+                            currentImage={editingSettings.profile_image_url}
+                            onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
+                            folder="profile"
+                            recommendedSize="400x400px"
+                          />
+                          
+                          {editingSettings.profile_image_url && (
+                            <div className="mt-4 p-4 bg-black/30 rounded-lg border border-gray-700">
+                              <h4 className="text-sm font-medium text-gray-300 mb-2">Preview:</h4>
+                              <div className="flex justify-center">
+                                <div className="cyber-border rounded-full p-1 w-32 h-32">
+                                  <img 
+                                    src={editingSettings.profile_image_url} 
+                                    alt="Profile Preview" 
+                                    className="w-full h-full object-cover rounded-full" 
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -894,13 +911,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       <div>
                         <strong className="text-cyan-400 block mb-2">Foto de Perfil:</strong>
                         {settings.profile_image_url ? (
-                          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                            <img
-                              src={settings.profile_image_url}
-                              alt="Profile"
-                              className="w-32 h-32 object-cover rounded-full border-2 border-cyan-500/30"
-                            />
-                            <span className="text-green-400">✅ Configurada</span>
+                          <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                              <div className="cyber-border rounded-full p-1 w-32 h-32">
+                                <img
+                                  src={settings.profile_image_url}
+                                  alt="Profile"
+                                  className="w-full h-full object-cover rounded-full"
+                                />
+                              </div>
+                              <span className="text-green-400">✅ Configurada</span>
+                            </div>
                           </div>
                         ) : (
                           <span className="text-yellow-400 ml-2">⚠️ Não configurada</span>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowLeft, Calendar, Clock, Tag, User, Share2, Bookmark, ThumbsUp, MessageSquare, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Calendar, Clock, Tag, User, Share2, Bookmark, ThumbsUp, MessageSquare, FileText, ChevronLeft, ChevronRight, File, Download } from 'lucide-react';
 
 interface BlogPostProps {
   post: {
@@ -14,11 +14,22 @@ interface BlogPostProps {
     published_at: string;
     author: string;
     reading_time?: string;
+    document_url?: string;
   };
   onBack: () => void;
 }
 
 const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showGallery, setShowGallery] = useState(false);
+  
+  // Simular múltiplas imagens para o carrossel
+  const galleryImages = [
+    post.image_url || "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200"
+  ].filter(Boolean);
+  
   // Formatar data
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -49,6 +60,14 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
       image_url: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=600",
       published_at: "2025-01-08T14:30:00Z",
       reading_time: "6 min"
+    },
+    {
+      id: 103,
+      title: "Inteligência Artificial para Desenvolvedores",
+      excerpt: "Como integrar IA em seus projetos de desenvolvimento de software.",
+      image_url: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=600",
+      published_at: "2025-01-03T09:15:00Z",
+      reading_time: "8 min"
     }
   ];
 
@@ -110,17 +129,81 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
                 <Clock className="w-4 h-4 mr-2" />
                 {readingTime} de leitura
               </div>
+              
+              {post.document_url && (
+                <a 
+                  href={post.document_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  <File className="w-4 h-4 mr-2" />
+                  <span>Baixar documento</span>
+                  <Download className="w-3 h-3 ml-1" />
+                </a>
+              )}
             </div>
             
-            {post.image_url && (
+            {/* Imagem principal com opção de galeria */}
+            <div className="relative">
               <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-8">
                 <img
-                  src={post.image_url}
+                  src={galleryImages[activeImageIndex]}
                   alt={post.title}
                   className="w-full h-full object-cover"
+                  onClick={() => setShowGallery(true)}
                 />
+                
+                {galleryImages.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveImageIndex(prev => (prev === 0 ? galleryImages.length - 1 : prev - 1));
+                      }}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveImageIndex(prev => (prev === galleryImages.length - 1 ? 0 : prev + 1));
+                      }}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                      {galleryImages.map((_, index) => (
+                        <button 
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveImageIndex(index);
+                          }}
+                          className={`w-2 h-2 rounded-full ${
+                            index === activeImageIndex ? 'bg-white' : 'bg-white/50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-            )}
+              
+              {galleryImages.length > 1 && (
+                <div className="flex justify-center mb-8">
+                  <button 
+                    onClick={() => setShowGallery(true)}
+                    className="px-4 py-2 bg-gray-800/50 text-cyan-400 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                  >
+                    Ver todas as imagens ({galleryImages.length})
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Content */}
@@ -195,7 +278,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
               Artigos Relacionados
             </h3>
             
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedPosts.map((relatedPost) => (
                 <div key={relatedPost.id} className="bg-gray-900/30 rounded-xl overflow-hidden border border-gray-800 hover:border-cyan-500/30 transition-all duration-300 group">
                   <div className="relative h-40 overflow-hidden">
@@ -208,7 +291,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
                   </div>
                   
                   <div className="p-4">
-                    <h4 className="text-lg font-bold text-purple-400 group-hover:text-cyan-400 transition-colors duration-300 mb-2">
+                    <h4 className="text-lg font-bold text-purple-400 group-hover:text-cyan-400 transition-colors duration-300 mb-2 line-clamp-2">
                       {relatedPost.title}
                     </h4>
                     <p className="text-gray-300 text-sm mb-3 line-clamp-2">
@@ -331,6 +414,52 @@ const BlogPost: React.FC<BlogPostProps> = ({ post, onBack }) => {
           </div>
         </div>
       </main>
+      
+      {/* Galeria de imagens em tela cheia */}
+      {showGallery && (
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center">
+          <button 
+            onClick={() => setShowGallery(false)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-gray-800/50 text-white hover:bg-gray-800 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div className="relative w-full max-w-4xl">
+            <img
+              src={galleryImages[activeImageIndex]}
+              alt={`Imagem ${activeImageIndex + 1}`}
+              className="w-full h-auto max-h-[80vh] object-contain"
+            />
+            
+            <button 
+              onClick={() => setActiveImageIndex(prev => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <button 
+              onClick={() => setActiveImageIndex(prev => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
+              {galleryImages.map((_, index) => (
+                <button 
+                  key={index}
+                  onClick={() => setActiveImageIndex(index)}
+                  className={`w-3 h-3 rounded-full ${
+                    index === activeImageIndex ? 'bg-white' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

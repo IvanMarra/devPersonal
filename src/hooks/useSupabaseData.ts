@@ -4,10 +4,15 @@ import {
   testimonialsService, 
   talksService, 
   settingsService,
+  blogService,
+  classesService,
   Project,
   Testimonial,
   Talk,
   SiteSettings,
+  BlogPost,
+  ClassPlan,
+  ClassSettings,
   isSupabaseConfigured
 } from '../lib/supabase';
 
@@ -112,7 +117,87 @@ const DEFAULT_DATA = {
       "Machine Learning", "AI Tools", "Cybersecurity", "Ethical Hacking", "Penetration Testing"
     ],
     profile_image_url: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
-  }
+  },
+  blogPosts: [
+    {
+      id: 1,
+      title: "Introdução à Segurança Cibernética",
+      slug: "introducao-seguranca-cibernetica",
+      content: "<h2>Introdução à Segurança Cibernética</h2><p>A segurança cibernética é um campo em constante evolução que se concentra na proteção de sistemas, redes e programas contra ataques digitais.</p>",
+      excerpt: "Uma introdução aos conceitos básicos de segurança cibernética e como proteger seus dados.",
+      image_url: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      tags: ["Cybersecurity", "Beginners", "Data Protection"],
+      category: "Security",
+      published_at: "2025-01-15T10:00:00Z",
+      author: "DevIem"
+    },
+    {
+      id: 2,
+      title: "Como Iniciar sua Carreira em Desenvolvimento Web",
+      slug: "iniciar-carreira-desenvolvimento-web",
+      content: "<h2>Como Iniciar sua Carreira em Desenvolvimento Web em 2025</h2><p>O desenvolvimento web continua sendo uma das carreiras mais promissoras e acessíveis na área de tecnologia.</p>",
+      excerpt: "Guia completo para quem deseja iniciar uma carreira em desenvolvimento web em 2025.",
+      image_url: "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      tags: ["Career", "Web Development", "Beginners"],
+      category: "Career",
+      published_at: "2025-01-10T14:30:00Z",
+      author: "DevIem"
+    }
+  ],
+  classSettings: {
+    id: 1,
+    title: "Aulas Particulares",
+    subtitle: "Aprenda com um especialista",
+    description: "Aulas personalizadas para seu nível e objetivos, com foco em projetos práticos e aplicação real.",
+    cta_text: "Agendar Aula Experimental",
+    cta_link: "https://wa.me/5511999999999",
+    methodology: [
+      "Aulas 100% práticas com projetos reais",
+      "Conteúdo personalizado por aluno",
+      "Suporte contínuo via WhatsApp",
+      "Flexibilidade de horários"
+    ],
+    areas: [
+      "Desenvolvimento Web (React, Angular, Vue)",
+      "Desenvolvimento Mobile (React Native)",
+      "Backend (Node.js, Python, Java)",
+      "Cybersecurity e Ethical Hacking"
+    ]
+  },
+  classPlans: [
+    {
+      id: 1,
+      title: "Plano Básico",
+      description: "Ideal para iniciantes que desejam aprender os fundamentos.",
+      price: 150,
+      duration: "1 hora",
+      features: [
+        "1 aula semanal",
+        "Suporte por e-mail",
+        "Material didático",
+        "Certificado de conclusão"
+      ],
+      image_url: "https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=800",
+      is_featured: false
+    },
+    {
+      id: 2,
+      title: "Plano Premium",
+      description: "Para quem deseja aprender de forma intensiva e com mais recursos.",
+      price: 250,
+      duration: "1.5 horas",
+      features: [
+        "2 aulas semanais",
+        "Suporte por WhatsApp",
+        "Material didático avançado",
+        "Projetos práticos",
+        "Certificado de conclusão",
+        "Mentoria personalizada"
+      ],
+      image_url: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=800",
+      is_featured: true
+    }
+  ]
 };
 
 export const useProjects = () => {
@@ -720,6 +805,431 @@ export const useSiteSettings = () => {
   };
 };
 
+// Hook para blog posts
+export const useBlogPosts = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const forceUpdate = useForceUpdate();
+
+  const fetchBlogPosts = useCallback(async (force = false) => {
+    try {
+      if (force) console.log('🔄 FORÇANDO atualização de posts do blog...');
+      setLoading(true);
+      setError(null);
+      
+      if (!isSupabaseConfigured()) {
+        console.error('❌ Supabase não configurado - usando dados padrão');
+        setBlogPosts(DEFAULT_DATA.blogPosts);
+        setError('Supabase não configurado');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('🌐 Buscando posts do blog do Supabase...');
+      const data = await blogService.getAll();
+      
+      if (data && data.length > 0) {
+        setBlogPosts(data);
+        console.log('📊 Posts do blog carregados do Supabase:', data.length);
+      } else {
+        console.log('📊 Nenhum post do blog encontrado no Supabase, usando dados padrão');
+        setBlogPosts(DEFAULT_DATA.blogPosts);
+      }
+      
+      forceUpdate();
+    } catch (err) {
+      console.error('❌ Erro ao carregar posts do blog:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar posts do blog');
+      console.log('📊 Usando dados padrão devido a erro');
+      setBlogPosts(DEFAULT_DATA.blogPosts);
+    } finally {
+      setLoading(false);
+    }
+  }, [forceUpdate]);
+
+  useEffect(() => {
+    fetchBlogPosts();
+    
+    const unsubscribe = dataSyncManager.subscribe(() => {
+      console.log('🔄 Recebido evento de sync - atualizando posts do blog...');
+      fetchBlogPosts(true);
+    });
+    
+    return unsubscribe;
+  }, [fetchBlogPosts]);
+
+  const addBlogPost = async (post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando adição');
+        const newPost = {
+          id: Date.now(),
+          ...post,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setBlogPosts(prev => [newPost, ...prev]);
+        return newPost;
+      }
+      
+      console.log('➕ Adicionando post do blog no Supabase:', post.title);
+      const newPost = await blogService.create(post);
+      
+      if (newPost) {
+        console.log('✅ Post do blog adicionado com sucesso no Supabase');
+        await fetchBlogPosts(true);
+        dataSyncManager.notify();
+        return newPost;
+      } else {
+        throw new Error('Falha ao criar post do blog no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao adicionar post do blog:', err);
+      
+      // Fallback: adicionar localmente
+      console.log('📊 Adicionando post do blog localmente devido a erro');
+      const newPost = {
+        id: Date.now(),
+        ...post,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setBlogPosts(prev => [newPost, ...prev]);
+      
+      throw err;
+    }
+  };
+
+  const updateBlogPost = async (id: number, post: Partial<BlogPost>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setBlogPosts(prev => 
+          prev.map(p => p.id === id ? { ...p, ...post, updated_at: new Date().toISOString() } : p)
+        );
+        return { id, ...post };
+      }
+      
+      console.log('📝 Atualizando post do blog no Supabase:', id);
+      const updatedPost = await blogService.update(id, post);
+      
+      if (updatedPost) {
+        console.log('✅ Post do blog atualizado com sucesso no Supabase');
+        await fetchBlogPosts(true);
+        dataSyncManager.notify();
+        return updatedPost;
+      } else {
+        throw new Error('Falha ao atualizar post do blog no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao atualizar post do blog:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando post do blog localmente devido a erro');
+      setBlogPosts(prev => 
+        prev.map(p => p.id === id ? { ...p, ...post, updated_at: new Date().toISOString() } : p)
+      );
+      
+      throw err;
+    }
+  };
+
+  const deleteBlogPost = async (id: number) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando exclusão');
+        setBlogPosts(prev => prev.filter(p => p.id !== id));
+        return true;
+      }
+      
+      console.log('🗑️ Deletando post do blog no Supabase:', id);
+      await blogService.delete(id);
+      console.log('✅ Post do blog deletado com sucesso no Supabase');
+      await fetchBlogPosts(true);
+      dataSyncManager.notify();
+      return true;
+    } catch (err) {
+      console.error('❌ Erro ao deletar post do blog:', err);
+      
+      // Fallback: deletar localmente
+      console.log('📊 Deletando post do blog localmente devido a erro');
+      setBlogPosts(prev => prev.filter(p => p.id !== id));
+      
+      throw err;
+    }
+  };
+
+  return {
+    blogPosts,
+    loading,
+    error,
+    addBlogPost,
+    updateBlogPost,
+    deleteBlogPost,
+    refetch: fetchBlogPosts
+  };
+};
+
+// Hook para configurações de aulas
+export const useClassSettings = () => {
+  const [classSettings, setClassSettings] = useState<ClassSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const forceUpdate = useForceUpdate();
+
+  const fetchClassSettings = useCallback(async (force = false) => {
+    try {
+      if (force) console.log('🔄 FORÇANDO atualização de configurações de aulas...');
+      setLoading(true);
+      setError(null);
+      
+      if (!isSupabaseConfigured()) {
+        console.error('❌ Supabase não configurado - usando configurações padrão');
+        setClassSettings(DEFAULT_DATA.classSettings);
+        setError('Supabase não configurado');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('🌐 Buscando configurações de aulas do Supabase...');
+      const data = await classesService.getSettings();
+      
+      if (data) {
+        setClassSettings(data);
+        console.log('📊 Configurações de aulas carregadas do Supabase');
+      } else {
+        console.log('📊 Nenhuma configuração de aulas encontrada no Supabase, usando configurações padrão');
+        setClassSettings(DEFAULT_DATA.classSettings);
+      }
+      
+      forceUpdate();
+    } catch (err) {
+      console.error('❌ Erro ao carregar configurações de aulas:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar configurações de aulas');
+      console.log('📊 Usando configurações padrão devido a erro');
+      setClassSettings(DEFAULT_DATA.classSettings);
+    } finally {
+      setLoading(false);
+    }
+  }, [forceUpdate]);
+
+  useEffect(() => {
+    fetchClassSettings();
+    
+    const unsubscribe = dataSyncManager.subscribe(() => {
+      console.log('🔄 Recebido evento de sync - atualizando configurações de aulas...');
+      fetchClassSettings(true);
+    });
+    
+    return unsubscribe;
+  }, [fetchClassSettings]);
+
+  const updateClassSettings = async (settings: Partial<ClassSettings>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setClassSettings(prev => prev ? { ...prev, ...settings, updated_at: new Date().toISOString() } : null);
+        return settings;
+      }
+      
+      console.log('📝 Atualizando configurações de aulas no Supabase');
+      const updatedSettings = await classesService.updateSettings(settings);
+      
+      if (updatedSettings) {
+        console.log('✅ Configurações de aulas atualizadas com sucesso no Supabase');
+        await fetchClassSettings(true);
+        dataSyncManager.notify();
+        return updatedSettings;
+      } else {
+        throw new Error('Falha ao atualizar configurações de aulas no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao atualizar configurações de aulas:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando configurações de aulas localmente devido a erro');
+      setClassSettings(prev => prev ? { ...prev, ...settings, updated_at: new Date().toISOString() } : null);
+      
+      throw err;
+    }
+  };
+
+  return {
+    classSettings,
+    loading,
+    error,
+    updateClassSettings,
+    refetch: fetchClassSettings
+  };
+};
+
+// Hook para planos de aula
+export const useClassPlans = () => {
+  const [classPlans, setClassPlans] = useState<ClassPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const forceUpdate = useForceUpdate();
+
+  const fetchClassPlans = useCallback(async (force = false) => {
+    try {
+      if (force) console.log('🔄 FORÇANDO atualização de planos de aula...');
+      setLoading(true);
+      setError(null);
+      
+      if (!isSupabaseConfigured()) {
+        console.error('❌ Supabase não configurado - usando dados padrão');
+        setClassPlans(DEFAULT_DATA.classPlans);
+        setError('Supabase não configurado');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('🌐 Buscando planos de aula do Supabase...');
+      const data = await classesService.getPlans();
+      
+      if (data && data.length > 0) {
+        setClassPlans(data);
+        console.log('📊 Planos de aula carregados do Supabase:', data.length);
+      } else {
+        console.log('📊 Nenhum plano de aula encontrado no Supabase, usando dados padrão');
+        setClassPlans(DEFAULT_DATA.classPlans);
+      }
+      
+      forceUpdate();
+    } catch (err) {
+      console.error('❌ Erro ao carregar planos de aula:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar planos de aula');
+      console.log('📊 Usando dados padrão devido a erro');
+      setClassPlans(DEFAULT_DATA.classPlans);
+    } finally {
+      setLoading(false);
+    }
+  }, [forceUpdate]);
+
+  useEffect(() => {
+    fetchClassPlans();
+    
+    const unsubscribe = dataSyncManager.subscribe(() => {
+      console.log('🔄 Recebido evento de sync - atualizando planos de aula...');
+      fetchClassPlans(true);
+    });
+    
+    return unsubscribe;
+  }, [fetchClassPlans]);
+
+  const addClassPlan = async (plan: Omit<ClassPlan, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando adição');
+        const newPlan = {
+          id: Date.now(),
+          ...plan,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setClassPlans(prev => [...prev, newPlan]);
+        return newPlan;
+      }
+      
+      console.log('➕ Adicionando plano de aula no Supabase:', plan.title);
+      const newPlan = await classesService.createPlan(plan);
+      
+      if (newPlan) {
+        console.log('✅ Plano de aula adicionado com sucesso no Supabase');
+        await fetchClassPlans(true);
+        dataSyncManager.notify();
+        return newPlan;
+      } else {
+        throw new Error('Falha ao criar plano de aula no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao adicionar plano de aula:', err);
+      
+      // Fallback: adicionar localmente
+      console.log('📊 Adicionando plano de aula localmente devido a erro');
+      const newPlan = {
+        id: Date.now(),
+        ...plan,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setClassPlans(prev => [...prev, newPlan]);
+      
+      throw err;
+    }
+  };
+
+  const updateClassPlan = async (id: number, plan: Partial<ClassPlan>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setClassPlans(prev => 
+          prev.map(p => p.id === id ? { ...p, ...plan, updated_at: new Date().toISOString() } : p)
+        );
+        return { id, ...plan };
+      }
+      
+      console.log('📝 Atualizando plano de aula no Supabase:', id);
+      const updatedPlan = await classesService.updatePlan(id, plan);
+      
+      if (updatedPlan) {
+        console.log('✅ Plano de aula atualizado com sucesso no Supabase');
+        await fetchClassPlans(true);
+        dataSyncManager.notify();
+        return updatedPlan;
+      } else {
+        throw new Error('Falha ao atualizar plano de aula no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao atualizar plano de aula:', err);
+      
+      // Fallback: atualizar localmente
+      console.log('📊 Atualizando plano de aula localmente devido a erro');
+      setClassPlans(prev => 
+        prev.map(p => p.id === id ? { ...p, ...plan, updated_at: new Date().toISOString() } : p)
+      );
+      
+      throw err;
+    }
+  };
+
+  const deleteClassPlan = async (id: number) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando exclusão');
+        setClassPlans(prev => prev.filter(p => p.id !== id));
+        return true;
+      }
+      
+      console.log('🗑️ Deletando plano de aula no Supabase:', id);
+      await classesService.deletePlan(id);
+      console.log('✅ Plano de aula deletado com sucesso no Supabase');
+      await fetchClassPlans(true);
+      dataSyncManager.notify();
+      return true;
+    } catch (err) {
+      console.error('❌ Erro ao deletar plano de aula:', err);
+      
+      // Fallback: deletar localmente
+      console.log('📊 Deletando plano de aula localmente devido a erro');
+      setClassPlans(prev => prev.filter(p => p.id !== id));
+      
+      throw err;
+    }
+  };
+
+  return {
+    classPlans,
+    loading,
+    error,
+    addClassPlan,
+    updateClassPlan,
+    deleteClassPlan,
+    refetch: fetchClassPlans
+  };
+};
+
 // Hook para sincronização global de dados
 export const useDataSync = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -750,6 +1260,9 @@ export const useFrontendData = () => {
   const { testimonials } = useTestimonials();
   const { talks } = useTalks();
   const { settings } = useSiteSettings();
+  const { blogPosts } = useBlogPosts();
+  const { classSettings } = useClassSettings();
+  const { classPlans } = useClassPlans();
 
   const refreshAllData = useCallback(() => {
     console.log('🔄 FORÇANDO refresh TOTAL de todos os dados do frontend...');
@@ -761,6 +1274,9 @@ export const useFrontendData = () => {
     testimonials,
     talks,
     settings,
+    blogPosts,
+    classSettings,
+    classPlans,
     refreshAllData
   };
 };

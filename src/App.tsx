@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Code, Shield, Users, MessageSquare, Mic, GraduationCap, ChevronDown, Terminal, Zap, Brain, Eye, Menu, X, FileText } from 'lucide-react';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
@@ -12,113 +12,106 @@ const MatrixRain = () => {
   useEffect(() => {
     const canvas = document.getElementById('matrix-canvas') as HTMLCanvasElement;
     if (!canvas) return;
-
+    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
+    
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
+    
     const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
     const matrixArray = matrix.split("");
-
+    
     const fontSize = 10;
     const columns = canvas.width / fontSize;
-
+    
     const drops: number[] = [];
     for (let i = 0; i < columns; i++) {
       drops[i] = 1;
     }
-
+    
     const draw = () => {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+      
       ctx.fillStyle = '#00ff00';
       ctx.font = fontSize + 'px monospace';
-
+      
       for (let i = 0; i < drops.length; i++) {
         const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
+        
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
+        
         drops[i]++;
       }
     };
-
+    
     const interval = setInterval(draw, 35);
-
+    
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
-
+    
     window.addEventListener('resize', handleResize);
-
+    
     return () => {
       clearInterval(interval);
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
+  
   return (
-    <canvas
-      id="matrix-canvas"
-      className="fixed inset-0 z-0 opacity-20"
-      style={{ pointerEvents: 'none' }}
-    />
+    <canvas id="matrix-canvas" className="fixed inset-0 z-0 opacity-20" style={{ pointerEvents: 'none' }}></canvas>
   );
 };
 
 // Mobile Menu Component - RESPONSIVIDADE MELHORADA
-const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
+const MobileMenu = ({ sections, activeSection, onSectionChange }: {
+  sections: Array<{ id: string; title: string; icon: React.ComponentType<any> }>;
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  
   useEffect(() => {
     setIsOpen(false);
   }, [activeSection]);
-
+  
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-
+    
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
+  
   return (
     <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
         className="md:hidden p-2 rounded-lg border border-cyan-400/50 text-cyan-400 hover:bg-cyan-500/20 transition-all duration-300 relative z-50"
       >
         <div className="relative w-6 h-6">
-          <Menu 
-            className={`absolute inset-0 w-6 h-6 transition-all duration-300 ${
-              isOpen ? 'opacity-0 rotate-45 scale-0' : 'opacity-100 rotate-0 scale-100'
-            }`} 
-          />
-          <X 
-            className={`absolute inset-0 w-6 h-6 transition-all duration-300 ${
-              isOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-45 scale-0'
-            }`} 
-          />
+          <Menu className={`absolute inset-0 w-6 h-6 transition-all duration-300 ${isOpen ? 'opacity-0 rotate-45 scale-0' : 'opacity-100 rotate-0 scale-100'}`} />
+          <X className={`absolute inset-0 w-6 h-6 transition-all duration-300 ${isOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-45 scale-0'}`} />
         </div>
       </button>
-
+      
       <div 
         className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsOpen(false)}
       />
-
+      
       <div 
         className={`fixed top-0 right-0 h-full w-full max-w-sm bg-black/95 backdrop-blur-md border-l border-cyan-500/30 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -129,16 +122,16 @@ const MobileMenu = ({ sections, activeSection, onSectionChange }: any) => {
             <Terminal className="w-6 h-6 text-cyan-400" />
             <span className="text-xl font-bold text-cyan-400">DEVIEM</span>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
+          <button 
+            onClick={() => setIsOpen(false)} 
             className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/20 transition-all duration-300"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-
+        
         <nav className="p-4 sm:p-6 space-y-2">
-          {sections.map((section: any, index: number) => (
+          {sections.map((section, index) => (
             <button
               key={section.id}
               onClick={() => onSectionChange(section.id)}
@@ -168,204 +161,10 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [activeBlogPost, setActiveBlogPost] = useState<any>(null);
-
+  
   // Usar dados do Supabase
-  const { projects, testimonials, talks, settings, refreshAllData } = useFrontendData();
-
-  // Dados de exemplo para o blog
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Introdução à Segurança Cibernética",
-      slug: "introducao-seguranca-cibernetica",
-      content: `<p>A segurança cibernética é um campo em constante evolução que se concentra na proteção de sistemas, redes e programas contra ataques digitais. Esses ataques geralmente visam acessar, alterar ou destruir informações confidenciais, extorquir dinheiro dos usuários ou interromper processos de negócios normais.</p>
-      
-      <h2>Por que a segurança cibernética é importante?</h2>
-      
-      <p>Com o aumento da dependência de computadores e da internet, mais dados sensíveis estão sendo armazenados online. Isso inclui informações financeiras, propriedade intelectual, dados pessoais e muito mais. Se essas informações caírem em mãos erradas, as consequências podem ser devastadoras.</p>
-      
-      <h2>Tipos comuns de ameaças cibernéticas</h2>
-      
-      <ul>
-        <li><strong>Malware</strong>: Software malicioso projetado para danificar ou interromper sistemas.</li>
-        <li><strong>Phishing</strong>: Tentativas de obter informações sensíveis através de e-mails ou sites fraudulentos.</li>
-        <li><strong>Ransomware</strong>: Malware que criptografa dados e exige pagamento para descriptografá-los.</li>
-        <li><strong>Ataques de negação de serviço (DDoS)</strong>: Sobrecarregam sistemas para torná-los inacessíveis.</li>
-      </ul>
-      
-      <h2>Melhores práticas de segurança</h2>
-      
-      <ol>
-        <li>Mantenha seu software atualizado</li>
-        <li>Use senhas fortes e um gerenciador de senhas</li>
-        <li>Implemente autenticação de dois fatores</li>
-        <li>Faça backup regular dos seus dados</li>
-        <li>Eduque-se e a sua equipe sobre ameaças cibernéticas</li>
-      </ol>
-      
-      <p>A segurança cibernética é responsabilidade de todos. Ao implementar boas práticas e manter-se informado sobre as últimas ameaças, você pode ajudar a proteger seus dados e sistemas contra ataques cibernéticos.</p>`,
-      excerpt: "Uma introdução aos conceitos básicos de segurança cibernética e como proteger seus dados.",
-      image_url: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      tags: ["Cybersecurity", "Beginners", "Data Protection"],
-      category: "Security",
-      published_at: "2025-01-15T10:00:00Z",
-      author: "DevIem"
-    },
-    {
-      id: 2,
-      title: "Como Iniciar sua Carreira em Desenvolvimento Web",
-      slug: "iniciar-carreira-desenvolvimento-web",
-      content: `<p>O desenvolvimento web continua sendo uma das carreiras mais promissoras e acessíveis na área de tecnologia. Com a crescente digitalização dos negócios, a demanda por desenvolvedores web qualificados só aumenta.</p>
-      
-      <h2>Por onde começar?</h2>
-      
-      <p>Iniciar uma carreira em desenvolvimento web pode parecer intimidador, mas com um plano estruturado, você pode progredir rapidamente:</p>
-      
-      <h3>1. Aprenda os fundamentos</h3>
-      
-      <p>Comece com as tecnologias básicas da web:</p>
-      <ul>
-        <li><strong>HTML</strong>: A estrutura de todas as páginas web</li>
-        <li><strong>CSS</strong>: Para estilizar e formatar o conteúdo</li>
-        <li><strong>JavaScript</strong>: Para adicionar interatividade</li>
-      </ul>
-      
-      <h3>2. Escolha uma especialização</h3>
-      
-      <p>Após dominar os fundamentos, você pode se especializar em:</p>
-      <ul>
-        <li><strong>Frontend</strong>: Foco na interface do usuário (React, Vue, Angular)</li>
-        <li><strong>Backend</strong>: Desenvolvimento do servidor (Node.js, Python, PHP)</li>
-        <li><strong>Fullstack</strong>: Combinação de frontend e backend</li>
-      </ul>
-      
-      <h3>3. Construa projetos práticos</h3>
-      
-      <p>A teoria é importante, mas a prática é essencial. Construa projetos reais para aplicar o que aprendeu e criar um portfólio.</p>
-      
-      <h3>4. Aprenda ferramentas e práticas modernas</h3>
-      
-      <ul>
-        <li>Controle de versão com Git</li>
-        <li>Metodologias ágeis</li>
-        <li>Testes automatizados</li>
-        <li>CI/CD (Integração e Entrega Contínuas)</li>
-      </ul>
-      
-      <h2>Recursos para aprendizado</h2>
-      
-      <p>Existem muitos recursos gratuitos e pagos para aprender desenvolvimento web:</p>
-      <ul>
-        <li>freeCodeCamp</li>
-        <li>The Odin Project</li>
-        <li>MDN Web Docs</li>
-        <li>Udemy, Coursera, Pluralsight</li>
-        <li>YouTube e blogs técnicos</li>
-      </ul>
-      
-      <p>Lembre-se: consistência é a chave. Dedique um tempo todos os dias para aprender e praticar, e você verá progresso constante em sua jornada como desenvolvedor web.</p>`,
-      excerpt: "Guia completo para quem deseja iniciar uma carreira em desenvolvimento web em 2025.",
-      image_url: "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      tags: ["Career", "Web Development", "Beginners"],
-      category: "Career",
-      published_at: "2025-01-10T14:30:00Z",
-      author: "DevIem"
-    },
-    {
-      id: 3,
-      title: "Inteligência Artificial para Desenvolvedores",
-      slug: "inteligencia-artificial-desenvolvedores",
-      content: `<p>A inteligência artificial está transformando o desenvolvimento de software. Neste artigo, exploramos como desenvolvedores podem aproveitar ferramentas de IA para aumentar sua produtividade.</p>
-      
-      <h2>Ferramentas de IA para Desenvolvedores</h2>
-      
-      <p>Existem diversas ferramentas de IA que podem ajudar desenvolvedores em seu trabalho diário:</p>
-      
-      <ul>
-        <li>GitHub Copilot</li>
-        <li>Tabnine</li>
-        <li>ChatGPT</li>
-        <li>Claude</li>
-      </ul>
-      
-      <h2>Casos de Uso</h2>
-      
-      <p>A IA pode ser utilizada para:</p>
-      
-      <ul>
-        <li>Geração de código</li>
-        <li>Debugging</li>
-        <li>Refatoração</li>
-        <li>Documentação</li>
-        <li>Testes</li>
-      </ul>
-      
-      <p>Aprenda a integrar IA em seu fluxo de trabalho para se tornar um desenvolvedor mais eficiente.</p>`,
-      excerpt: "Como desenvolvedores podem aproveitar ferramentas de IA para aumentar sua produtividade.",
-      image_url: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      tags: ["AI", "Development", "Productivity"],
-      category: "Technology",
-      published_at: "2025-01-05T09:15:00Z",
-      author: "DevIem"
-    }
-  ];
-
-  // Dados de exemplo para aulas particulares
-  const classSettings = {
-    title: "Aulas Particulares",
-    subtitle: "Aprenda com um especialista",
-    description: "Aulas personalizadas para seu nível e objetivos, com foco em projetos práticos e aplicação real.",
-    cta_text: "Agendar Aula Experimental",
-    cta_link: "https://wa.me/5511999999999",
-    methodology: [
-      "Aulas 100% práticas com projetos reais",
-      "Conteúdo personalizado por aluno",
-      "Suporte contínuo via WhatsApp",
-      "Flexibilidade de horários"
-    ],
-    areas: [
-      "Desenvolvimento Web (React, Angular, Vue)",
-      "Desenvolvimento Mobile (React Native)",
-      "Backend (Node.js, Python, Java)",
-      "Cybersecurity e Ethical Hacking"
-    ]
-  };
-
-  const classPlans = [
-    {
-      id: 1,
-      title: "Plano Básico",
-      description: "Ideal para iniciantes que desejam aprender os fundamentos.",
-      price: 150,
-      duration: "1 hora",
-      features: [
-        "1 aula semanal",
-        "Suporte por e-mail",
-        "Material didático",
-        "Certificado de conclusão"
-      ],
-      image_url: "https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=800",
-      is_featured: false
-    },
-    {
-      id: 2,
-      title: "Plano Premium",
-      description: "Para quem deseja aprender de forma intensiva e com mais recursos.",
-      price: 250,
-      duration: "1.5 horas",
-      features: [
-        "2 aulas semanais",
-        "Suporte por WhatsApp",
-        "Material didático avançado",
-        "Projetos práticos",
-        "Certificado de conclusão",
-        "Mentoria personalizada"
-      ],
-      image_url: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=800",
-      is_featured: true
-    }
-  ];
-
+  const { projects, testimonials, talks, settings, blogPosts, classPlans, classSettings, refreshAllData } = useFrontendData();
+  
   useEffect(() => {
     // Verificar se já está autenticado
     const token = localStorage.getItem('deviem_admin_token');
@@ -386,16 +185,16 @@ function App() {
       }
     }
   }, []);
-
+  
   // Função especial para acesso admin (sequência de teclas)
   useEffect(() => {
     let sequence = '';
     const adminSequence = 'deviem';
-    let sequenceTimeout: NodeJS.Timeout;
+    let sequenceTimeout: number | undefined;
     
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!e.key) return;
-
+      
       // Limpar timeout anterior
       if (sequenceTimeout) {
         clearTimeout(sequenceTimeout);
@@ -422,11 +221,11 @@ function App() {
       }
       
       // Definir timeout para limpar a sequência após 2 segundos de inatividade
-      sequenceTimeout = setTimeout(() => {
+      sequenceTimeout = window.setTimeout(() => {
         sequence = '';
       }, 2000);
     };
-
+    
     window.addEventListener('keydown', handleKeyPress);
     
     return () => {
@@ -436,17 +235,17 @@ function App() {
       }
     };
   }, [isAuthenticated]);
-
+  
   // Auto-refresh dos dados a cada 30 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       console.log('🔄 Auto-refresh dos dados...');
       refreshAllData();
     }, 30000);
-
+    
     return () => clearInterval(interval);
   }, [refreshAllData]);
-
+  
   const handleLogin = (success: boolean) => {
     if (success) {
       setIsAuthenticated(true);
@@ -458,13 +257,13 @@ function App() {
       setShowLogin(false);
     }
   };
-
+  
   const handleAdminClose = () => {
     setIsAdminOpen(false);
     // Forçar refresh dos dados após fechar admin
     refreshAllData();
   };
-
+  
   const handleBackToFrontend = () => {
     setIsAdminOpen(false);
     setShowLogin(false);
@@ -472,38 +271,31 @@ function App() {
     // Forçar refresh dos dados
     refreshAllData();
   };
-
+  
+  const handleOpenBlogPost = (post: any) => {
+    setActiveBlogPost(post);
+  };
+  
+  const handleCloseBlogPost = () => {
+    setActiveBlogPost(null);
+  };
+  
   const sections = [
     { id: 'home', title: 'Início', icon: Terminal },
     { id: 'about', title: 'Sobre', icon: Eye },
     { id: 'projects', title: 'Projetos', icon: Code },
     { id: 'testimonials', title: 'Depoimentos', icon: MessageSquare },
     { id: 'talks', title: 'Palestras', icon: Mic },
-    { id: 'classes', title: 'Aulas Particulares', icon: GraduationCap },
     { id: 'blog', title: 'Blog', icon: FileText },
+    { id: 'classes', title: 'Aulas Particulares', icon: GraduationCap },
   ];
-
-  // Se estiver visualizando um post do blog
-  if (activeBlogPost) {
-    return (
-      <BlogPost 
-        post={activeBlogPost} 
-        onBack={() => setActiveBlogPost(null)} 
-      />
-    );
-  }
-
+  
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       <MatrixRain />
-      
-      {/* Supabase Status */}
       <SupabaseStatus />
-      
-      {/* Version Info */}
       <VersionInfo />
       
-      {/* Custom CSS */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .glitch-text {
@@ -634,6 +426,12 @@ function App() {
             backdrop-filter: blur(10px);
             border: 1px solid rgba(34, 197, 94, 0.2);
           }
+          
+          .blog-card {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+          }
 
           .avatar-glow {
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
@@ -683,33 +481,29 @@ function App() {
               font-size: 2rem !important;
             }
             
-            .project-card, .testimonial-card, .talk-card {
+            .project-card, .testimonial-card, .talk-card, .blog-card {
               margin: 0.5rem 0;
             }
           }
         `
       }} />
-
-      {/* Navigation - RESPONSIVIDADE MELHORADA */}
+      
       <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-sm border-b border-cyan-500/30">
         <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Terminal className="w-6 sm:w-8 h-6 sm:h-8 text-cyan-400" />
-              <div className="text-xl sm:text-2xl font-bold text-cyan-400 glitch-text">
-                DEVIEM
-              </div>
+              <div className="text-xl sm:text-2xl font-bold text-cyan-400 glitch-text">DEVIEM</div>
             </div>
             
-            {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-6">
               {sections.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                    activeSection === section.id 
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400' 
+                    activeSection === section.id
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400'
                       : 'text-gray-400 hover:text-cyan-400'
                   }`}
                 >
@@ -718,18 +512,17 @@ function App() {
                 </button>
               ))}
             </div>
-
-            {/* Mobile Menu */}
-            <MobileMenu
-              sections={sections}
-              activeSection={activeSection}
-              onSectionChange={setActiveSection}
+            
+            <MobileMenu 
+              sections={sections} 
+              activeSection={activeSection} 
+              onSectionChange={setActiveSection} 
             />
           </div>
         </div>
       </nav>
-
-      {/* Hero Section - RESPONSIVIDADE MELHORADA */}
+      
+      {/* Home Section */}
       {activeSection === 'home' && (
         <section className="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6">
           <div className="text-center z-10 w-full max-w-4xl">
@@ -750,16 +543,16 @@ function App() {
                 {settings?.site_description || 'Especialista em desenvolvimento web/mobile, inteligência artificial, cybersecurity e mentor de transição de carreira'}
               </p>
             </div>
-
+            
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button 
+              <button
                 onClick={() => setActiveSection('projects')}
                 className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow"
               >
                 <Code className="w-4 sm:w-5 h-4 sm:h-5 inline mr-2" />
                 Ver Projetos
               </button>
-              <button 
+              <button
                 onClick={() => setActiveSection('about')}
                 className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-purple-500/20 border-purple-400 text-purple-400 hover:bg-purple-500/30 hover:shadow-purple-glow"
               >
@@ -774,25 +567,24 @@ function App() {
           </div>
         </section>
       )}
-
-      {/* About Section - RESPONSIVIDADE MELHORADA */}
+      
+      {/* About Section */}
       {activeSection === 'about' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Sobre DevIem
             </h2>
             
             <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 items-start">
-              {/* Profile Image Section */}
               <div className="lg:col-span-1 flex justify-center">
                 <div className="relative">
                   <div className="cyber-border rounded-full p-1">
                     {settings?.profile_image_url ? (
-                      <img
-                        src={settings.profile_image_url}
-                        alt="DevIem"
-                        className="w-40 sm:w-48 md:w-64 h-40 sm:h-48 md:h-64 object-cover rounded-full floating-animation"
+                      <img 
+                        src={settings.profile_image_url} 
+                        alt="DevIem" 
+                        className="w-40 sm:w-48 md:w-64 h-40 sm:h-48 md:h-64 object-cover rounded-full floating-animation" 
                       />
                     ) : (
                       <div className="w-40 sm:w-48 md:w-64 h-40 sm:h-48 md:h-64 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-cyan-400/50 floating-animation">
@@ -805,20 +597,20 @@ function App() {
                     )}
                   </div>
                   
-                  {/* Floating elements around the image */}
                   <div className="absolute -top-2 sm:-top-4 -right-2 sm:-right-4 w-6 sm:w-8 h-6 sm:h-8 bg-cyan-400/20 rounded-full border border-cyan-400 flex items-center justify-center floating-animation">
                     <Shield className="w-3 sm:w-4 h-3 sm:h-4 text-cyan-400" />
                   </div>
-                  <div className="absolute -bottom-2 sm:-bottom-4 -left-2 sm:-left-4 w-6 sm:w-8 h-6 sm:h-8 bg-purple-400/20 rounded-full border border-purple-400 flex items-center justify-center floating-animation" style={{animationDelay: '1s'}}>
+                  
+                  <div className="absolute -bottom-2 sm:-bottom-4 -left-2 sm:-left-4 w-6 sm:w-8 h-6 sm:h-8 bg-purple-400/20 rounded-full border border-purple-400 flex items-center justify-center floating-animation" style={{ animationDelay: '1s' }}>
                     <Brain className="w-3 sm:w-4 h-3 sm:h-4 text-purple-400" />
                   </div>
-                  <div className="absolute top-1/2 -left-4 sm:-left-8 w-5 sm:w-6 h-5 sm:h-6 bg-green-400/20 rounded-full border border-green-400 flex items-center justify-center floating-animation" style={{animationDelay: '2s'}}>
+                  
+                  <div className="absolute top-1/2 -left-4 sm:-left-8 w-5 sm:w-6 h-5 sm:h-6 bg-green-400/20 rounded-full border border-green-400 flex items-center justify-center floating-animation" style={{ animationDelay: '2s' }}>
                     <Code className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-green-400" />
                   </div>
                 </div>
               </div>
-
-              {/* Content Section */}
+              
               <div className="lg:col-span-2 space-y-6 sm:space-y-8">
                 <div className="cyber-border rounded-lg">
                   <div className="bg-black p-4 sm:p-6 rounded-lg">
@@ -826,9 +618,13 @@ function App() {
                       <Shield className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
                       Especialidades
                     </h3>
+                    
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2">
                       {(settings?.skills || []).map((skill, index) => (
-                        <div key={index} className="bg-gray-900/50 p-2 rounded text-xs sm:text-sm text-cyan-400 border border-cyan-500/20 hover:border-cyan-400 transition-all duration-300">
+                        <div 
+                          key={index}
+                          className="bg-gray-900/50 p-2 rounded text-xs sm:text-sm text-cyan-400 border border-cyan-500/20 hover:border-cyan-400 transition-all duration-300"
+                        >
                           {skill}
                         </div>
                       ))}
@@ -838,7 +634,10 @@ function App() {
                 
                 <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
-                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-4">Experiência</h3>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-4">
+                      Experiência
+                    </h3>
+                    
                     <ul className="space-y-3 text-gray-300 text-sm md:text-base">
                       <li className="flex items-start">
                         <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-cyan-400 mr-2 mt-0.5 flex-shrink-0" />
@@ -858,9 +657,12 @@ function App() {
                       </li>
                     </ul>
                   </div>
-
+                  
                   <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
-                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-cyan-400 mb-4">Conquistas</h3>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-cyan-400 mb-4">
+                      Conquistas
+                    </h3>
+                    
                     <ul className="space-y-3 text-gray-300 text-sm md:text-base">
                       <li className="flex items-start">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -886,10 +688,10 @@ function App() {
           </div>
         </section>
       )}
-
-      {/* Projects Section - RESPONSIVIDADE MELHORADA */}
+      
+      {/* Projects Section */}
       {activeSection === 'projects' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Projetos Desenvolvidos
@@ -899,10 +701,10 @@ function App() {
               {projects.map((project, index) => (
                 <div key={project.id} className="project-card rounded-xl p-4 sm:p-6 card-hover group">
                   <div className="relative overflow-hidden rounded-lg mb-4 sm:mb-6">
-                    <img
-                      src={project.image_url || "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=800"}
-                      alt={project.title}
-                      className="w-full h-40 sm:h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                    <img 
+                      src={project.image_url || "https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=800"} 
+                      alt={project.title} 
+                      className="w-full h-40 sm:h-48 object-cover transition-transform duration-300 group-hover:scale-110" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
@@ -911,13 +713,15 @@ function App() {
                     <h3 className="text-lg sm:text-xl font-bold text-purple-400 group-hover:text-cyan-400 transition-colors duration-300">
                       {project.title}
                     </h3>
+                    
                     <p className="text-gray-300 text-sm leading-relaxed">
                       {project.description}
                     </p>
+                    
                     <div className="flex flex-wrap gap-2">
                       {(Array.isArray(project.tech) ? project.tech : []).map((tech, techIndex) => (
                         <span 
-                          key={techIndex} 
+                          key={techIndex}
                           className="px-2 sm:px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs border border-cyan-500/30 hover:border-cyan-400 transition-colors duration-300"
                         >
                           {tech}
@@ -931,10 +735,10 @@ function App() {
           </div>
         </section>
       )}
-
-      {/* Testimonials Section - RESPONSIVIDADE MELHORADA */}
+      
+      {/* Testimonials Section */}
       {activeSection === 'testimonials' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Depoimentos
@@ -945,20 +749,23 @@ function App() {
                 <div key={testimonial.id} className="testimonial-card rounded-xl p-4 sm:p-6 card-hover group">
                   <div className="flex items-center space-x-4 mb-4 sm:mb-6">
                     <div className="relative">
-                      <img
-                        src={testimonial.avatar_url || "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"}
-                        alt={testimonial.name}
-                        className="w-12 sm:w-16 h-12 sm:h-16 object-cover rounded-full avatar-glow"
+                      <img 
+                        src={testimonial.avatar_url || "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200"} 
+                        alt={testimonial.name} 
+                        className="w-12 sm:w-16 h-12 sm:h-16 object-cover rounded-full avatar-glow" 
                       />
                       <div className="absolute -bottom-1 -right-1 w-4 sm:w-5 h-4 sm:h-5 bg-green-400 rounded-full border-2 border-black flex items-center justify-center">
                         <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full"></div>
                       </div>
                     </div>
+                    
                     <div>
                       <h4 className="font-bold text-cyan-400 group-hover:text-purple-400 transition-colors duration-300 text-sm sm:text-base">
                         {testimonial.name}
                       </h4>
-                      <p className="text-xs sm:text-sm text-gray-400">{testimonial.role}</p>
+                      <p className="text-xs sm:text-sm text-gray-400">
+                        {testimonial.role}
+                      </p>
                     </div>
                   </div>
                   
@@ -972,7 +779,9 @@ function App() {
                   <div className="mt-4 sm:mt-6 flex justify-end">
                     <div className="flex space-x-1">
                       {[...Array(5)].map((_, i) => (
-                        <div key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-yellow-400">⭐</div>
+                        <div key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-yellow-400">
+                          ★
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -982,10 +791,10 @@ function App() {
           </div>
         </section>
       )}
-
-      {/* Talks Section - RESPONSIVIDADE MELHORADA */}
+      
+      {/* Talks Section */}
       {activeSection === 'talks' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Palestras & Eventos
@@ -996,10 +805,10 @@ function App() {
                 <div key={talk.id} className="talk-card rounded-xl p-4 sm:p-6 lg:p-8 card-hover group">
                   <div className="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6 sm:lg:space-x-8">
                     <div className="flex-shrink-0 w-full lg:w-auto">
-                      <img
-                        src={talk.image_url || "https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=800"}
-                        alt={talk.title}
-                        className="w-full lg:w-40 xl:w-48 h-32 lg:h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                      <img 
+                        src={talk.image_url || "https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=800"} 
+                        alt={talk.title} 
+                        className="w-full lg:w-40 xl:w-48 h-32 lg:h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300" 
                       />
                     </div>
                     
@@ -1019,7 +828,7 @@ function App() {
                       <div className="flex flex-wrap gap-2">
                         {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, tagIndex) => (
                           <span 
-                            key={tagIndex} 
+                            key={tagIndex}
                             className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs sm:text-sm border border-green-500/30 hover:border-green-400 transition-colors duration-300"
                           >
                             #{tag}
@@ -1034,31 +843,101 @@ function App() {
           </div>
         </section>
       )}
-
-      {/* Classes Section - RESPONSIVIDADE MELHORADA */}
-      {activeSection === 'classes' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
+      
+      {/* Blog Section */}
+      {activeSection === 'blog' && !activeBlogPost && (
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
-              {classSettings.title}
+              Blog & Artigos
             </h2>
             
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {blogPosts.map((post) => (
+                <div 
+                  key={post.id} 
+                  className="blog-card rounded-xl overflow-hidden card-hover group cursor-pointer"
+                  onClick={() => handleOpenBlogPost(post)}
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={post.image_url || "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200"} 
+                      alt={post.title} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-orange-500/80 text-white text-xs rounded-full">
+                      {post.category}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-orange-400 group-hover:text-cyan-400 transition-colors duration-300 mb-2 line-clamp-2">
+                      {post.title}
+                    </h3>
+                    
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(Array.isArray(post.tags) ? post.tags.slice(0, 3) : []).map((tag, tagIndex) => (
+                        <span 
+                          key={tagIndex}
+                          className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
+                      <span>{post.author}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {/* Blog Post View */}
+      {activeSection === 'blog' && activeBlogPost && (
+        <BlogPost post={activeBlogPost} onBack={handleCloseBlogPost} />
+      )}
+      
+      {/* Classes Section */}
+      {activeSection === 'classes' && (
+        <section className="min-h-screen pt-24 px-4 sm:px-6">
+          <div className="container mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
+              {classSettings?.title || "Aulas Particulares"}
+            </h2>
+            
+            <div className="text-center mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-purple-400 mb-4">
+                {classSettings?.subtitle || "Aprenda com um especialista"}
+              </h3>
+              <p className="text-gray-300 max-w-3xl mx-auto">
+                {classSettings?.description || "Aulas personalizadas para seu nível e objetivos, com foco em projetos práticos e aplicação real."}
+              </p>
+            </div>
+            
             <div className="max-w-4xl mx-auto">
-              {/* Intro Section */}
-              <div className="text-center mb-12">
-                <h3 className="text-xl sm:text-2xl font-bold text-purple-400 mb-4">{classSettings.subtitle}</h3>
-                <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto">
-                  {classSettings.description}
-                </p>
-              </div>
-              
-              {/* Features Grid */}
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-12">
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
                 <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-cyan-500/30">
                   <GraduationCap className="w-8 sm:w-12 h-8 sm:h-12 text-cyan-400 mb-4" />
                   <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-cyan-400 mb-4">Metodologia</h3>
+                  
                   <ul className="space-y-3 text-gray-300 text-sm md:text-base">
-                    {classSettings.methodology.map((item, index) => (
+                    {(classSettings?.methodology || [
+                      "Aulas 100% práticas com projetos reais",
+                      "Conteúdo personalizado por aluno",
+                      "Suporte contínuo via WhatsApp",
+                      "Flexibilidade de horários"
+                    ]).map((item, index) => (
                       <li key={index} className="flex items-start">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                         <span>{item}</span>
@@ -1066,12 +945,18 @@ function App() {
                     ))}
                   </ul>
                 </div>
-
+                
                 <div className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
                   <Brain className="w-8 sm:w-12 h-8 sm:h-12 text-purple-400 mb-4" />
                   <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-400 mb-4">Áreas de Ensino</h3>
+                  
                   <ul className="space-y-3 text-gray-300 text-sm md:text-base">
-                    {classSettings.areas.map((area, index) => (
+                    {(classSettings?.areas || [
+                      "Desenvolvimento Web (React, Angular, Vue)",
+                      "Desenvolvimento Mobile (React Native)",
+                      "Backend (Node.js, Python, Java)",
+                      "Cybersecurity e Ethical Hacking"
+                    ]).map((area, index) => (
                       <li key={index} className="flex items-start">
                         <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                         <span>{area}</span>
@@ -1081,16 +966,17 @@ function App() {
                 </div>
               </div>
               
-              {/* Plans Section */}
-              <h3 className="text-xl sm:text-2xl font-bold text-center text-cyan-400 mb-8">Planos Disponíveis</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-center text-cyan-400 mb-8">
+                Planos Disponíveis
+              </h3>
               
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-12">
+              <div className="grid md:grid-cols-2 gap-6 mb-12">
                 {classPlans.map((plan) => (
                   <div 
                     key={plan.id} 
                     className={`bg-gray-900/50 p-6 rounded-lg ${
                       plan.is_featured 
-                        ? 'border-2 border-cyan-500/50 shadow-lg shadow-cyan-900/20 transform scale-105 relative z-10' 
+                        ? 'border-2 border-cyan-400 shadow-lg shadow-cyan-900/20 relative' 
                         : 'border border-gray-700'
                     }`}
                   >
@@ -1113,7 +999,7 @@ function App() {
                     </div>
                     
                     <ul className="space-y-2 mb-6">
-                      {plan.features.map((feature, index) => (
+                      {(Array.isArray(plan.features) ? plan.features : []).map((feature, index) => (
                         <li key={index} className="flex items-start">
                           <div className="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                           <span className="text-gray-300">{feature}</span>
@@ -1121,150 +1007,51 @@ function App() {
                       ))}
                     </ul>
                     
-                    <a 
-                      href={settings?.class_link || classSettings.cta_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full text-center px-4 py-3 rounded-lg font-semibold transition-all duration-300 bg-cyan-500/20 border border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow"
-                    >
-                      {classSettings.cta_text}
-                    </a>
+                    {plan.image_url && (
+                      <div className="mb-6">
+                        <img 
+                          src={plan.image_url} 
+                          alt={plan.title} 
+                          className="w-full h-32 object-cover rounded-lg" 
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
               
-              {/* CTA Section */}
-              <div className="text-center bg-gray-900/30 p-8 rounded-xl border border-cyan-500/20">
-                <h3 className="text-xl font-bold text-cyan-400 mb-4">Pronto para começar sua jornada?</h3>
-                <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-                  Entre em contato para agendar uma aula experimental e descobrir como posso ajudar você a alcançar seus objetivos.
-                </p>
-                <a 
-                  href={settings?.class_link || classSettings.cta_link}
+              <div className="text-center">
+                <a
+                  href={classSettings?.cta_link || "https://wa.me/5511999999999"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-purple-500/20 border-purple-400 text-purple-400 hover:bg-purple-500/30 hover:shadow-purple-glow"
+                  className="px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 border-2 bg-cyan-500/20 border-cyan-400 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-cyan-glow inline-flex items-center"
                 >
-                  <MessageSquare className="w-5 h-5 inline mr-2" />
-                  {classSettings.cta_text}
+                  <MessageSquare className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
+                  {classSettings?.cta_text || "Agendar Aula Experimental"}
                 </a>
               </div>
             </div>
           </div>
         </section>
       )}
-
-      {/* Blog Section */}
-      {activeSection === 'blog' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6 pb-16">
-          <div className="container mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
-              Blog & Artigos
-            </h2>
-            
-            {/* Featured Post */}
-            {blogPosts.length > 0 && (
-              <div 
-                className="mb-12 cursor-pointer"
-                onClick={() => setActiveBlogPost(blogPosts[0])}
-              >
-                <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-6">
-                  <img
-                    src={blogPosts[0].image_url}
-                    alt={blogPosts[0].title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-sm border border-orange-500/30">
-                        {blogPosts[0].category}
-                      </span>
-                      {blogPosts[0].tags.slice(0, 2).map((tag, index) => (
-                        <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm border border-purple-500/30">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3">
-                      {blogPosts[0].title}
-                    </h3>
-                    <p className="text-gray-300 text-base sm:text-lg mb-4 max-w-3xl">
-                      {blogPosts[0].excerpt}
-                    </p>
-                    <div className="flex items-center text-sm text-gray-400">
-                      <span className="mr-4">{new Date(blogPosts[0].published_at).toLocaleDateString('pt-BR')}</span>
-                      <span>{Math.ceil(blogPosts[0].content.length / 1000)} min de leitura</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Recent Posts Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {blogPosts.slice(1).map((post) => (
-                <div 
-                  key={post.id} 
-                  className="bg-gray-900/30 rounded-xl overflow-hidden border border-gray-800 hover:border-cyan-500/30 transition-all duration-300 group cursor-pointer"
-                  onClick={() => setActiveBlogPost(post)}
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={post.image_url}
-                      alt={post.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                    <div className="absolute top-3 left-3">
-                      <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs border border-orange-500/30">
-                        {post.category}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 sm:p-6">
-                    <h3 className="text-lg sm:text-xl font-bold text-purple-400 group-hover:text-cyan-400 transition-colors duration-300 mb-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-gray-300 text-sm mb-4 line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span>{new Date(post.published_at).toLocaleDateString('pt-BR')}</span>
-                      <span>{Math.ceil(post.content.length / 1000)} min de leitura</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Categories Section */}
-            <div className="mt-12 pt-12 border-t border-gray-800">
-              <h3 className="text-xl font-bold text-cyan-400 mb-6">Categorias</h3>
-              <div className="flex flex-wrap gap-3">
-                {['Technology', 'Security', 'Career', 'Development', 'AI'].map((category) => (
-                  <div key={category} className="px-4 py-2 bg-gray-900/50 text-gray-300 rounded-lg border border-gray-700 hover:border-cyan-500/30 hover:text-cyan-400 transition-all duration-300 cursor-pointer">
-                    {category}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Login Modal */}
+      
+      {/* Admin Login */}
       {showLogin && (
-        <AdminLogin onLogin={handleLogin} onBackToFrontend={handleBackToFrontend} />
+        <AdminLogin 
+          onLogin={handleLogin} 
+          onBackToFrontend={handleBackToFrontend} 
+        />
       )}
-
+      
       {/* Admin Panel */}
       {isAdminOpen && isAuthenticated && (
-        <AdminPanel onClose={handleAdminClose} onBackToFrontend={handleBackToFrontend} />
+        <AdminPanel 
+          onClose={handleAdminClose} 
+          onBackToFrontend={handleBackToFrontend} 
+        />
       )}
-
-      {/* Hidden admin hint */}
+      
       <div className="fixed bottom-4 left-4 text-xs text-gray-600 opacity-30 pointer-events-none">
         Digite "deviem" para acesso administrativo
       </div>

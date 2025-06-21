@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, FileText, Tag, Calendar, Clock, Search, Filter, ArrowRight, Link, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, FileText, Tag, Calendar, Clock, Search, Filter, ArrowRight, Link, Image as ImageIcon, Upload, File, Check } from 'lucide-react';
 import ImageUpload from './ImageUpload';
+import { useBlogPosts } from '../hooks/useSupabaseData';
 
 // Tipos para o blog
 interface BlogPost {
@@ -14,37 +15,12 @@ interface BlogPost {
   published_at: string;
   author: string;
   slug: string;
+  document_url?: string;
 }
 
 const BlogManager: React.FC = () => {
-  const [posts, setPosts] = useState<BlogPost[]>([
-    {
-      id: 1,
-      title: "Introdução à Segurança Cibernética",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, quis aliquam nisl nunc quis nisl.",
-      excerpt: "Uma introdução aos conceitos básicos de segurança cibernética e como proteger seus dados.",
-      image_url: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      tags: ["Cybersecurity", "Beginners", "Data Protection"],
-      category: "Security",
-      published_at: "2025-01-15T10:00:00Z",
-      author: "DevIem",
-      slug: "introducao-seguranca-cibernetica"
-    },
-    {
-      id: 2,
-      title: "Como Iniciar sua Carreira em Desenvolvimento Web",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, quis aliquam nisl nunc quis nisl.",
-      excerpt: "Guia completo para quem deseja iniciar uma carreira em desenvolvimento web em 2025.",
-      image_url: "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      tags: ["Career", "Web Development", "Beginners"],
-      category: "Career",
-      published_at: "2025-01-10T14:30:00Z",
-      author: "DevIem",
-      slug: "iniciar-carreira-desenvolvimento-web"
-    }
-  ]);
+  const { blogPosts, loading, addBlogPost, updateBlogPost, deleteBlogPost } = useBlogPosts();
   
-  const [loading, setLoading] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [newPost, setNewPost] = useState<Partial<BlogPost>>({
     title: '',
@@ -53,11 +29,13 @@ const BlogManager: React.FC = () => {
     image_url: '',
     tags: [],
     category: 'Technology',
-    author: 'DevIem'
+    author: 'DevIem',
+    document_url: ''
   });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [isUploading, setIsUploading] = useState(false);
 
   const categories = [
     { id: 'all', name: 'Todas Categorias' },
@@ -73,14 +51,14 @@ const BlogManager: React.FC = () => {
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  const handleAddPost = () => {
+  const handleAddPost = async () => {
     if (!newPost.title || !newPost.content) {
       showMessage('❌ Título e conteúdo são obrigatórios');
       return;
     }
 
     try {
-      setLoading(true);
+      setIsUploading(true);
       
       // Gerar slug a partir do título
       const slug = newPost.title
@@ -91,9 +69,9 @@ const BlogManager: React.FC = () => {
         .replace(/\s+/g, '-');
       
       // Criar novo post
-      const post: BlogPost = {
-        id: Date.now(),
+      const post: any = {
         title: newPost.title || '',
+        slug: slug,
         content: newPost.content || '',
         excerpt: newPost.excerpt || newPost.content?.substring(0, 150) + '...' || '',
         image_url: newPost.image_url,
@@ -102,10 +80,11 @@ const BlogManager: React.FC = () => {
         category: newPost.category || 'Technology',
         published_at: new Date().toISOString(),
         author: newPost.author || 'DevIem',
-        slug: slug
+        document_url: newPost.document_url
       };
       
-      setPosts(prev => [post, ...prev]);
+      await addBlogPost(post);
+      
       setNewPost({
         title: '',
         content: '',
@@ -113,7 +92,8 @@ const BlogManager: React.FC = () => {
         image_url: '',
         tags: [],
         category: 'Technology',
-        author: 'DevIem'
+        author: 'DevIem',
+        document_url: ''
       });
       
       showMessage('✅ Artigo adicionado com sucesso!');
@@ -121,18 +101,18 @@ const BlogManager: React.FC = () => {
       console.error('Erro ao adicionar artigo:', error);
       showMessage('❌ Erro ao adicionar artigo');
     } finally {
-      setLoading(false);
+      setIsUploading(false);
     }
   };
 
-  const handleUpdatePost = () => {
+  const handleUpdatePost = async () => {
     if (!editingPost) return;
     
     try {
-      setLoading(true);
+      setIsUploading(true);
       
       // Atualizar post
-      setPosts(prev => prev.map(p => p.id === editingPost.id ? editingPost : p));
+      await updateBlogPost(editingPost.id, editingPost);
       setEditingPost(null);
       
       showMessage('✅ Artigo atualizado com sucesso!');
@@ -140,14 +120,14 @@ const BlogManager: React.FC = () => {
       console.error('Erro ao atualizar artigo:', error);
       showMessage('❌ Erro ao atualizar artigo');
     } finally {
-      setLoading(false);
+      setIsUploading(false);
     }
   };
 
-  const handleDeletePost = (id: number) => {
+  const handleDeletePost = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este artigo?')) {
       try {
-        setPosts(prev => prev.filter(p => p.id !== id));
+        await deleteBlogPost(id);
         showMessage('✅ Artigo excluído com sucesso!');
       } catch (error) {
         console.error('Erro ao excluir artigo:', error);
@@ -157,7 +137,7 @@ const BlogManager: React.FC = () => {
   };
 
   // Filtrar posts
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(filter.toLowerCase()) || 
                          post.content.toLowerCase().includes(filter.toLowerCase()) ||
                          post.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()));
@@ -177,13 +157,44 @@ const BlogManager: React.FC = () => {
     });
   };
 
+  // Função para lidar com upload de documentos
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>, isNewPost: boolean) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Verificar tipo de arquivo
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      showMessage('❌ Apenas arquivos PDF e Word são permitidos');
+      return;
+    }
+    
+    // Simular upload
+    setIsUploading(true);
+    
+    // Em um ambiente real, aqui você faria o upload para o Supabase Storage
+    // Para este exemplo, vamos simular um URL
+    setTimeout(() => {
+      const fakeUrl = `https://example.com/documents/${file.name}`;
+      
+      if (isNewPost) {
+        setNewPost(prev => ({ ...prev, document_url: fakeUrl }));
+      } else if (editingPost) {
+        setEditingPost(prev => ({ ...prev!, document_url: fakeUrl }));
+      }
+      
+      setIsUploading(false);
+      showMessage('✅ Documento anexado com sucesso!');
+    }, 1500);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Blog</h2>
         <div className="text-sm text-gray-400">
-          Total: {posts.length} artigos
+          Total: {blogPosts.length} artigos
         </div>
       </div>
 
@@ -256,7 +267,7 @@ const BlogManager: React.FC = () => {
         
         <div className="mb-4">
           <textarea
-            placeholder="Conteúdo completo do artigo"
+            placeholder="Conteúdo completo do artigo (suporta HTML)"
             rows={8}
             value={editingPost?.content || newPost.content || ''}
             onChange={(e) => editingPost
@@ -288,19 +299,78 @@ const BlogManager: React.FC = () => {
           />
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Imagem de Capa
-          </label>
-          <ImageUpload
-            currentImage={editingPost?.image_url || newPost.image_url || ''}
-            onImageUploaded={(url) => editingPost
-              ? setEditingPost({...editingPost, image_url: url})
-              : setNewPost({...newPost, image_url: url})
-            }
-            folder="blog"
-            recommendedSize="1200x630px"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Imagem de Capa
+            </label>
+            <ImageUpload
+              currentImage={editingPost?.image_url || newPost.image_url || ''}
+              onImageUploaded={(url) => editingPost
+                ? setEditingPost({...editingPost, image_url: url})
+                : setNewPost({...newPost, image_url: url})
+              }
+              folder="blog"
+              recommendedSize="1200x630px"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+              <File className="w-4 h-4 mr-2" />
+              Documento Anexo (PDF, Word)
+            </label>
+            <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+              {(editingPost?.document_url || newPost.document_url) ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <File className="w-5 h-5 text-cyan-400 mr-2" />
+                    <span className="text-sm text-gray-300 truncate max-w-[200px]">
+                      {editingPost?.document_url?.split('/').pop() || newPost.document_url?.split('/').pop()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => editingPost
+                      ? setEditingPost({...editingPost, document_url: ''})
+                      : setNewPost({...newPost, document_url: ''})
+                    }
+                    className="p-1 text-red-400 hover:bg-red-500/20 rounded"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="document-upload"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleDocumentUpload(e, !editingPost)}
+                  />
+                  <label
+                    htmlFor="document-upload"
+                    className="flex items-center justify-center p-3 bg-black border border-gray-600 rounded-lg text-gray-400 hover:text-cyan-400 hover:border-cyan-400 cursor-pointer transition-colors"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Clock className="w-5 h-5 mr-2 animate-spin" />
+                        <span>Enviando documento...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 mr-2" />
+                        <span>Clique para anexar documento</span>
+                      </>
+                    )}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Formatos suportados: PDF, DOC, DOCX (máx. 10MB)
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
@@ -308,7 +378,7 @@ const BlogManager: React.FC = () => {
             <>
               <button
                 onClick={handleUpdatePost}
-                disabled={loading}
+                disabled={isUploading}
                 className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50"
               >
                 <Save className="w-4 h-4 inline mr-2" />
@@ -325,7 +395,7 @@ const BlogManager: React.FC = () => {
           ) : (
             <button
               onClick={handleAddPost}
-              disabled={loading}
+              disabled={isUploading}
               className="px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300 disabled:opacity-50"
             >
               <Plus className="w-4 h-4 inline mr-2" />
@@ -366,7 +436,12 @@ const BlogManager: React.FC = () => {
 
       {/* Lista de Posts */}
       <div className="space-y-4">
-        {filteredPosts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-gray-700">
+            <div className="animate-spin w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-400">Carregando artigos...</p>
+          </div>
+        ) : filteredPosts.length === 0 ? (
           <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-gray-700">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400">Nenhum artigo encontrado</p>
@@ -428,6 +503,14 @@ const BlogManager: React.FC = () => {
                     </div>
                     <span>{post.author}</span>
                   </div>
+                  
+                  {post.document_url && (
+                    <div className="mb-4 flex items-center text-sm text-cyan-400">
+                      <File className="w-4 h-4 mr-1" />
+                      <span>Documento anexado</span>
+                      <Check className="w-4 h-4 ml-1 text-green-400" />
+                    </div>
+                  )}
                   
                   <div className="flex flex-wrap gap-2">
                     <button

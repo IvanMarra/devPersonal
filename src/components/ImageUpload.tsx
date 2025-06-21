@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Loader, Info } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader, Info, FileText } from 'lucide-react';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -7,6 +7,7 @@ interface ImageUploadProps {
   folder?: string;
   className?: string;
   recommendedSize?: string;
+  acceptDocuments?: boolean;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
@@ -14,7 +15,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageUploaded, 
   folder = 'general',
   className = '',
-  recommendedSize = '800x600px'
+  recommendedSize = '800x600px',
+  acceptDocuments = false
 }) => {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -22,19 +24,28 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [showInfo, setShowInfo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadImage = async (file: File) => {
+  const uploadFile = async (file: File) => {
     try {
       setUploading(true);
       setError(null);
 
       // Validate file type
-      if (!file.type.startsWith('image/')) {
+      const isImage = file.type.startsWith('image/');
+      const isDocument = file.type === 'application/pdf' || 
+                         file.type === 'application/msword' || 
+                         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      
+      if (!isImage && !isDocument) {
+        throw new Error('Por favor, selecione apenas arquivos de imagem ou documentos (PDF, DOC, DOCX)');
+      }
+      
+      if (!acceptDocuments && !isImage) {
         throw new Error('Por favor, selecione apenas arquivos de imagem');
       }
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        throw new Error('A imagem deve ter no máximo 5MB');
+        throw new Error('O arquivo deve ter no máximo 5MB');
       }
 
       // Simular upload - em produção usaria Supabase Storage
@@ -46,8 +57,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       reader.readAsDataURL(file);
       
     } catch (error) {
-      console.error('Error uploading image:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer upload da imagem';
+      console.error('Error uploading file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer upload do arquivo';
       setError(errorMessage);
     } finally {
       setUploading(false);
@@ -57,7 +68,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      uploadImage(file);
+      uploadFile(file);
     }
   };
 
@@ -67,7 +78,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     
     const file = e.dataTransfer.files[0];
     if (file) {
-      uploadImage(file);
+      uploadFile(file);
     }
   };
 
@@ -81,7 +92,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setDragOver(false);
   };
 
-  const removeImage = () => {
+  const removeFile = () => {
     onImageUploaded('');
     setError(null);
   };
@@ -96,13 +107,27 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {currentImage ? (
         <div className="relative">
-          <img
-            src={currentImage}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded-lg border border-gray-600"
-          />
+          {currentImage.startsWith('data:image/') || currentImage.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+            // Imagem
+            <img
+              src={currentImage}
+              alt="Preview"
+              className="w-full h-48 object-cover rounded-lg border border-gray-600"
+            />
+          ) : (
+            // Documento
+            <div className="w-full h-48 bg-gray-800 rounded-lg border border-gray-600 flex items-center justify-center">
+              <div className="text-center">
+                <FileText className="w-12 h-12 text-cyan-400 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm">Documento anexado</p>
+                <p className="text-gray-400 text-xs mt-1">
+                  {currentImage.split('/').pop()}
+                </p>
+              </div>
+            </div>
+          )}
           <button
-            onClick={removeImage}
+            onClick={removeFile}
             className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full hover:bg-red-500 transition-colors"
           >
             <X className="w-4 h-4" />
@@ -126,12 +151,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <ImageIcon className="w-12 h-12 text-gray-400 mb-4" />
+              {acceptDocuments ? (
+                <div className="flex space-x-4 mb-4">
+                  <ImageIcon className="w-10 h-10 text-gray-400" />
+                  <FileText className="w-10 h-10 text-gray-400" />
+                </div>
+              ) : (
+                <ImageIcon className="w-12 h-12 text-gray-400 mb-4" />
+              )}
+              
               <p className="text-gray-400 mb-2">
-                Arraste uma imagem aqui ou clique para selecionar
+                Arraste {acceptDocuments ? 'uma imagem ou documento' : 'uma imagem'} aqui ou clique para selecionar
               </p>
               <p className="text-xs text-gray-500 mb-4">
-                PNG, JPG, GIF até 5MB
+                {acceptDocuments 
+                  ? 'PNG, JPG, GIF, PDF, DOC até 5MB' 
+                  : 'PNG, JPG, GIF até 5MB'}
               </p>
               <button
                 type="button"
@@ -139,7 +174,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 className="px-4 py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-all duration-300"
               >
                 <Upload className="w-4 h-4 inline mr-2" />
-                Selecionar Imagem
+                Selecionar {acceptDocuments ? 'Arquivo' : 'Imagem'}
               </button>
             </div>
           )}
@@ -177,7 +212,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={acceptDocuments ? "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "image/*"}
         onChange={handleFileSelect}
         className="hidden"
       />
