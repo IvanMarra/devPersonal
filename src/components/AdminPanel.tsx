@@ -148,7 +148,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     }
   };
 
-  // Funções para depoimentos
+  // Funções para testimonials
   const handleAddTestimonial = async () => {
     if (newTestimonial.name && newTestimonial.text) {
       try {
@@ -169,7 +169,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     if (editingTestimonial) {
       try {
         setLoading(true);
-        await updateTestimonial(editingTestimonial.id, editingTestimonial);
+        await updateTestimonial(editingTestimonial.id, {
+          name: editingTestimonial.name,
+          role: editingTestimonial.role,
+          text: editingTestimonial.text,
+          avatar_url: editingTestimonial.avatar_url
+        });
         setEditingTestimonial(null);
         showSuccessMessage('✅ Depoimento atualizado com sucesso no Supabase!');
       } catch (error) {
@@ -196,7 +201,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     }
   };
 
-  // Funções para palestras
+  // Funções para talks
   const handleAddTalk = async () => {
     if (newTalk.title && newTalk.description) {
       try {
@@ -224,7 +229,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     if (editingTalk) {
       try {
         setLoading(true);
-        await updateTalk(editingTalk.id, editingTalk);
+        await updateTalk(editingTalk.id, {
+          title: editingTalk.title,
+          description: editingTalk.description,
+          tags: editingTalk.tags,
+          image_url: editingTalk.image_url
+        });
         setEditingTalk(null);
         showSuccessMessage('✅ Palestra atualizada com sucesso no Supabase!');
       } catch (error) {
@@ -694,18 +704,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                             <span className="text-gray-400 text-sm">{testimonial.role}</span>
                           </div>
                           <p className="text-gray-300 italic text-sm sm:text-base">"{testimonial.text}"</p>
-                          
                           <div className="flex justify-center sm:justify-start space-x-2 mt-3">
                             <button
                               onClick={() => setEditingTestimonial(testimonial)}
-                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/30 transition-all duration-300"
+                              className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded text-xs hover:bg-cyan-500/30 transition-all duration-300"
                             >
                               <Edit className="w-3 h-3 inline mr-1" />
                               Editar
                             </button>
                             <button
                               onClick={() => handleDeleteTestimonial(testimonial.id)}
-                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 transition-all duration-300"
+                              className="px-3 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 transition-all duration-300"
                             >
                               <Trash2 className="w-3 h-3 inline mr-1" />
                               Excluir
@@ -865,18 +874,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                               </span>
                             ))}
                           </div>
-                          
                           <div className="flex space-x-2 mt-3">
                             <button
                               onClick={() => setEditingTalk(talk)}
-                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/30 transition-all duration-300"
+                              className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded text-xs hover:bg-cyan-500/30 transition-all duration-300"
                             >
                               <Edit className="w-3 h-3 inline mr-1" />
                               Editar
                             </button>
                             <button
                               onClick={() => handleDeleteTalk(talk.id)}
-                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 transition-all duration-300"
+                              className="px-3 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 transition-all duration-300"
                             >
                               <Trash2 className="w-3 h-3 inline mr-1" />
                               Excluir
@@ -1006,29 +1014,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Foto de Perfil
                         </label>
-                        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                          <ImageUpload
-                            currentImage={editingSettings.profile_image_url}
-                            onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
-                            folder="profile"
-                            recommendedSize="400x400px"
-                          />
-                          
-                          {editingSettings.profile_image_url && (
-                            <div className="mt-4 bg-black/30 p-4 rounded-lg border border-cyan-500/20">
-                              <h4 className="text-sm font-medium text-cyan-400 mb-2">Preview da Foto</h4>
-                              <div className="flex justify-center">
-                                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-cyan-400/30">
-                                  <img 
-                                    src={editingSettings.profile_image_url} 
-                                    alt="Preview" 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                        <ImageUpload
+                          currentImage={editingSettings.profile_image_url}
+                          onImageUploaded={(url) => setEditingSettings({ ...editingSettings, profile_image_url: url })}
+                          folder="profile"
+                          recommendedSize="400x400px"
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -1119,18 +1110,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       <div>
                         <strong className="text-cyan-400 block mb-2">Foto de Perfil:</strong>
                         {settings.profile_image_url ? (
-                          <div className="bg-gray-800/50 p-4 rounded-lg border border-cyan-500/20">
-                            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                            <div className="bg-gray-800/50 p-2 rounded-lg border border-cyan-500/30">
                               <img
                                 src={settings.profile_image_url}
                                 alt="Profile"
                                 className="w-32 h-32 object-cover rounded-full border-2 border-cyan-500/30"
                               />
-                              <div>
-                                <span className="text-green-400 block mb-1">✅ Configurada</span>
-                                <span className="text-xs text-gray-400">Tamanho recomendado: 400x400px</span>
-                              </div>
                             </div>
+                            <span className="text-green-400">✅ Configurada</span>
                           </div>
                         ) : (
                           <span className="text-yellow-400 ml-2">⚠️ Não configurada</span>

@@ -701,7 +701,7 @@ function App() {
             </h2>
             
             <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {(Array.isArray(projects) ? projects : []).map((project, index) => (
+              {(Array.isArray(projects) ? projects : []).map((project) => (
                 <div key={project.id} className="project-card rounded-xl p-4 sm:p-6 card-hover group">
                   <div className="relative overflow-hidden rounded-lg mb-4 sm:mb-6">
                     <img 
@@ -748,7 +748,7 @@ function App() {
             </h2>
             
             <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {(Array.isArray(testimonials) ? testimonials : []).map((testimonial, index) => (
+              {(Array.isArray(testimonials) ? testimonials : []).map((testimonial) => (
                 <div key={testimonial.id} className="testimonial-card rounded-xl p-4 sm:p-6 card-hover group">
                   <div className="flex items-center space-x-4 mb-4 sm:mb-6">
                     <div className="relative">
@@ -804,7 +804,7 @@ function App() {
             </h2>
             
             <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
-              {(Array.isArray(talks) ? talks : []).map((talk, index) => (
+              {(Array.isArray(talks) ? talks : []).map((talk) => (
                 <div key={talk.id} className="talk-card rounded-xl p-4 sm:p-6 lg:p-8 card-hover group">
                   <div className="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6 sm:lg:space-x-8">
                     <div className="flex-shrink-0 w-full lg:w-auto">
