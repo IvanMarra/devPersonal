@@ -695,17 +695,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           </div>
                           <p className="text-gray-300 italic text-sm sm:text-base">"{testimonial.text}"</p>
                           
-                          <div className="flex justify-center sm:justify-start space-x-2 mt-4">
+                          <div className="flex justify-center sm:justify-start space-x-2 mt-3">
                             <button
                               onClick={() => setEditingTestimonial(testimonial)}
-                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30 transition-all duration-300"
+                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/30 transition-all duration-300"
                             >
                               <Edit className="w-3 h-3 inline mr-1" />
                               Editar
                             </button>
                             <button
                               onClick={() => handleDeleteTestimonial(testimonial.id)}
-                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-all duration-300"
+                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 transition-all duration-300"
                             >
                               <Trash2 className="w-3 h-3 inline mr-1" />
                               Excluir
@@ -811,8 +811,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                         <input
                           type="text"
                           value={Array.isArray(editingTalk.tags) ? editingTalk.tags.join(', ') : editingTalk.tags}
-                          onChange={(e) => setEditingTalk({
-                            ...editingTalk,
+                          onChange={(e) => setEditingTalk({ 
+                            ...editingTalk, 
                             tags: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
                           })}
                           className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
@@ -866,17 +866,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                             ))}
                           </div>
                           
-                          <div className="flex space-x-2 mt-4">
+                          <div className="flex space-x-2 mt-3">
                             <button
                               onClick={() => setEditingTalk(talk)}
-                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30 transition-all duration-300"
+                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/30 transition-all duration-300"
                             >
                               <Edit className="w-3 h-3 inline mr-1" />
                               Editar
                             </button>
                             <button
                               onClick={() => handleDeleteTalk(talk.id)}
-                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-all duration-300"
+                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 transition-all duration-300"
                             >
                               <Trash2 className="w-3 h-3 inline mr-1" />
                               Excluir
@@ -1015,14 +1015,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           />
                           
                           {editingSettings.profile_image_url && (
-                            <div className="mt-4 p-4 bg-black/30 rounded-lg border border-gray-700">
-                              <h4 className="text-sm font-medium text-gray-300 mb-2">Preview:</h4>
+                            <div className="mt-4 bg-black/30 p-4 rounded-lg border border-cyan-500/20">
+                              <h4 className="text-sm font-medium text-cyan-400 mb-2">Preview da Foto</h4>
                               <div className="flex justify-center">
-                                <div className="cyber-border rounded-full p-1 w-32 h-32">
+                                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-cyan-400/30">
                                   <img 
                                     src={editingSettings.profile_image_url} 
-                                    alt="Profile Preview" 
-                                    className="w-full h-full object-cover rounded-full" 
+                                    alt="Preview" 
+                                    className="w-full h-full object-cover"
                                   />
                                 </div>
                               </div>
@@ -1119,23 +1119,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                       <div>
                         <strong className="text-cyan-400 block mb-2">Foto de Perfil:</strong>
                         {settings.profile_image_url ? (
-                          <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                          <div className="bg-gray-800/50 p-4 rounded-lg border border-cyan-500/20">
                             <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                              <div className="cyber-border rounded-full p-1 w-32 h-32">
-                                <img
-                                  src={settings.profile_image_url}
-                                  alt="Profile"
-                                  className="w-full h-full object-cover rounded-full"
-                                />
+                              <img
+                                src={settings.profile_image_url}
+                                alt="Profile"
+                                className="w-32 h-32 object-cover rounded-full border-2 border-cyan-500/30"
+                              />
+                              <div>
+                                <span className="text-green-400 block mb-1">✅ Configurada</span>
+                                <span className="text-xs text-gray-400">Tamanho recomendado: 400x400px</span>
                               </div>
-                              <span className="text-green-400">✅ Configurada</span>
                             </div>
                           </div>
                         ) : (
                           <span className="text-yellow-400 ml-2">⚠️ Não configurada</span>
                         )}
                       </div>
-                      
                       <div>
                         <strong className="text-cyan-400 block mb-2">Habilidades:</strong>
                         <div className="flex flex-wrap gap-2 mt-2">
