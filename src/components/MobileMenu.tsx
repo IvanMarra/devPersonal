@@ -64,7 +64,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
       {/* Mobile Menu */}
       <div 
-        className={`fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-cyan-500/30 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed top-0 right-0 h-full w-full max-w-sm bg-black/95 backdrop-blur-md border-l border-cyan-500/30 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -83,7 +83,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="p-6 space-y-2">
+        <nav className="p-6 space-y-2 overflow-y-auto max-h-[calc(100vh-80px)]">
           {sections.map((section, index) => (
             <button
               key={section.id}

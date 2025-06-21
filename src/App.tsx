@@ -130,11 +130,14 @@ const MobileMenu = ({ sections, activeSection, onSectionChange }: {
           </button>
         </div>
         
-        <nav className="p-4 sm:p-6 space-y-2">
+        <nav className="p-4 sm:p-6 space-y-2 overflow-y-auto max-h-[calc(100vh-80px)]">
           {sections.map((section, index) => (
             <button
               key={section.id}
-              onClick={() => onSectionChange(section.id)}
+              onClick={() => {
+                onSectionChange(section.id);
+                setIsOpen(false); // Fechar menu ao clicar em um item
+              }}
               className={`w-full flex items-center space-x-3 px-4 py-4 rounded-lg transition-all duration-300 text-left ${
                 activeSection === section.id
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-400 shadow-cyan-glow'
@@ -570,7 +573,7 @@ function App() {
       
       {/* About Section */}
       {activeSection === 'about' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-12">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Sobre DevIem
@@ -691,7 +694,7 @@ function App() {
       
       {/* Projects Section */}
       {activeSection === 'projects' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-12">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Projetos Desenvolvidos
@@ -738,7 +741,7 @@ function App() {
       
       {/* Testimonials Section */}
       {activeSection === 'testimonials' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-12">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Depoimentos
@@ -794,7 +797,7 @@ function App() {
       
       {/* Talks Section */}
       {activeSection === 'talks' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-12">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Palestras & Eventos
@@ -846,7 +849,7 @@ function App() {
       
       {/* Blog Section */}
       {activeSection === 'blog' && !activeBlogPost && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-12">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               Blog & Artigos
@@ -910,7 +913,7 @@ function App() {
       
       {/* Classes Section */}
       {activeSection === 'classes' && (
-        <section className="min-h-screen pt-24 px-4 sm:px-6">
+        <section className="min-h-screen pt-24 px-4 sm:px-6 mb-12">
           <div className="container mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 text-cyan-400 glitch-text">
               {classSettings?.title || "Aulas Particulares"}

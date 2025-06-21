@@ -1,91 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, Book, DollarSign, Clock, Users, Link, Check } from 'lucide-react';
 import ImageUpload from './ImageUpload';
-
-// Tipos para as aulas
-interface ClassPlan {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  duration: string;
-  features: string[];
-  image_url?: string;
-  is_featured: boolean;
-}
-
-interface ClassSettings {
-  title: string;
-  subtitle: string;
-  description: string;
-  cta_text: string;
-  cta_link: string;
-  methodology: string[];
-  areas: string[];
-}
+import { useClassSettings, useClassPlans } from '../hooks/useSupabaseData';
 
 const ClassesManager: React.FC = () => {
-  // Estado para planos de aula
-  const [plans, setPlans] = useState<ClassPlan[]>([
-    {
-      id: 1,
-      title: "Plano Básico",
-      description: "Ideal para iniciantes que desejam aprender os fundamentos.",
-      price: 150,
-      duration: "1 hora",
-      features: [
-        "1 aula semanal",
-        "Suporte por e-mail",
-        "Material didático",
-        "Certificado de conclusão"
-      ],
-      image_url: "https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=800",
-      is_featured: false
-    },
-    {
-      id: 2,
-      title: "Plano Premium",
-      description: "Para quem deseja aprender de forma intensiva e com mais recursos.",
-      price: 250,
-      duration: "1.5 horas",
-      features: [
-        "2 aulas semanais",
-        "Suporte por WhatsApp",
-        "Material didático avançado",
-        "Projetos práticos",
-        "Certificado de conclusão",
-        "Mentoria personalizada"
-      ],
-      image_url: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=800",
-      is_featured: true
-    }
-  ]);
-
-  // Estado para configurações gerais
-  const [settings, setSettings] = useState<ClassSettings>({
-    title: "Aulas Particulares",
-    subtitle: "Aprenda com um especialista",
-    description: "Aulas personalizadas para seu nível e objetivos, com foco em projetos práticos e aplicação real.",
-    cta_text: "Agendar Aula Experimental",
-    cta_link: "https://wa.me/5511999999999",
-    methodology: [
-      "Aulas 100% práticas com projetos reais",
-      "Conteúdo personalizado por aluno",
-      "Suporte contínuo via WhatsApp",
-      "Flexibilidade de horários"
-    ],
-    areas: [
-      "Desenvolvimento Web (React, Angular, Vue)",
-      "Desenvolvimento Mobile (React Native)",
-      "Backend (Node.js, Python, Java)",
-      "Cybersecurity e Ethical Hacking"
-    ]
-  });
+  // Hooks para dados do Supabase
+  const { 
+    classSettings, 
+    loading: settingsLoading, 
+    updateClassSettings 
+  } = useClassSettings();
+  
+  const { 
+    classPlans, 
+    loading: plansLoading, 
+    addClassPlan, 
+    updateClassPlan, 
+    deleteClassPlan 
+  } = useClassPlans();
 
   // Estados para edição
-  const [editingPlan, setEditingPlan] = useState<ClassPlan | null>(null);
+  const [editingPlan, setEditingPlan] = useState<any>(null);
   const [editingSettings, setEditingSettings] = useState<boolean>(false);
-  const [newPlan, setNewPlan] = useState<Partial<ClassPlan>>({
+  const [newPlan, setNewPlan] = useState<any>({
     title: '',
     description: '',
     price: 0,
@@ -98,13 +35,20 @@ const ClassesManager: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Inicializar estados com dados do Supabase
+  useEffect(() => {
+    if (classSettings) {
+      // Já temos os dados, não precisamos fazer nada
+    }
+  }, [classSettings]);
+
   const showMessage = (message: string) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   // Funções para gerenciar planos
-  const handleAddPlan = () => {
+  const handleAddPlan = async () => {
     if (!newPlan.title || !newPlan.description) {
       showMessage('❌ Título e descrição são obrigatórios');
       return;
@@ -114,19 +58,19 @@ const ClassesManager: React.FC = () => {
       setLoading(true);
       
       // Criar novo plano
-      const plan: ClassPlan = {
-        id: Date.now(),
+      const plan = {
         title: newPlan.title || '',
         description: newPlan.description || '',
         price: newPlan.price || 0,
         duration: newPlan.duration || '1 hora',
         features: Array.isArray(newPlan.features) ? newPlan.features : 
-                typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : [],
+                typeof newPlan.features === 'string' ? newPlan.features.split('\n').map(f => f.trim()).filter(f => f) : [],
         image_url: newPlan.image_url,
         is_featured: newPlan.is_featured || false
       };
       
-      setPlans(prev => [...prev, plan]);
+      await addClassPlan(plan);
+      
       setNewPlan({
         title: '',
         description: '',
@@ -145,16 +89,25 @@ const ClassesManager: React.FC = () => {
     }
   };
 
-  const handleUpdatePlan = () => {
+  const handleUpdatePlan = async () => {
     if (!editingPlan) return;
     
     try {
       setLoading(true);
       
       // Atualizar plano
-      setPlans(prev => prev.map(p => p.id === editingPlan.id ? editingPlan : p));
-      setEditingPlan(null);
+      await updateClassPlan(editingPlan.id, {
+        title: editingPlan.title,
+        description: editingPlan.description,
+        price: editingPlan.price,
+        duration: editingPlan.duration,
+        features: Array.isArray(editingPlan.features) ? editingPlan.features : 
+                 typeof editingPlan.features === 'string' ? editingPlan.features.split('\n').filter(line => line.trim()) : [],
+        image_url: editingPlan.image_url,
+        is_featured: editingPlan.is_featured
+      });
       
+      setEditingPlan(null);
       showMessage('✅ Plano atualizado com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar plano:', error);
@@ -164,10 +117,10 @@ const ClassesManager: React.FC = () => {
     }
   };
 
-  const handleDeletePlan = (id: number) => {
+  const handleDeletePlan = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este plano?')) {
       try {
-        setPlans(prev => prev.filter(p => p.id !== id));
+        await deleteClassPlan(id);
         showMessage('✅ Plano excluído com sucesso!');
       } catch (error) {
         console.error('Erro ao excluir plano:', error);
@@ -177,9 +130,22 @@ const ClassesManager: React.FC = () => {
   };
 
   // Função para atualizar configurações
-  const handleUpdateSettings = () => {
+  const handleUpdateSettings = async () => {
+    if (!classSettings) return;
+    
     try {
       setLoading(true);
+      
+      await updateClassSettings({
+        title: classSettings.title,
+        subtitle: classSettings.subtitle,
+        description: classSettings.description,
+        cta_text: classSettings.cta_text,
+        cta_link: classSettings.cta_link,
+        methodology: classSettings.methodology,
+        areas: classSettings.areas
+      });
+      
       setEditingSettings(false);
       showMessage('✅ Configurações atualizadas com sucesso!');
     } catch (error) {
@@ -190,13 +156,21 @@ const ClassesManager: React.FC = () => {
     }
   };
 
+  if (settingsLoading || plansLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-cyan-400">Carregando dados...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl sm:text-2xl font-bold text-cyan-400">Gerenciar Aulas Particulares</h2>
         <div className="text-sm text-gray-400">
-          Total: {plans.length} planos
+          Total: {classPlans.length} planos
         </div>
       </div>
 
@@ -241,7 +215,7 @@ const ClassesManager: React.FC = () => {
           )}
         </div>
 
-        {editingSettings ? (
+        {editingSettings && classSettings ? (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -250,8 +224,8 @@ const ClassesManager: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={settings.title}
-                  onChange={(e) => setSettings({...settings, title: e.target.value})}
+                  value={classSettings.title}
+                  onChange={(e) => updateClassSettings({...classSettings, title: e.target.value})}
                   className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
                 />
               </div>
@@ -261,8 +235,8 @@ const ClassesManager: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={settings.subtitle}
-                  onChange={(e) => setSettings({...settings, subtitle: e.target.value})}
+                  value={classSettings.subtitle}
+                  onChange={(e) => updateClassSettings({...classSettings, subtitle: e.target.value})}
                   className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
                 />
               </div>
@@ -274,8 +248,8 @@ const ClassesManager: React.FC = () => {
               </label>
               <textarea
                 rows={3}
-                value={settings.description}
-                onChange={(e) => setSettings({...settings, description: e.target.value})}
+                value={classSettings.description}
+                onChange={(e) => updateClassSettings({...classSettings, description: e.target.value})}
                 className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
               />
             </div>
@@ -287,8 +261,8 @@ const ClassesManager: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={settings.cta_text}
-                  onChange={(e) => setSettings({...settings, cta_text: e.target.value})}
+                  value={classSettings.cta_text}
+                  onChange={(e) => updateClassSettings({...classSettings, cta_text: e.target.value})}
                   className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
                 />
               </div>
@@ -299,8 +273,8 @@ const ClassesManager: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
-                    value={settings.cta_link}
-                    onChange={(e) => setSettings({...settings, cta_link: e.target.value})}
+                    value={classSettings.cta_link}
+                    onChange={(e) => updateClassSettings({...classSettings, cta_link: e.target.value})}
                     placeholder="https://wa.me/5511999999999"
                     className="flex-1 p-3 bg-black border border-gray-600 rounded-lg text-white"
                   />
@@ -316,8 +290,8 @@ const ClassesManager: React.FC = () => {
                 </label>
                 <textarea
                   rows={4}
-                  value={settings.methodology.join('\n')}
-                  onChange={(e) => setSettings({...settings, methodology: e.target.value.split('\n').filter(line => line.trim())})}
+                  value={Array.isArray(classSettings.methodology) ? classSettings.methodology.join('\n') : ''}
+                  onChange={(e) => updateClassSettings({...classSettings, methodology: e.target.value.split('\n').filter(line => line.trim())})}
                   className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
                 />
               </div>
@@ -327,8 +301,8 @@ const ClassesManager: React.FC = () => {
                 </label>
                 <textarea
                   rows={4}
-                  value={settings.areas.join('\n')}
-                  onChange={(e) => setSettings({...settings, areas: e.target.value.split('\n').filter(line => line.trim())})}
+                  value={Array.isArray(classSettings.areas) ? classSettings.areas.join('\n') : ''}
+                  onChange={(e) => updateClassSettings({...classSettings, areas: e.target.value.split('\n').filter(line => line.trim())})}
                   className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white"
                 />
               </div>
@@ -338,19 +312,19 @@ const ClassesManager: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <strong className="text-cyan-400">Título:</strong> {settings.title}
+                <strong className="text-cyan-400">Título:</strong> {classSettings?.title}
               </div>
               <div>
-                <strong className="text-cyan-400">Subtítulo:</strong> {settings.subtitle}
+                <strong className="text-cyan-400">Subtítulo:</strong> {classSettings?.subtitle}
               </div>
               <div>
-                <strong className="text-cyan-400">Descrição:</strong> {settings.description}
+                <strong className="text-cyan-400">Descrição:</strong> {classSettings?.description}
               </div>
               <div>
-                <strong className="text-cyan-400">Botão CTA:</strong> {settings.cta_text}
+                <strong className="text-cyan-400">Botão CTA:</strong> {classSettings?.cta_text}
               </div>
               <div>
-                <strong className="text-cyan-400">Link CTA:</strong> {settings.cta_link}
+                <strong className="text-cyan-400">Link CTA:</strong> {classSettings?.cta_link}
               </div>
             </div>
             
@@ -358,7 +332,7 @@ const ClassesManager: React.FC = () => {
               <div>
                 <strong className="text-cyan-400 block mb-2">Metodologia:</strong>
                 <ul className="space-y-1 text-gray-300 text-sm">
-                  {settings.methodology.map((item, index) => (
+                  {(classSettings?.methodology || []).map((item, index) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       <span>{item}</span>
@@ -370,7 +344,7 @@ const ClassesManager: React.FC = () => {
               <div>
                 <strong className="text-cyan-400 block mb-2">Áreas de Ensino:</strong>
                 <ul className="space-y-1 text-gray-300 text-sm">
-                  {settings.areas.map((area, index) => (
+                  {(classSettings?.areas || []).map((area, index) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       <span>{area}</span>
@@ -535,7 +509,7 @@ const ClassesManager: React.FC = () => {
 
       {/* Lista de Planos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {plans.map(plan => (
+        {classPlans.map(plan => (
           <div 
             key={plan.id} 
             className={`bg-gray-900/50 p-4 rounded-lg border ${
@@ -563,7 +537,7 @@ const ClassesManager: React.FC = () => {
             </div>
             
             <ul className="space-y-2 mb-4">
-              {plan.features.map((feature, index) => (
+              {(Array.isArray(plan.features) ? plan.features : []).map((feature, index) => (
                 <li key={index} className="flex items-start text-sm">
                   <Check className="w-4 h-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-300">{feature}</span>
