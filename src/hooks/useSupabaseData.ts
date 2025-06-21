@@ -200,6 +200,11 @@ const DEFAULT_DATA = {
   ]
 };
 
+// Função para verificar se está em modo local
+export const isLocalMode = () => {
+  return false; // Sempre retornar false para forçar o uso do Supabase
+};
+
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);

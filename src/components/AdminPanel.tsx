@@ -148,7 +148,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     }
   };
 
-  // Funções similares para testimonials e talks...
+  // Funções para depoimentos
   const handleAddTestimonial = async () => {
     if (newTestimonial.name && newTestimonial.text) {
       try {
@@ -165,6 +165,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
     }
   };
 
+  const handleUpdateTestimonial = async () => {
+    if (editingTestimonial) {
+      try {
+        setLoading(true);
+        await updateTestimonial(editingTestimonial.id, editingTestimonial);
+        setEditingTestimonial(null);
+        showSuccessMessage('✅ Depoimento atualizado com sucesso no Supabase!');
+      } catch (error) {
+        console.error('❌ Erro ao atualizar depoimento:', error);
+        showSuccessMessage('❌ Erro ao atualizar depoimento: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleDeleteTestimonial = async (id: number) => {
+    if (confirm('Tem certeza que deseja excluir este depoimento?')) {
+      try {
+        setLoading(true);
+        await deleteTestimonial(id);
+        showSuccessMessage('✅ Depoimento excluído com sucesso do Supabase!');
+      } catch (error) {
+        console.error('❌ Erro ao deletar depoimento:', error);
+        showSuccessMessage('❌ Erro ao deletar depoimento: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Funções para palestras
   const handleAddTalk = async () => {
     if (newTalk.title && newTalk.description) {
       try {
@@ -182,6 +214,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
       } catch (error) {
         console.error('❌ Erro ao adicionar palestra:', error);
         showSuccessMessage('❌ Erro ao adicionar palestra: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleUpdateTalk = async () => {
+    if (editingTalk) {
+      try {
+        setLoading(true);
+        await updateTalk(editingTalk.id, editingTalk);
+        setEditingTalk(null);
+        showSuccessMessage('✅ Palestra atualizada com sucesso no Supabase!');
+      } catch (error) {
+        console.error('❌ Erro ao atualizar palestra:', error);
+        showSuccessMessage('❌ Erro ao atualizar palestra: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleDeleteTalk = async (id: number) => {
+    if (confirm('Tem certeza que deseja excluir esta palestra?')) {
+      try {
+        setLoading(true);
+        await deleteTalk(id);
+        showSuccessMessage('✅ Palestra excluída com sucesso do Supabase!');
+      } catch (error) {
+        console.error('❌ Erro ao deletar palestra:', error);
+        showSuccessMessage('❌ Erro ao deletar palestra: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
       } finally {
         setLoading(false);
       }
@@ -490,7 +553,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
           </div>
         )}
 
-        {/* Outras seções similares... */}
+        {/* Seção de Depoimentos */}
         {activeTab === 'testimonials' && (
           <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -563,22 +626,94 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               ) : (
                 testimonials.map((testimonial) => (
                   <div key={testimonial.id} className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
-                    <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                      {testimonial.avatar_url && (
-                        <img
-                          src={testimonial.avatar_url}
-                          alt={testimonial.name}
-                          className="w-16 h-16 object-cover rounded-full mx-auto sm:mx-0"
-                        />
-                      )}
-                      <div className="flex-1 text-center sm:text-left">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
-                          <h4 className="text-base sm:text-lg font-semibold text-purple-400">{testimonial.name}</h4>
-                          <span className="text-gray-400 text-sm">{testimonial.role}</span>
+                    {editingTestimonial?.id === testimonial.id ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            value={editingTestimonial.name}
+                            onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
+                            className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                            placeholder="Nome do cliente"
+                          />
+                          <input
+                            type="text"
+                            value={editingTestimonial.role}
+                            onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
+                            className="p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                            placeholder="Cargo/Empresa"
+                          />
                         </div>
-                        <p className="text-gray-300 italic text-sm sm:text-base">"{testimonial.text}"</p>
+                        <textarea
+                          value={editingTestimonial.text}
+                          onChange={(e) => setEditingTestimonial({ ...editingTestimonial, text: e.target.value })}
+                          rows={3}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          placeholder="Depoimento"
+                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Avatar do Cliente
+                          </label>
+                          <ImageUpload
+                            currentImage={editingTestimonial.avatar_url}
+                            onImageUploaded={(url) => setEditingTestimonial({ ...editingTestimonial, avatar_url: url })}
+                            folder="avatars"
+                            recommendedSize="200x200px"
+                          />
+                        </div>
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                          <button
+                            onClick={handleUpdateTestimonial}
+                            disabled={loading}
+                            className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
+                          >
+                            <Save className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
+                            Salvar
+                          </button>
+                          <button
+                            onClick={() => setEditingTestimonial(null)}
+                            className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm sm:text-base"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                        {testimonial.avatar_url && (
+                          <img
+                            src={testimonial.avatar_url}
+                            alt={testimonial.name}
+                            className="w-16 h-16 object-cover rounded-full mx-auto sm:mx-0"
+                          />
+                        )}
+                        <div className="flex-1 text-center sm:text-left">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
+                            <h4 className="text-base sm:text-lg font-semibold text-purple-400">{testimonial.name}</h4>
+                            <span className="text-gray-400 text-sm">{testimonial.role}</span>
+                          </div>
+                          <p className="text-gray-300 italic text-sm sm:text-base">"{testimonial.text}"</p>
+                          
+                          <div className="flex justify-center sm:justify-start space-x-2 mt-4">
+                            <button
+                              onClick={() => setEditingTestimonial(testimonial)}
+                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30 transition-all duration-300"
+                            >
+                              <Edit className="w-3 h-3 inline mr-1" />
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTestimonial(testimonial.id)}
+                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-all duration-300"
+                            >
+                              <Trash2 className="w-3 h-3 inline mr-1" />
+                              Excluir
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
@@ -657,26 +792,99 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
               ) : (
                 talks.map((talk) => (
                   <div key={talk.id} className="bg-gray-900/50 p-4 sm:p-6 rounded-lg border border-purple-500/30">
-                    <div className="flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
-                      {talk.image_url && (
-                        <img
-                          src={talk.image_url}
-                          alt={talk.title}
-                          className="w-full lg:w-20 h-32 lg:h-20 object-cover rounded-lg"
+                    {editingTalk?.id === talk.id ? (
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          value={editingTalk.title}
+                          onChange={(e) => setEditingTalk({ ...editingTalk, title: e.target.value })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          placeholder="Título da palestra"
                         />
-                      )}
-                      <div className="flex-1">
-                        <h4 className="text-base sm:text-lg font-semibold text-purple-400">{talk.title}</h4>
-                        <p className="text-gray-300 mt-2 text-sm sm:text-base">{talk.description}</p>
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, index) => (
-                            <span key={index} className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs sm:text-sm">
-                              {tag}
-                            </span>
-                          ))}
+                        <textarea
+                          value={editingTalk.description}
+                          onChange={(e) => setEditingTalk({ ...editingTalk, description: e.target.value })}
+                          rows={3}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          placeholder="Descrição da palestra"
+                        />
+                        <input
+                          type="text"
+                          value={Array.isArray(editingTalk.tags) ? editingTalk.tags.join(', ') : editingTalk.tags}
+                          onChange={(e) => setEditingTalk({
+                            ...editingTalk,
+                            tags: e.target.value.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+                          })}
+                          className="w-full p-3 bg-black border border-gray-600 rounded-lg text-white text-sm sm:text-base"
+                          placeholder="Tags (separadas por vírgula)"
+                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Imagem da Palestra
+                          </label>
+                          <ImageUpload
+                            currentImage={editingTalk.image_url}
+                            onImageUploaded={(url) => setEditingTalk({ ...editingTalk, image_url: url })}
+                            folder="talks"
+                            recommendedSize="800x400px"
+                          />
+                        </div>
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                          <button
+                            onClick={handleUpdateTalk}
+                            disabled={loading}
+                            className="px-4 py-2 bg-green-500/20 border border-green-400 text-green-400 rounded-lg hover:bg-green-500/30 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
+                          >
+                            <Save className="w-3 sm:w-4 h-3 sm:h-4 inline mr-2" />
+                            Salvar
+                          </button>
+                          <button
+                            onClick={() => setEditingTalk(null)}
+                            className="px-4 py-2 bg-gray-500/20 border border-gray-400 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-300 text-sm sm:text-base"
+                          >
+                            Cancelar
+                          </button>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
+                        {talk.image_url && (
+                          <img
+                            src={talk.image_url}
+                            alt={talk.title}
+                            className="w-full lg:w-20 h-32 lg:h-20 object-cover rounded-lg"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <h4 className="text-base sm:text-lg font-semibold text-purple-400">{talk.title}</h4>
+                          <p className="text-gray-300 mt-2 text-sm sm:text-base">{talk.description}</p>
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {(Array.isArray(talk.tags) ? talk.tags : []).map((tag, index) => (
+                              <span key={index} className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs sm:text-sm">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          <div className="flex space-x-2 mt-4">
+                            <button
+                              onClick={() => setEditingTalk(talk)}
+                              className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30 transition-all duration-300"
+                            >
+                              <Edit className="w-3 h-3 inline mr-1" />
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTalk(talk.id)}
+                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-all duration-300"
+                            >
+                              <Trash2 className="w-3 h-3 inline mr-1" />
+                              Excluir
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
@@ -927,6 +1135,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onBackToFrontend }) =>
                           <span className="text-yellow-400 ml-2">⚠️ Não configurada</span>
                         )}
                       </div>
+                      
                       <div>
                         <strong className="text-cyan-400 block mb-2">Habilidades:</strong>
                         <div className="flex flex-wrap gap-2 mt-2">

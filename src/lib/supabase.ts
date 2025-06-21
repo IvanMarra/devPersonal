@@ -84,6 +84,7 @@ export interface BlogPost {
   content: string;
   excerpt: string;
   image_url?: string;
+  document_url?: string;
   tags: string[];
   category: string;
   published_at: string;
@@ -630,7 +631,7 @@ export const blogService = {
   },
 
   async create(post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) {
-    console.log('➕ Criando post do blog no Supabase:', post.title);
+    console.log('➕ Adicionando post do blog no Supabase:', post.title);
     
     return withErrorHandling(async () => {
       const { data, error } = await supabase!
@@ -641,6 +642,7 @@ export const blogService = {
           content: post.content,
           excerpt: post.excerpt,
           image_url: post.image_url,
+          document_url: post.document_url,
           tags: post.tags,
           category: post.category,
           published_at: post.published_at,
@@ -669,6 +671,7 @@ export const blogService = {
       if (post.content !== undefined) updateData.content = post.content;
       if (post.excerpt !== undefined) updateData.excerpt = post.excerpt;
       if (post.image_url !== undefined) updateData.image_url = post.image_url;
+      if (post.document_url !== undefined) updateData.document_url = post.document_url;
       if (post.tags !== undefined) updateData.tags = post.tags;
       if (post.category !== undefined) updateData.category = post.category;
       if (post.published_at !== undefined) updateData.published_at = post.published_at;
