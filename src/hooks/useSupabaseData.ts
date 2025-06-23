@@ -4,10 +4,12 @@ import {
   testimonialsService, 
   talksService, 
   settingsService,
+  blogPostsService,
   Project,
   Testimonial,
   Talk,
   SiteSettings,
+  BlogPost,
   isSupabaseConfigured
 } from '../lib/supabase';
 
@@ -112,7 +114,20 @@ const DEFAULT_DATA = {
       "Machine Learning", "AI Tools", "Cybersecurity", "Ethical Hacking", "Penetration Testing"
     ],
     profile_image_url: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
-  }
+  },
+  blogPosts: [
+    {
+      id: 1,
+      title: "O Futuro da Inteligência Artificial em 2025",
+      slug: "futuro-ia-2025",
+      content: "# O Futuro da Inteligência Artificial em 2025\n\nA inteligência artificial está evoluindo rapidamente...",
+      excerpt: "Explore as principais tendências de IA para 2025 e como elas impactarão o mercado de trabalho e a sociedade.",
+      tags: ["IA", "Tecnologia", "Futuro"],
+      category: "Technology",
+      author: "DevIem",
+      published_at: new Date().toISOString()
+    }
+  ]
 };
 
 export const useProjects = () => {
@@ -720,6 +735,166 @@ export const useSiteSettings = () => {
   };
 };
 
+// Hook para blog posts
+export const useBlogPosts = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const forceUpdate = useForceUpdate();
+
+  const fetchBlogPosts = useCallback(async (force = false) => {
+    try {
+      if (force) console.log('🔄 FORÇANDO atualização de posts do blog...');
+      setLoading(true);
+      setError(null);
+      
+      if (!isSupabaseConfigured()) {
+        console.error('❌ Supabase não configurado - usando dados padrão');
+        setBlogPosts(DEFAULT_DATA.blogPosts);
+        setError('Supabase não configurado');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('🌐 Buscando posts do blog do Supabase...');
+      const data = await blogPostsService.getAll();
+      
+      if (data && data.length > 0) {
+        setBlogPosts(data);
+        console.log('📊 Posts do blog carregados do Supabase:', data.length);
+      } else {
+        console.log('📊 Nenhum post encontrado no Supabase, usando dados padrão');
+        setBlogPosts(DEFAULT_DATA.blogPosts);
+      }
+      
+      forceUpdate();
+    } catch (err) {
+      console.error('❌ Erro ao carregar posts do blog:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar posts do blog');
+      console.log('📊 Usando dados padrão devido a erro');
+      setBlogPosts(DEFAULT_DATA.blogPosts);
+    } finally {
+      setLoading(false);
+    }
+  }, [forceUpdate]);
+
+  useEffect(() => {
+    fetchBlogPosts();
+    
+    const unsubscribe = dataSyncManager.subscribe(() => {
+      console.log('🔄 Recebido evento de sync - atualizando posts do blog...');
+      fetchBlogPosts(true);
+    });
+    
+    return unsubscribe;
+  }, [fetchBlogPosts]);
+
+  const addBlogPost = async (post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando adição');
+        const newPost = {
+          id: Date.now(),
+          ...post,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setBlogPosts(prev => [newPost, ...prev]);
+        return newPost;
+      }
+      
+      console.log('➕ Adicionando post do blog no Supabase:', post.title);
+      const newPost = await blogPostsService.create(post);
+      
+      if (newPost) {
+        console.log('✅ Post do blog adicionado com sucesso no Supabase');
+        await fetchBlogPosts(true);
+        dataSyncManager.notify();
+        return newPost;
+      } else {
+        throw new Error('Falha ao criar post do blog no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao adicionar post do blog:', err);
+      throw err;
+    }
+  };
+
+  const updateBlogPost = async (id: number, post: Partial<BlogPost>) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando atualização');
+        setBlogPosts(prev => 
+          prev.map(p => p.id === id ? { ...p, ...post, updated_at: new Date().toISOString() } : p)
+        );
+        return { id, ...post };
+      }
+      
+      console.log('📝 Atualizando post do blog no Supabase:', id);
+      const updatedPost = await blogPostsService.update(id, post);
+      
+      if (updatedPost) {
+        console.log('✅ Post do blog atualizado com sucesso no Supabase');
+        await fetchBlogPosts(true);
+        dataSyncManager.notify();
+        return updatedPost;
+      } else {
+        throw new Error('Falha ao atualizar post do blog no Supabase');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao atualizar post do blog:', err);
+      throw err;
+    }
+  };
+
+  const deleteBlogPost = async (id: number) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, simulando exclusão');
+        setBlogPosts(prev => prev.filter(p => p.id !== id));
+        return true;
+      }
+      
+      console.log('🗑️ Deletando post do blog no Supabase:', id);
+      await blogPostsService.delete(id);
+      console.log('✅ Post do blog deletado com sucesso no Supabase');
+      await fetchBlogPosts(true);
+      dataSyncManager.notify();
+      return true;
+    } catch (err) {
+      console.error('❌ Erro ao deletar post do blog:', err);
+      throw err;
+    }
+  };
+
+  const getBlogPostBySlug = async (slug: string) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        console.log('❌ Supabase não configurado, buscando nos dados padrão');
+        return DEFAULT_DATA.blogPosts.find(post => post.slug === slug) || null;
+      }
+      
+      console.log('🔍 Buscando post do blog por slug:', slug);
+      const post = await blogPostsService.getBySlug(slug);
+      return post;
+    } catch (err) {
+      console.error('❌ Erro ao buscar post do blog por slug:', err);
+      return DEFAULT_DATA.blogPosts.find(post => post.slug === slug) || null;
+    }
+  };
+
+  return {
+    blogPosts,
+    loading,
+    error,
+    addBlogPost,
+    updateBlogPost,
+    deleteBlogPost,
+    getBlogPostBySlug,
+    refetch: fetchBlogPosts
+  };
+};
+
 // Hook para sincronização global de dados
 export const useDataSync = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -750,6 +925,7 @@ export const useFrontendData = () => {
   const { testimonials } = useTestimonials();
   const { talks } = useTalks();
   const { settings } = useSiteSettings();
+  const { blogPosts } = useBlogPosts();
 
   const refreshAllData = useCallback(() => {
     console.log('🔄 FORÇANDO refresh TOTAL de todos os dados do frontend...');
@@ -761,6 +937,7 @@ export const useFrontendData = () => {
     testimonials,
     talks,
     settings,
+    blogPosts,
     refreshAllData
   };
 };
