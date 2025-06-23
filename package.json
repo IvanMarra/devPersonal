@@ -1,0 +1,156 @@
+{
+  "name": "deviem-portfolio",
+  "version": "2.2.5",
+  "private": true,
+  "type": "module",
+  "description": "Portfolio profissional do DevIem com área administrativa completa",
+  "author": "DevIem",
+  "keywords": [
+    "portfolio",
+    "react",
+    "typescript",
+    "supabase",
+    "cybersecurity",
+    "mentoring"
+  ],
+  "homepage": "https://deviem.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deviem/portfolio"
+  },
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview --host",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-google-recaptcha": "^3.1.0",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^4.5.2",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "changelog": {
+    "2.2.5": {
+      "date": "2025-01-19",
+      "changes": [
+        "🎯 CORREÇÃO DEFINITIVA: Sistema agora usa APENAS dados do Supabase",
+        "❌ REMOVIDOS DADOS MOCK: Eliminados completamente dados inline/mock",
+        "🔧 DETECÇÃO CORRIGIDA: Validação rigorosa das credenciais do Supabase",
+        "📊 LOGS DETALHADOS: Sistema de logs para debugging completo",
+        "⚡ CRUD REAL: Todas as operações agora gravam diretamente no banco",
+        "🗄️ BANCO COMO FONTE ÚNICA: Sistema depende 100% do Supabase",
+        "🔍 VALIDAÇÃO RIGOROSA: Verificação de URL e chave anônima",
+        "✨ ERRO CLARO: Mensagens específicas quando Supabase não está configurado",
+        "🔄 SINCRONIZAÇÃO REAL: Dados atualizados em tempo real do banco",
+        "🛡️ SEM FALLBACK: Sistema falha graciosamente se Supabase não estiver disponível"
+      ]
+    },
+    "2.2.4": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 CORREÇÃO CRÍTICA: CRUD agora grava em tempo real no Supabase",
+        "📱 RESPONSIVIDADE COMPLETA: Dashboard 100% responsivo em todos os dispositivos",
+        "🔔 NOTIFICAÇÕES CORRIGIDAS: Posicionamento à direita e informações visíveis",
+        "🗄️ DADOS APENAS DO BANCO: Removidos dados inline, sistema usa apenas Supabase",
+        "⚡ CONFIGURAÇÃO OTIMIZADA: Cliente Supabase com headers corretos para CRUD",
+        "🛡️ VALIDAÇÃO ROBUSTA: Tratamento de erros melhorado em todas as operações",
+        "📊 LOGS DETALHADOS: Sistema de logs para debugging de operações CRUD",
+        "🔄 SINCRONIZAÇÃO AUTOMÁTICA: Dados atualizados em tempo real após operações",
+        "📱 MOBILE FIRST: Interface administrativa responsiva para todos os dispositivos",
+        "✨ UX MELHORADA: Feedback visual para todas as operações do usuário"
+      ]
+    },
+    "2.2.3": {
+      "date": "2025-01-19",
+      "changes": [
+        "📱 RESPONSIVIDADE COMPLETA: Frontend e backend 100% responsivos",
+        "🔧 CRUD CORRIGIDO: Agora grava em tempo real no Supabase",
+        "🚪 LOGOUT FUNCIONAL: Sistema de logout completamente corrigido",
+        "🔔 NOTIFICAÇÕES CORRIGIDAS: Posicionamento à direita e informações visíveis",
+        "📱 Mobile Menu melhorado com animações suaves",
+        "🎨 Breakpoints otimizados para todos os dispositivos",
+        "⚡ Performance melhorada em dispositivos móveis",
+        "🔄 Sincronização automática entre admin e frontend",
+        "🛡️ Validação robusta de formulários",
+        "✨ Micro-interações e animações responsivas"
+      ]
+    },
+    "2.2.2": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 CORREÇÃO CRÍTICA: CRUD agora escreve em tempo real no Supabase",
+        "🚪 Sistema de logout completamente corrigido com limpeza total",
+        "🔒 Implementado reCAPTCHA obrigatório no login administrativo",
+        "⚡ Sincronização automática entre admin e frontend após operações",
+        "🔄 Auto-refresh dos dados a cada 30 segundos",
+        "📊 Logs detalhados para debugging de todas as operações CRUD",
+        "🛡️ Validação robusta de formulários e estados de loading",
+        "✨ Mensagens de sucesso/erro para todas as operações",
+        "🎯 Auto-complete nos campos de login para facilitar testes",
+        "🔐 Limpeza completa de cache e sessões no logout"
+      ]
+    },
+    "2.2.1": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 CORREÇÃO CRÍTICA: Resolvido problema de tela preta",
+        "🚀 Adicionado loading screen para evitar tela em branco",
+        "🛠️ Corrigidos problemas de TypeScript no tsconfig.node.json",
+        "⚡ Melhorado sistema de inicialização da aplicação",
+        "🔄 Implementado fallback em caso de erro de renderização",
+        "📱 Otimizado carregamento para melhor experiência do usuário",
+        "🎯 Corrigida configuração do Vite para JavaScript modules",
+        "✨ Adicionado sistema de logs detalhados para debugging"
+      ]
+    },
+    "2.2.0": {
+      "date": "2025-01-19",
+      "changes": [
+        "🔧 Corrigido erro de MIME type no Vite para JavaScript",
+        "🔄 Implementado sistema de sincronização FORÇADA de dados",
+        "📊 Melhorado sistema de logs detalhados para debugging",
+        "🎯 Corrigida sequência de acesso admin para 'deviem' (era 'admin')",
+        "✨ Adicionado sistema completo de gerenciamento de usuários",
+        "🔐 Implementado alteração de senhas com validação robusta",
+        "👥 Criado sistema de roles (Admin/Editor) para usuários",
+        "🔑 Gerador automático de senhas seguras",
+        "📱 Melhorado design responsivo com animações cyberpunk",
+        "🎨 Adicionados efeitos visuais avançados (hover, glow, floating)",
+        "🌐 Configuração completa para deploy no Vercel",
+        "📝 Criados guias detalhados de configuração (Vercel + Supabase)",
+        "🛠️ Corrigidos problemas de TypeScript no tsconfig.node.json",
+        "⚡ Otimizado sistema de force update para atualizações imediatas",
+        "🔍 Implementado DataSyncManager para sincronização global"
+      ]
+    }
+  }
+}
