@@ -448,6 +448,118 @@ export const settingsService = {
         });
     }
 };
+
+// Blog Posts Service - MISSING EXPORT
+export const blogPostsService = {
+    async getAll() {
+        console.log('🔍 Buscando posts do blog do Supabase...');
+        return withErrorHandling(async () => {
+            const { data, error } = await supabase
+                .from('blog_posts')
+                .select('*')
+                .order('published_at', { ascending: false });
+            if (error) {
+                console.error('❌ Erro ao buscar posts do blog:', error);
+                throw error;
+            }
+            console.log('✅ Posts do blog encontrados:', data?.length || 0);
+            return data || [];
+        });
+    },
+    async create(post) {
+        console.log('➕ Criando post do blog no Supabase:', post.title);
+        if (!isAdminAuthenticated()) {
+            throw new Error('Usuário não autenticado para esta operação');
+        }
+        return withServiceRole(async () => {
+            const { data, error } = await supabase
+                .from('blog_posts')
+                .insert([{
+                    title: post.title,
+                    slug: post.slug,
+                    content: post.content,
+                    excerpt: post.excerpt,
+                    image_url: post.image_url,
+                    tags: post.tags,
+                    category: post.category,
+                    author: post.author
+                }])
+                .select()
+                .single();
+            if (error) {
+                console.error('❌ Erro ao criar post do blog:', error);
+                throw error;
+            }
+            console.log('✅ Post do blog criado com sucesso:', data);
+            return data;
+        });
+    },
+    async update(id, post) {
+        console.log('📝 Atualizando post do blog no Supabase:', id);
+        if (!isAdminAuthenticated()) {
+            throw new Error('Usuário não autenticado para esta operação');
+        }
+        return withServiceRole(async () => {
+            const updateData = {};
+            if (post.title !== undefined) updateData.title = post.title;
+            if (post.slug !== undefined) updateData.slug = post.slug;
+            if (post.content !== undefined) updateData.content = post.content;
+            if (post.excerpt !== undefined) updateData.excerpt = post.excerpt;
+            if (post.image_url !== undefined) updateData.image_url = post.image_url;
+            if (post.tags !== undefined) updateData.tags = post.tags;
+            if (post.category !== undefined) updateData.category = post.category;
+            if (post.author !== undefined) updateData.author = post.author;
+
+            const { data, error } = await supabase
+                .from('blog_posts')
+                .update(updateData)
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) {
+                console.error('❌ Erro ao atualizar post do blog:', error);
+                throw error;
+            }
+            console.log('✅ Post do blog atualizado com sucesso:', data);
+            return data;
+        });
+    },
+    async delete(id) {
+        console.log('🗑️ Deletando post do blog no Supabase:', id);
+        if (!isAdminAuthenticated()) {
+            throw new Error('Usuário não autenticado para esta operação');
+        }
+        return withServiceRole(async () => {
+            const { error } = await supabase
+                .from('blog_posts')
+                .delete()
+                .eq('id', id);
+            if (error) {
+                console.error('❌ Erro ao deletar post do blog:', error);
+                throw error;
+            }
+            console.log('✅ Post do blog deletado com sucesso');
+            return true;
+        });
+    },
+    async getBySlug(slug) {
+        console.log('🔍 Buscando post do blog por slug:', slug);
+        return withErrorHandling(async () => {
+            const { data, error } = await supabase
+                .from('blog_posts')
+                .select('*')
+                .eq('slug', slug)
+                .single();
+            if (error) {
+                console.error('❌ Erro ao buscar post do blog por slug:', error);
+                throw error;
+            }
+            console.log('✅ Post do blog encontrado por slug:', !!data);
+            return data;
+        });
+    }
+};
+
 // Storage functions
 export const storageService = {
     async uploadImage(file, folder = 'general') {
