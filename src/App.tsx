@@ -305,8 +305,7 @@ function App() {
   // Se estiver visualizando um post específico
   if (currentBlogPost) {
     return (
-      <div className="min-h-screen bg-black text-white overflow-x-hidden">
-        <MatrixRain />
+      <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
         <SupabaseStatus />
         <VersionInfo />
         <BlogPost post={currentBlogPost} onBack={handleBackToBlog} />
@@ -315,8 +314,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      <MatrixRain />
+    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
       <SupabaseStatus />
       <VersionInfo />
 
