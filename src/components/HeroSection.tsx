@@ -80,7 +80,7 @@ const HeroSection = () => {
             <div className="terminal-window p-8 rounded-none">
               <div className="p-4 relative group">
                 <img
-                  src="/lovable-uploads/ivan-anonymous-photo.png"
+                  src="/lovable-uploads/te-tech-gemini.png"
                   alt="Ivan Marra - Especialista em IA"
                   className="relative w-80 h-80 lg:w-96 lg:h-96 rounded-none object-cover neon-border grayscale group-hover:opacity-0 transition-all duration-500"
                 />
