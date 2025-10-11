@@ -82,12 +82,7 @@ const HeroSection = () => {
                 <img
                   src="/lovable-uploads/te-tech-gemini.png"
                   alt="Ivan Marra - Especialista em IA"
-                  className="relative w-80 h-80 lg:w-96 lg:h-96 rounded-none object-cover neon-border grayscale group-hover:opacity-0 transition-all duration-500"
-                />
-                <img
-                  src="/lovable-uploads/ivan-colored-photo.png"
-                  alt="Ivan Marra - Especialista em IA"
-                  className="absolute top-4 left-4 w-80 h-80 lg:w-96 lg:h-96 rounded-none object-cover neon-border opacity-0 group-hover:opacity-100 transition-all duration-500"
+                  className="w-80 h-80 lg:w-96 lg:h-96 rounded-none object-cover neon-border grayscale group-hover:grayscale-0 transition-all duration-500"
                 />
               </div>
             </div>
